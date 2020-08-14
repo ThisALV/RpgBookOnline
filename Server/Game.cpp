@@ -199,7 +199,7 @@ std::string Game::getMessage(const Validity validity) {
 
 std::vector<std::string> getNames(const StatsInitializers& stats) {
     std::vector<std::string> names { stats.size() };
-    std::transform(stats.cbegin(), stats.cend(), std::inserter(names, names.begin()),
+    std::transform(stats.cbegin(), stats.cend(), names.begin(),
                    [](const auto& stat) -> std::string { return stat.first; });
 
     return names;

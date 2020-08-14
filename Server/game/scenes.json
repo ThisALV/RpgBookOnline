@@ -3,7 +3,10 @@
     "1": [ { "cmd": "TextThen", "args": [ "[1] Hello world !", "2" ] } ],
     "_1": [ { "cmd": "RangeOptions", "args": [ "2", "Deux", "Trois", "Quatre" ] } ],
     "_2": [ { "cmd": "TextThen", "args": [ "[2] Hello world !", "3" ] } ],
-    "2": [ { "cmd": "EventTo", "args": [ "3", "bigDmg" ] } ],
+    "2": [
+        { "cmd": "EventTo", "args": [ "3", "bigDmg" ] },
+        { "cmd": "Goto", "args": [ "3" ] }
+    ],
     "3": [ { "cmd": "TextThen", "args": [ "[3] Hello world !", "4" ] } ],
     "4": [ { "cmd": "Goto", "args": [ "5" ] } ],
     "5": [

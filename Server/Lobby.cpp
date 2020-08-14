@@ -24,12 +24,13 @@ std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) c
 }
 
 Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
-             const GameBuilder& game_builder)
+             const GameBuilder& game_builder, const ulong prepare_delay_ms)
     : id_ { counter_++ },
       logger_ { rboLogger("Lobby", id()) },
       lobby_io_ { lobby_io },
       executor_ { lobby_io },
       new_players_acceptor_ { lobby_io, acceptor_endpt },
+      prepare_delay_ { prepare_delay_ms },
       state_ { Closed },
       prepare_timer_ { lobby_io },
       session_ { lobby_io, game_builder } {}
@@ -82,8 +83,8 @@ bool Lobby::registered(const std::string& name) const {
 }
 
 void Lobby::preparation() {
-    logger_.info("Préparation de la session dans {} s...", DELAY_);
-    prepare_timer_.expires_after(std::chrono::seconds { DELAY_ });
+    logger_.info("Préparation de la session dans {} ms...", prepare_delay_.count());
+    prepare_timer_.expires_after(prepare_delay_);
     prepare_timer_.async_wait([this](const ErrCode err)
     {
         if (err) {

@@ -13,7 +13,8 @@ Rbo.EventTo = function (interface, args)
    local target = interface:player(target_id)
    local effect = args:get(2)
 
-   interface:game():effects():at(effect):apply(target)
+   interface:game().effects:iterable():get(effect):apply(target)
+   interface:sendInfos(target_id)
 end
 
 Rbo.RangeOptions = function (interface, args)

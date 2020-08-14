@@ -27,21 +27,25 @@ void run(io::io_context& server, Lobby& lobby, spdlog::logger& logger) {
 }
 
 int main(const int argc, const char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Utilisation : <ip> <port>" << std::endl;
+    const std::string usage { "Utilisation : <ip> <port> <prepare_delay (ms)>" };
+
+    if (argc != 4) {
+        std::cerr << usage << std::endl;
         return 1;
     }
 
     const std::string ip { argv[1] };
     ushort port;
+    ulong prepare_delay;
 
     try {
         if (ip != "ipv4" && ip != "ipv6")
             throw std::logic_error { "Protocole IP inconnu" };
 
         port = std::stoi(std::string { argv[2] });
+        prepare_delay = std::stoul(std::string { argv[3] });
     } catch (const std::logic_error&) {
-        std::cerr << "Utilisation : <ip> <port>" << std::endl;
+        std::cerr << usage << std::endl;
         return 1;
     }
 
@@ -59,6 +63,7 @@ int main(const int argc, const char* argv[]) {
             server,
             tcp::endpoint { ip == "ipv4" ? tcp::v4() : tcp::v6(), port },
             game_builder,
+            prepare_delay
         };
 
         io::signal_set stop_handler { server, STOP_SIGS };

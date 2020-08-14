@@ -103,6 +103,7 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
       executor_ { io },
       logger_ { rboLogger("Session", id()) },
       game_ { g_builder() },
+      first_state_ { true },
       running_ { false },
       game_builer_ { g_builder } {}
 
@@ -306,7 +307,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
         target.stats().setHidden(name, hidden);
 
         const std::string stat_msg { initStatMsg(init, name, value) };
-        logger_.info("[Player {} stats] {}", stat_msg);
+        logger_.info("[Player {} stats] {}", target.id(), stat_msg);
         interface.print(stat_msg);
     }
 
@@ -460,7 +461,7 @@ PlayerStateChanges Session::getChanges(const byte id) {
 
     PlayerStateChanges changes;
     for (const auto& [name, stat] : p.stats()) {
-        if (!p.stats().hidden(name) && stat != stats.at(name)) {
+        if (first_state_ || (!p.stats().hidden(name) && stat != stats.at(name))) {
             changes.statsChanges[name] = stat;
             stats[name] = stat;
         }
@@ -470,7 +471,7 @@ PlayerStateChanges Session::getChanges(const byte id) {
         const InventoryContent& content { inv.content() };
 
         for (const auto& [item, qty] : inv.content()) {
-            if (qty != content.at(item)) {
+            if (first_state_ || qty != content.at(item)) {
                 changes.itemsChanges[name][item] = qty;
                 inventories[name][item] = qty;
             }
@@ -478,12 +479,13 @@ PlayerStateChanges Session::getChanges(const byte id) {
     }
 
     for (const auto& [name, inv_max_capacity] : capacities) {
-        if (inv_max_capacity != capacities.at(name)) {
+        if (first_state_ || inv_max_capacity != capacities.at(name)) {
             changes.capacitiesChanges[name] = inv_max_capacity ? inv_max_capacity.value() : 0;
             capacities[name] = inv_max_capacity;
         }
     }
 
+    first_state_ = false;
     return changes;
 }
 

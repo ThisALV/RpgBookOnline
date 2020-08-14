@@ -38,7 +38,6 @@ private:
         Open, Starting, Preparing, Running, Closed
     };
 
-    inline static const ulong DELAY_ { 5 };
     inline static ulong counter_;
 
     ulong id_;
@@ -54,6 +53,7 @@ private:
     std::vector<byte> ready_members_;
     std::map<byte, ReceiveBuffer> request_buffers_;
 
+    std::chrono::milliseconds prepare_delay_;
     std::mutex close_;
     std::atomic<LobbyState> state_;
     io::steady_timer prepare_timer_;
@@ -80,7 +80,7 @@ private:
     bool askYesNo(const YesNoQuestion);
 
 public:
-    Lobby(io::io_context&, const tcp::endpoint&, const GameBuilder&);
+    Lobby(io::io_context&, const tcp::endpoint&, const GameBuilder&, const ulong = 5);
 
     void open();
     void close(const bool = false);

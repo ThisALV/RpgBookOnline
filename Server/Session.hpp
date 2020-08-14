@@ -55,6 +55,7 @@ private:
     Game game_;
     byte leader_;
     std::map<byte, PlayerState> last_states_;
+    bool first_state_;
     word current_scene_;
     std::atomic_bool running_;
 
