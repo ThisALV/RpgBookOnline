@@ -41,6 +41,14 @@ Rbo.TextThen = function (interface, args)
     return tonumber(args:get(2))
 end
 
+Rbo.PrintHp = function (interface, args)
+    assertArgs(#args == 1)
+    local target = interface:player(tonumber(args:get(1)))
+
+    interface:print("HP de "..target:name().." : "..target:stats():get("hp"), allPlayers)
+    return {}
+end
+
 Rbo.Error = function (interface, args)
     assertArgs(#args == 1)
     error(args:get(1))

@@ -144,8 +144,14 @@ void Lobby::close(const bool crash) {
     const std::lock_guard close_guard { close_ };
 
     if (!crash) {
-        for (auto& connection : connections_)
-            disconnect(connection.first);
+        std::vector<byte> ids;
+        ids.resize(names().size());
+
+        std::transform(names().cbegin(), names().cend(), ids.begin(),
+                       [](const auto& member) -> byte { return member.first; });
+
+        for (const byte id : ids)
+            disconnect(id);
     }
 }
 

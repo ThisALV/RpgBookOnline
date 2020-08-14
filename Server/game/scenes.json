@@ -15,7 +15,8 @@
     ],
     "10": [
         { "cmd": "Text", "args": [ "Merci d'avoir joué.", "false" ] },
-        { "cmd": "Text", "args": [ "Terminé." ] }
+        { "cmd": "Text", "args": [ "Terminé." ] },
+        { "cmd": "PrintHp", "args": [ "3" ] }
     ],
     "11": [
         { "cmd": "Text", "args": [ "Vous avez perdu !" ] }
