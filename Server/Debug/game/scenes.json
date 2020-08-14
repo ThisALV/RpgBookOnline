@@ -1,0 +1,18 @@
+{
+    "0": [ { "cmd": "Text", "args": [ "Introduction -- HelloWorld" ] } ],
+    "1": [ { "cmd": "TextThen", "args": [ "[1] Hello world !", "2" ] } ],
+    "2": [ { "cmd": "TextThen", "args": [ "[2] Hello world !", "3" ] } ],
+    "3": [ { "cmd": "TextThen", "args": [ "[3] Hello world !", "4" ] } ],
+    "4": [ { "cmd": "Goto", "args": [ "5" ] } ],
+    "5": [
+        { "cmd": "Text", "args": [ "Souhaitez-vous gagner ?", "false" ] },
+        { "cmd": "YesNo", "args": [ "10", "11" ] }
+    ],
+    "10": [
+        { "cmd": "Text", "args": [ "Merci d'avoir joué.", "false" ] },
+        { "cmd": "Text", "args": [ "Terminé." ] }
+    ],
+    "11": [
+        { "cmd": "Text", "args": [ "Vous avez perdu !" ] }
+    ]
+}
