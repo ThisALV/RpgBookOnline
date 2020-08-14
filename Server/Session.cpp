@@ -222,6 +222,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
                 break;
             }
         }
+        first_state_ = false;
 
         if (!invalid_participants)
             invalid_participants = count() > state.players.size();
@@ -485,7 +486,6 @@ PlayerStateChanges Session::getChanges(const byte id) {
         }
     }
 
-    first_state_ = false;
     return changes;
 }
 
