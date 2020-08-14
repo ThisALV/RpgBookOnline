@@ -26,6 +26,9 @@ void InstructionsProvider::initLuaResources() {
     lua_.new_usertype<std::unordered_map<byte, std::string>>(
                 "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(),
                 "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
+    lua_.new_usertype<Effects>(
+                "Effects", sol::constructors<Effects()>(),
+                "iterable", luaContainer<Effects>);
 
     sol::usertype<RestProperties> rest_type { lua_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
@@ -80,7 +83,7 @@ void InstructionsProvider::initLuaResources() {
     game_type["voteOnLeaderDeath"] = sol::readonly(&Game::voteOnLeaderDeath);
     game_type["voteLeader"] = sol::readonly(&Game::voteLeader);
     game_type["rest"] = sol::readonly(&Game::rest);
-    game_type["effect"] = &Game::effect;
+    game_type["effects"] = sol::readonly(&Game::eventEffects);
 
     sol::usertype<PlayerCheckingResult> check_result_type {
         lua_.new_usertype<PlayerCheckingResult>("CheckingResult")
@@ -91,8 +94,8 @@ void InstructionsProvider::initLuaResources() {
 
     sol::usertype<Gameplay> gameplay_type { lua_.new_usertype<Gameplay>("Gameplay") };
     gameplay_type["global"] = static_cast<StatsManager&(Gameplay::*)()>(&Gameplay::global);
-    gameplay_type["game"] = [](Gameplay& ctx) { return Game { ctx.game() }; };
-    gameplay_type["rest"] = [](Gameplay& ctx) { return RestProperties { ctx.rest() }; };
+    gameplay_type["game"] = &Gameplay::game;
+    gameplay_type["rest"] = &Gameplay::rest;
     gameplay_type["checkpoint"] = &Gameplay::checkpoint;
     gameplay_type["player"] = static_cast<Player&(Gameplay::*)(const byte)>(&Gameplay::player);
     gameplay_type["count"] = &Gameplay::count;
@@ -117,5 +120,5 @@ void InstructionsProvider::initLuaResources() {
     gameplay_type["sendInfos"] = &Gameplay::sendInfos;
     gameplay_type["sendBattleInfos"] = &Gameplay::sendBattleInfos;
     gameplay_type["sendBattleAtk"] = &Gameplay::sendBattleAtk;
-    gameplay_type["endBattle"] = &Gameplay::endBattle;
+    gameplay_type["sendBattleEnd"] = &Gameplay::endBattle;
 }

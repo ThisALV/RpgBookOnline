@@ -11,6 +11,8 @@ struct EventEffect {
     std::unordered_map<std::string, int> statsChanges;
     std::unordered_map<std::string, int> itemsChanges;
 
+    bool operator==(const EventEffect&) const;
+
     void apply(Player&) const;
     ItemsChanges simulateItemsChanges(const Player&) const;
 };
@@ -51,7 +53,6 @@ struct Game {
     bool voteOnLeaderDeath;
     bool voteLeader;
 
-    EventEffect effect(const std::string& name) const { return eventEffects.at(name); }
     std::vector<std::string> player() const;
     std::vector<std::string> global() const;
     ItemsList itemsList() const;

@@ -440,12 +440,16 @@ ConstPlayers Session::players() const {
 }
 
 Player& Session::player(const byte id) {
-    assert(players_.count(id) == 1);
+    if (players_.count(id) == 0)
+        throw UnknownPlayer { id };
+
     return players_.at(id);
 }
 
 const Player& Session::player(const byte id) const {
-    assert(players_.count(id) == 1);
+    if (players_.count(id) == 0)
+        throw UnknownPlayer { id };
+
     return players_.at(id);
 }
 

@@ -1,10 +1,22 @@
 {
     "name": "HelloWorld",
     "globals": {},
-    "players": {},
+    "players": {
+        "hp": {
+            "formula": { "dices": 0, "bonus": 10 },
+            "limits": { "min": 0, "max": 20 },
+            "capped": false,
+            "hidden": false
+        }
+    },
     "inventories": {},
     "bonuses": {},
-    "effects": {},
+    "effects": {
+        "bigDmg": {
+            "stats": { "hp": -5 },
+            "items": {}
+        }
+    },
     "rest": {
         "givables": [],
         "availables": {}

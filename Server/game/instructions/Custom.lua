@@ -7,6 +7,15 @@ Rbo.YesNo = function (interface, args)
     return (vote(interface:askYesNo(allPlayers, true)) == 0 and yes) or no
 end
 
+Rbo.EventTo = function (interface, args)
+   assertArgs(#args == 2)
+   local target_id = tonumber(args:get(1))
+   local target = interface:player(target_id)
+   local effect = args:get(2)
+
+   interface:game():effects():at(effect):apply(target)
+end
+
 Rbo.RangeOptions = function (interface, args)
     assertArgs(#args > 1)
     local begin = tonumber(args:get(1))

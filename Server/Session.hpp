@@ -16,6 +16,11 @@ struct NoPlayerRemaining : std::runtime_error {
     NoPlayerRemaining() : std::runtime_error { "Tous les joueurs se sont déconnectés" } {}
 };
 
+struct UnknownPlayer : std::logic_error {
+    UnknownPlayer(const byte id)
+        : std::logic_error { "Joueur " + std::to_string(id) + " inconnu" } {}
+};
+
 struct CancelledRequest : std::exception {
     const char* what() const noexcept override;
 };

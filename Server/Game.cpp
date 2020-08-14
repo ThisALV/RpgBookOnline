@@ -16,6 +16,10 @@ const std::unordered_map<std::string, Operator> operators {
     { ">", std::greater {} }
 };
 
+bool EventEffect::operator==(const EventEffect& rhs) const {
+    return statsChanges == rhs.statsChanges && itemsChanges == rhs.itemsChanges;
+}
+
 void EventEffect::apply(Player& target) const {
     for (const auto& [name, value] : statsChanges)
         target.stats().change(name, value);
