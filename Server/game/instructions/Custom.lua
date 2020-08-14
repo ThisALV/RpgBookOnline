@@ -11,7 +11,7 @@ Rbo.RangeOptions = function (interface, args)
     assertArgs(#args > 1)
     local begin = tonumber(args:get(1))
 
-    local options = VectorByte:new():iterable()
+    local options = ByteVector:new():iterable()
     for i = 1, (#args - 1) do
         options:add(i + begin - 1)
     end

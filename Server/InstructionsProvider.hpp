@@ -49,7 +49,7 @@ private:
         lua_[name] = func;
         builtin_funcs_[name] = lua_[name];
     }
-    void initUsertypes();
+    void initLuaResources();
 
     std::unordered_map<std::string, sol::object> errorHandlers() const;
     bool validLuaResources() const;

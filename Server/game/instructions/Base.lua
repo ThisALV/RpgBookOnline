@@ -16,6 +16,8 @@ end
 
 Rbo.Text = function (interface, args)
     assertArgs(#args == 1 or #args == 2)
+
+    local confirm
     if #args == 2 then
         confirm = toBoolean(args:get(2))
     else
