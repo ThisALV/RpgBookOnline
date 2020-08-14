@@ -10,7 +10,7 @@ bool isInstruction(const sol::object& key, const sol::object& value) {
 }
 
 Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const {
-    const sol::function_result result { func(interface, args) };
+    const sol::function_result result { func(interface, sol::as_container(args)) };
 
     if (!result.valid()) {
         const sol::error err { result };
@@ -20,7 +20,7 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
         throw err;
     }
 
-    if (!provider->validUsertypes())
+    if (!provider->validLuaResources())
         throw IllegalLuaModifications {};
 
     const sol::optional<Next> next { result };
@@ -64,22 +64,36 @@ InstructionsProvider::InstructionsProvider(sol::state& lua, spdlog::logger& logg
     error_handlers_ = errorHandlers();
 }
 
-/*namespace sol {
+template<typename Container> sol::as_container_t<Container> luaContainer(Container& c) {
+    return sol::as_container(c);
+}
 
-template<> struct is_container<std::vector<std::string>> : std::true_type {};
-template<> struct is_container<std::vector<byte>> : std::true_type {};
-template<> struct is_container<OptionsList> : std::true_type {};
-
-}*/
+template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T>& v) {
+    return luaContainer<std::vector<T>>(v);
+}
 
 void InstructionsProvider::initUsertypes() {
-    //lua_.new_usertype<std::vector<std::string>>("VectorString");
-    //lua_.new_usertype<std::vector<byte>>("VectorByte");
-    //lua_.new_usertype<OptionsList>("OptionsList");
+    lua_.new_usertype<std::vector<std::string>>(
+                "StringVector", sol::constructors<std::vector<std::string>()>(),
+                "iterable", luaVector<std::string>);
+    lua_.new_usertype<std::vector<byte>>(
+                "ByteVector", sol::constructors<std::vector<byte>()>(),
+                "iterable", luaVector<byte>);
+
+    lua_.new_usertype<std::unordered_map<byte, std::string>>(
+                "ByteWithString", sol::constructors<std::unordered_map<byte, std::string>()>(),
+                "iterable", luaContainer<std::unordered_map<byte, std::string>>);
+    lua_.new_usertype<std::unordered_map<byte, std::string>>(
+                "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(),
+                "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
 
     sol::usertype<RestProperties> rest_type { lua_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
     rest_type["availables"] = sol::readonly(&RestProperties::availables);
+
+    sol::usertype<StatLimits> limits_type { lua_.new_usertype<StatLimits>("StatLimits") };
+    limits_type["min"] = &StatLimits::min;
+    limits_type["max"] = &StatLimits::max;
 
     sol::usertype<StatsManager> stats_type { lua_.new_usertype<StatsManager>("StatsManager") };
     stats_type["get"] = &StatsManager::get;
@@ -166,7 +180,7 @@ void InstructionsProvider::initUsertypes() {
     gameplay_type["endBattle"] = &Gameplay::endBattle;
 }
 
-bool InstructionsProvider::validUsertypes() const {
+bool InstructionsProvider::validLuaResources() const {
     return std::all_of(usertypes.cbegin(), usertypes.cend(), [this](const std::string& type) {
         return usertypes_.at(type) == lua_[type];
     }) && std::all_of(builtin_funcs_.cbegin(), builtin_funcs_.cend(), [this](const auto& f) {

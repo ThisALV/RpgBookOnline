@@ -52,7 +52,7 @@ private:
     void initUsertypes();
 
     std::unordered_map<std::string, sol::object> errorHandlers() const;
-    bool validUsertypes() const;
+    bool validLuaResources() const;
 
 public:
     InstructionsProvider() = default;
