@@ -7,10 +7,9 @@
 
 namespace fs = std::filesystem;
 
-struct InstructionLoadingError : std::runtime_error {
-    InstructionLoadingError(const fs::path& script, const std::string& msg)
-        : std::runtime_error { "Impossible de charger les instructions dans \"" + script.string() + "\" : " + msg }
-    {}
+struct ScriptLoadingError : std::runtime_error {
+    ScriptLoadingError(const fs::path& script, const std::string& msg)
+        : std::runtime_error { "Impossible de charger les instructions dans \"" + script.string() + "\" : " + msg } {}
 };
 
 struct GameLoadingError : std::runtime_error {

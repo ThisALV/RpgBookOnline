@@ -68,6 +68,8 @@ bool InstructionsProvider::validLuaResources() const {
         return usertypes_.at(type) == lua_[type];
     }) && std::all_of(builtin_vars_.cbegin(), builtin_vars_.cend(), [this](const auto& v) {
         return v.second == lua_[v.first];
+    }) && std::all_of(instructions_.cbegin(), instructions_.cend(), [this](const auto& f) {
+        return f.second == lua_["Rbo"][f.first];
     }) && lua_["errorHandlers"].get_type() == sol::type::table && error_handlers_ == errorHandlers();
 }
 

@@ -28,7 +28,7 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
         try {
             lua.script_file(script.path());
         } catch (const sol::error& err) {
-            throw InstructionLoadingError { script, err.what() };
+            throw ScriptLoadingError { script, err.what() };
         }
     }
 

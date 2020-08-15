@@ -91,7 +91,7 @@ int main(const int argc, const char* argv[]) {
 
         server_t1.join();
         server_t2.join();
-    } catch (const InstructionLoadingError& err) {
+    } catch (const ScriptLoadingError& err) {
         logger.critical(err.what());
         return 2;
     } catch (const GameLoadingError& err) {
