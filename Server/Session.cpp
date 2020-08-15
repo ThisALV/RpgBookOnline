@@ -544,8 +544,23 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         }
     }
 
+    // Méthode de connexion différente pour éviter d'essayer d'envoyer des paquets
+    // d'informations aux joueurs ayant crash
     for (const byte player : ctx.errorIDs)
-        disconnect(player, true);
+        removePlayer(player);
+
+    if (!playersRemaining())
+        throw NoPlayerRemaining {};
+
+    if (leader())
+        switchLeader(players_.cbegin()->first);
+
+    for (const byte player : ctx.errorIDs) {
+        SessionDataFactory crash_data;
+        crash_data.makeCrash(player);
+
+        sendToAll(crash_data.dataWithLength());
+    }
 
     logger_.debug("replies={}", ctx.replies);
     logger_.debug("errorIDs={}", ctx.errorIDs);
@@ -566,7 +581,7 @@ void Session::sendTo(const byte target_id, const Data& data) {
 
     if (err) {
         logPlayerError(logger_, target_id, err.message());
-        disconnect(target_id);
+        disconnect(target_id, true);
     }
 }
 
@@ -578,7 +593,7 @@ void Session::sendToAll(const Data& data) {
 
         if (err) {
             logPlayerError(logger_, id, err.message());
-            disconnect(id);
+            disconnect(id, true);
         }
     }
 }
