@@ -3,6 +3,10 @@
 
 #include "Rbo/Common.hpp"
 
+using namespace Rbo;
+
+namespace Rbo {
+
 std::ostream& operator<<(std::ostream&, const StatsValues&);
 std::ostream& operator<<(std::ostream&, const PlayerInventories&);
 
@@ -19,6 +23,8 @@ template<typename Outputable>
 std::ostream& operator<<(std::ostream& out, OutputWrapper<Outputable> wrapper) {
     return out << wrapper.value;
 }
+
+} // namespace Rbo
 
 
 #endif // TEST_COMMON_HPP

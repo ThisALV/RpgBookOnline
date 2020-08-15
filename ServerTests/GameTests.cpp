@@ -6,6 +6,8 @@
 #include "Rbo/Game.hpp"
 #include "Rbo/Player.hpp"
 
+namespace Rbo {
+
 std::ostream& operator<<(std::ostream& out, const EventEffect::ItemsChanges result) {
     return out << static_cast<int>(result);
 }
@@ -13,6 +15,8 @@ std::ostream& operator<<(std::ostream& out, const EventEffect::ItemsChanges resu
 std::ostream& operator<<(std::ostream& out, const Game::Validity result) {
     return out << static_cast<int>(result);
 }
+
+} // namespace Rbo
 
 BOOST_AUTO_TEST_SUITE(EventEffectTests)
 

@@ -4,7 +4,11 @@
 #include "nlohmann/json.hpp"
 #include "Rbo/SessionDataFactory.hpp"
 
+using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
+
 using json = nlohmann::json;
+
+namespace Rbo {
 
 std::ostream& operator<<(std::ostream& out, const Data& data) {
     out << "Data (" << data.count() << " B) :";
@@ -15,6 +19,8 @@ std::ostream& operator<<(std::ostream& out, const Data& data) {
 
     return out;
 }
+
+} // namespace Rbo
 
 BOOST_AUTO_TEST_SUITE(Make)
 

@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Rbo/Player.hpp"
 
+namespace Rbo {
+
 std::ostream& operator<<(std::ostream& out, const StatsValues& stats) {
     out << "StatsValues :";
     for (const auto& [stat, value] : stats)
@@ -26,3 +28,5 @@ std::ostream& operator<<(std::ostream& out, const PlayerInventories& inventories
 
     return out;
 }
+
+} // namespace Rbo

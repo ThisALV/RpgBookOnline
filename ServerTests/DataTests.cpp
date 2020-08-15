@@ -4,6 +4,8 @@
 #include "boost/test/data/test_case.hpp"
 #include "Rbo/Data.hpp"
 
+using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
+
 namespace dataset = boost::unit_test::data;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(DataBuffer)
