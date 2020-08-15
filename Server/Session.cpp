@@ -552,7 +552,7 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
     if (!playersRemaining())
         throw NoPlayerRemaining {};
 
-    if (leader())
+    if (players_.count(leader()) == 0)
         switchLeader(players_.cbegin()->first);
 
     for (const byte player : ctx.errorIDs) {
