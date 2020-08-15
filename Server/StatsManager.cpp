@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+namespace Rbo {
+
 StatsManager::StatsManager(const std::vector<std::string>& stats) {
     std::transform(stats.cbegin(), stats.cend(), std::inserter(stats_, stats_.begin()),
                    [](const std::string& stat) { return Stats::value_type { stat, {} }; });
@@ -73,4 +75,6 @@ StatsValues StatsManager::values() const {
                    [](const auto& s) { return StatsValues::value_type { s.first, s.second.value }; });
 
     return values;
+}
+
 }

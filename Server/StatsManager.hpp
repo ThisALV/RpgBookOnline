@@ -3,6 +3,8 @@
 
 #include "Common.hpp"
 
+namespace Rbo {
+
 struct UnknownStat : std::logic_error {
     UnknownStat(const std::string& name)
         : std::logic_error { "Statistique \"" + name + "\" inconnue" } {}
@@ -47,5 +49,7 @@ public:
     Stats::const_iterator cbegin() const { return stats_.cbegin(); }
     Stats::const_iterator cend() const { return stats_.cend(); }
 };
+
+} // namespace Rbo
 
 #endif // STATSMANAGER_HPP

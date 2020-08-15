@@ -5,6 +5,8 @@
 
 #include "StatsManager.hpp"
 
+namespace Rbo {
+
 struct UnknownInventory : std::logic_error {
     UnknownInventory(const std::string& name)
         : std::logic_error { "Inventoraire \"" + name + "\" inconnu" } {}
@@ -42,7 +44,7 @@ private:
     void checkExists(const std::string&) const;
 };
 
-class Player {    
+class Player {
 private:
     using StatsLimits = std::numeric_limits<int>;
 
@@ -94,5 +96,7 @@ public:
     const PlayerInventories& inventories() const { return inventories_; }
     const ItemsBonuses statsBonus() const { return bonuses_; }
 };
+
+} // namespace Rbo
 
 #endif // PLAYER_HPP

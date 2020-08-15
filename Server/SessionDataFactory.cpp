@@ -2,6 +2,8 @@
 
 #include "nlohmann/json.hpp"
 
+namespace Rbo {
+
 using json = nlohmann::json;
 
 bool isInvalid(const ReplyValidity type) {
@@ -136,3 +138,5 @@ void SessionDataFactory::makeLeaderSwitch(const byte player) {
     makeData(DataType::LeaderSwitch);
     data_.add(player);
 }
+
+} // namespace Rbo

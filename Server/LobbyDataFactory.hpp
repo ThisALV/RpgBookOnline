@@ -1,5 +1,7 @@
 #include "Data.hpp"
 
+namespace Rbo::Server {
+
 enum struct RegistrationResult : byte {
     Ok, InvalidRequest, UnavailableID, UnavailableName, UnavailableSession
 };
@@ -32,3 +34,5 @@ struct LobbyDataFactory : DataFactory {
     void makeResult(const SessionResult);
     void makeInvalidIDs(const SessionResult, const std::vector<byte>&);
 };
+
+} // namespace Rbo::Server

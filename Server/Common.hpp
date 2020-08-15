@@ -9,6 +9,8 @@
 #include <optional>
 #include "spdlog/fwd.h"
 
+namespace Rbo {
+
 using byte = std::uint8_t;
 using s_byte = std::int8_t;
 using word = std::uint16_t;
@@ -61,15 +63,6 @@ bool contains(const std::vector<std::string>&, const std::string&);
 byte vote(const Replies&);
 
 spdlog::logger& rboLogger(const std::string&, const std::optional<ulong> = {});
-
-template<typename Output> Output& operator<<(Output& out, const std::vector<byte>& ids) {
-    out << '[';
-    for (const byte id : ids)
-        out << ' ' << std::to_string(id) << ';';
-
-    out << " ]";
-    return out; // (ostringstream& << string) ne retourne pas une ostringstream&
-}
 
 template<typename NumType> std::vector<byte> decompose(const NumType value) {
     const NumType byte_mask { 0xff };
@@ -161,5 +154,16 @@ using StatsInitializers = std::unordered_map<std::string, StatInitilizer>;
 using InventoriesInitializers = std::unordered_map<std::string, InventoryInitializer>;
 
 using EnemyInitializers = std::map<byte, EnemyInitializer>;
+
+} // namespace Rbo
+
+template<typename Output> Output& operator<<(Output& out, const std::vector<Rbo::byte>& ids) {
+    out << '[';
+    for (const Rbo::byte id : ids)
+        out << ' ' << std::to_string(id) << ';';
+
+    out << " ]";
+    return out; // (ostringstream& << string) ne retourne pas une ostringstream&
+}
 
 #endif // COMMON_HPP

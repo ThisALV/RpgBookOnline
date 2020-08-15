@@ -3,6 +3,8 @@
 
 #include "Common.hpp"
 
+namespace Rbo {
+
 const word INTRO { 0 };
 
 struct CheckpointLoadingError : std::exception {
@@ -28,5 +30,7 @@ struct GameBuilder {
     virtual std::string save(const std::string&, const GameState&) const = 0;
     virtual Scene buildScene(const word) const = 0;
 };
+
+} // namespace Rbo
 
 #endif // GAMEBUILDER_HPP

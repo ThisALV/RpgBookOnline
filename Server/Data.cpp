@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+namespace Rbo {
+
 Data::Data() {
     assert(LENGTH_SIZE <= std::numeric_limits<byte>::max());
 
@@ -43,3 +45,5 @@ const Data& DataFactory::dataWithLength() {
 
     return data_;
 }
+
+} // namespace Rbo

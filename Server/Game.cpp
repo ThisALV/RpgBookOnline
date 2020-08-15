@@ -3,6 +3,8 @@
 #include <cassert>
 #include "Player.hpp"
 
+namespace Rbo {
+
 using Operator = std::function<bool(const int, const int)>;
 
 const std::unordered_map<std::string, Operator> operators {
@@ -219,3 +221,5 @@ ItemsList Game::itemsList() const {
 
     return items;
 }
+
+} // namespace Rbo

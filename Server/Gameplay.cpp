@@ -3,6 +3,8 @@
 #include "Session.hpp"
 #include "SessionDataFactory.hpp"
 
+namespace Rbo {
+
 void confirmController(const byte reply) {
     if (reply != 0)
         throw InvalidReply { ReplyValidity::NotConfirmError };
@@ -227,3 +229,5 @@ void Gameplay::endBattle() {
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }
+
+} // namespace Rbo

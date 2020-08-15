@@ -3,6 +3,8 @@
 
 #include "Common.hpp"
 
+namespace Rbo {
+
 const std::size_t MAX_LENGTH { 1300 };
 const std::size_t LENGTH_SIZE { sizeof(word) };
 
@@ -52,5 +54,7 @@ public:
     const Data& data() const { return data_; }
     const Data& dataWithLength();
 };
+
+} // namespace Rbo
 
 #endif // DATA_HPP

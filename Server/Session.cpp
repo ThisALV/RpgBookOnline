@@ -10,7 +10,7 @@
 #include "ReplyHandler.hpp"
 
 template<typename Output>
-Output& operator<<(Output& out, const StatsValues& stats) {
+Output& operator<<(Output& out, const Rbo::StatsValues& stats) {
     out << '[';
     for (const auto& [name, value] : stats)
         out << " \"" << name << "\"=" << value << ';';
@@ -18,14 +18,14 @@ Output& operator<<(Output& out, const StatsValues& stats) {
     return out << " ]";
 }
 
-template<typename Output> Output& operator<<(Output& out, const Inventory& inventory) {
+template<typename Output> Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
     return out << "[ maxSize="
                << (inventory.limited() ? std::string { "Inf" }
                                        : std::to_string(*inventory.maxSize()))
                << "; size=" << inventory.size() << " ]";
 }
 
-template<typename Output> Output& operator<<(Output& out, const Player& player) {
+template<typename Output> Output& operator<<(Output& out, const Rbo::Player& player) {
     out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name()
         << "\"; stats=" << player.stats().values() << " inventories=[";
     for (const auto& [name, inventory] : player.inventories())
@@ -34,13 +34,15 @@ template<typename Output> Output& operator<<(Output& out, const Player& player) 
     return out << " ] ]";
 }
 
-template<typename Output> Output& operator<<(Output& out, const Replies& replies) {
+template<typename Output> Output& operator<<(Output& out, const Rbo::Replies& replies) {
     out << '[';
     for (const auto [id, reply] : replies)
         out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
 
     return out << " ]";
 }
+
+namespace Rbo {
 
 const char* InvalidIDs::what() const noexcept {
     std::string msg { "Expected IDs :" };
@@ -580,3 +582,5 @@ void Session::sendToAll(const Data& data) {
         }
     }
 }
+
+} // namespace Rbo

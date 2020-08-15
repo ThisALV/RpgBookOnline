@@ -5,6 +5,8 @@
 
 #include "sol/sol.hpp"
 
+namespace Rbo::Server {
+
 struct UnknownInstruction : std::logic_error {
     std::string instruction;
 
@@ -69,5 +71,7 @@ public:
     Instruction get(const std::string&, const std::vector<std::string>&) const;
     bool has(const std::string& name) const { return instructions_.count(name) == 1; }
 };
+
+} // namespace Rbo::Server
 
 #endif // INSTRUCTIONSPROVIDER_HPP

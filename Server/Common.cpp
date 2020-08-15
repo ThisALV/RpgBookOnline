@@ -15,6 +15,8 @@
 #define LOG_LEVEL spdlog::level::info
 #endif
 
+namespace Rbo {
+
 auto sink_file {
     std::make_shared<spdlog::sinks::basic_file_sink_mt>(
                 "logs/"
@@ -141,3 +143,5 @@ bool StatLimits::operator==(const StatLimits& rhs) const {
 bool Stat::operator==(const Stat& rhs) const {
     return value == rhs.value && limits == rhs.limits && hidden == rhs.hidden;
 }
+
+} // namespace Rbo

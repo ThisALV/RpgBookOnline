@@ -3,9 +3,7 @@
 
 #include "AsioCommon.hpp"
 
-namespace io = boost::asio;
-using ErrCode = boost::system::error_code;
-using tcp = io::ip::tcp;
+namespace Rbo {
 
 enum struct ReplyValidity : byte;
 
@@ -60,4 +58,7 @@ private:
 
     void handleError(const NetworkError&) const;
 };
+
+}
+
 #endif // REPLYHANDLER_HPP

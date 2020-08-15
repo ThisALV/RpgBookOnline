@@ -6,6 +6,8 @@
 #include "nlohmann/json.hpp"
 #include "Game.hpp"
 
+namespace Rbo { // Doivent être dans le même ns que leur type pour fonctionner avec Json
+
 using json = nlohmann::json;
 
 template<typename T> void to_json(json& data, const std::optional<T>& opt) {
@@ -98,5 +100,7 @@ inline void from_json(const json& data, Condition& condition) {
     data.at("op").get_to(condition.op);
     data.at("value").get_to(condition.value);
 }
+
+} // namespace Rbo::Server
 
 #endif // GAMEJSONCAST_INL

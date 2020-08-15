@@ -5,6 +5,8 @@
 
 #include "boost/asio.hpp"
 
+namespace Rbo {
+
 class Data;
 
 namespace io = boost::asio;
@@ -14,5 +16,7 @@ using ReceiveBuffer = std::array<byte, 100>;
 
 io::const_buffer trunc(const Data&);
 ErrCode trySend(tcp::socket&, const io::const_buffer&);
+
+} // namespace Rbo
 
 #endif // ASIOCOMMON_HPP

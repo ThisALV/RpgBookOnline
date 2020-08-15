@@ -6,6 +6,8 @@
 #include "Game.hpp"
 #include "Player.hpp"
 
+namespace Rbo {
+
 class GameBuilder;
 class Data;
 class Gameplay;
@@ -125,5 +127,7 @@ public:
     const std::map<byte, PlayerState>& lastStates() const { return last_states_; }
     PlayerStateChanges getChanges(const byte);
 };
+
+} // namespace Rbo
 
 #endif // SESSION_HPP

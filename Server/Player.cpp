@@ -3,6 +3,8 @@
 #include <cassert>
 #include <numeric>
 
+namespace Rbo {
+
 void Player::refreshBonuses(const BonusAction action, const std::string& inv,
                             const std::string& item, const uint qty)
 {
@@ -109,3 +111,5 @@ bool Inventory::setMaxSize(const InventorySize& capacity) {
 
     return ok;
 }
+
+} // namespace Rbo

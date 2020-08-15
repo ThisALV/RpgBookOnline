@@ -3,6 +3,8 @@
 
 #include "Common.hpp"
 
+namespace Rbo {
+
 struct RestProperties;
 class Session;
 
@@ -56,5 +58,7 @@ public:
     void sendBattleAtk(const byte, const byte, const s_byte);
     void endBattle();
 };
+
+} // namespace Rbo
 
 #endif // GAMEPLAY_HPP

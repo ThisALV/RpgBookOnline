@@ -5,6 +5,8 @@
 #include "GameBuilder.hpp"
 #include "LobbyDataFactory.hpp"
 
+namespace Rbo::Server {
+
 void logMemberError(spdlog::logger& logger, const byte id, const ErrCode& err) {
     logger.error("Membre {} : {}", id, err.message());
 }
@@ -554,3 +556,5 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_particip
 
     return { SessionResult::Ok, std::move(participants) };
 }
+
+} // namespace Rbo::Server

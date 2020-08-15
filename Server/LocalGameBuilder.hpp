@@ -5,6 +5,8 @@
 #include "GameBuilder.hpp"
 #include "InstructionsProvider.hpp"
 
+namespace Rbo::Server {
+
 namespace fs = std::filesystem;
 
 struct ScriptLoadingError : std::runtime_error {
@@ -45,5 +47,7 @@ public:
     virtual std::string save(const std::string&, const GameState&) const override;
     virtual Scene buildScene(const word) const override;
 };
+
+} // namespace Rbo::Server
 
 #endif // LOCALGAMEBUILDER_HPP

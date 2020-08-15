@@ -3,6 +3,8 @@
 #include "spdlog/logger.h"
 #include "SessionDataFactory.hpp"
 
+namespace Rbo {
+
 ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger,
                            RequestCtx& ctx, const ReplyController controller, const byte p_id)
     : executor_ { &exectuor },
@@ -118,3 +120,5 @@ void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {
     replyBuffer_.fill(0);
     listenReply();
 }
+
+} // namespace Rbo

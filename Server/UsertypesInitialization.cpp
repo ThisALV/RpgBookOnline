@@ -4,6 +4,8 @@
 #include "Player.hpp"
 #include "Game.hpp"
 
+namespace Rbo::Server {
+
 template<typename Container> sol::as_container_t<Container> luaContainer(Container& c) {
     return sol::as_container(c);
 }
@@ -141,3 +143,5 @@ void InstructionsProvider::initUsertypes() {
     gameplay_type["sendBattleAtk"] = &Gameplay::sendBattleAtk;
     gameplay_type["sendBattleEnd"] = &Gameplay::endBattle;
 }
+
+} // namespace Rbo::Server

@@ -3,6 +3,8 @@
 
 #include "Common.hpp"
 
+namespace Rbo {
+
 struct EventEffect {
     enum struct ItemsChanges {
         Ok, InvFull, ItemEmpty
@@ -65,5 +67,7 @@ struct Game {
     bool hasEffect(const std::string& name) const { return eventEffects.count(name) == 1; }
     bool hasItem(const std::string&) const;
 };
+
+} // namespace Rbo
 
 #endif // GAME_HPP

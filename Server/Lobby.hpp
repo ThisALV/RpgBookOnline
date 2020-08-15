@@ -3,6 +3,8 @@
 
 #include "Session.hpp"
 
+namespace Rbo::Server {
+
 enum struct YesNoQuestion : byte;
 enum struct SessionResult : byte;
 
@@ -34,6 +36,9 @@ private:
         std::size_t operator()(const tcp::endpoint&) const;
     };
 
+    template<typename ValueT>
+    using RemoteEndptHashmap = std::unordered_map<tcp::endpoint, ValueT, RemoteEndpointHash>;
+
     enum LobbyState {
         Open, Starting, Preparing, Running, Closed
     };
@@ -48,8 +53,8 @@ private:
 
     MembersName players_;
     MembersConnection connections_;
-    std::unordered_map<tcp::endpoint, tcp::socket, RemoteEndpointHash> registering_;
-    std::unordered_map<tcp::endpoint, ReceiveBuffer, RemoteEndpointHash> registering_buffers_;
+    RemoteEndptHashmap<tcp::socket> registering_;
+    RemoteEndptHashmap<ReceiveBuffer> registering_buffers_;
     std::vector<byte> ready_members_;
     std::map<byte, ReceiveBuffer> request_buffers_;
 
@@ -101,5 +106,7 @@ public:
     bool isRunningSession() const { return state_ == Running; }
     bool isClosed() const { return state_ == Closed; }
 };
+
+} // namespace Rbo::Server
 
 #endif // LOBBY_HPP

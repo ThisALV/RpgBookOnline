@@ -3,6 +3,8 @@
 
 #include "Data.hpp"
 
+namespace Rbo {
+
 enum struct DataType : byte {
     Request, Text, Infos, GlobalStat, Die, Switch, Reply, Validation, BattleInfos, Crash,
     LeaderSwitch, Start, Stop
@@ -48,5 +50,7 @@ struct SessionDataFactory : DataFactory {
     void makeCrash(const byte);
     void makeLeaderSwitch(const byte);
 };
+
+} // namespace Rbo
 
 #endif // DATAFACTORY_HPP

@@ -3,6 +3,8 @@
 #include "spdlog/logger.h"
 #include "Gameplay.hpp"
 
+namespace Rbo::Server {
+
 bool isInstruction(const sol::object& key, const sol::object& value) {
     return key.get_type() == sol::type::string && value.get_type() == sol::type::function;
 }
@@ -100,3 +102,5 @@ std::unordered_map<std::string, sol::object> InstructionsProvider::errorHandlers
 
     return handlers;
 }
+
+} // namespace Rbo::Server

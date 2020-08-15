@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+namespace Rbo::Server {
+
 bool isParametersError(const SessionResult result) {
     return static_cast<byte>(result) > 1;
 }
@@ -65,3 +67,5 @@ void LobbyDataFactory::makeInvalidIDs(const SessionResult result,
     for (const byte id : expected)
         data_.add(id);
 }
+
+} // namespace Rbo::Server

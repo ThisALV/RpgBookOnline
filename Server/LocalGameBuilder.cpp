@@ -5,6 +5,8 @@
 #include "spdlog/fmt/ostr.h"
 #include "GameJsonCast.inl"
 
+namespace Rbo::Server {
+
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)
     : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
@@ -104,3 +106,5 @@ Scene LocalGameBuilder::buildScene(const word id) const {
     logger_.trace("Construction effectuée.");
     return scene;
 }
+
+} // namespace Rbo::Server

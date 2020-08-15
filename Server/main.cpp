@@ -12,7 +12,7 @@
 std::atomic_bool critical_stop { false };
 std::atomic_bool closed { false };
 
-void run(io::io_context& server, Lobby& lobby, spdlog::logger& logger) {
+void run(Rbo::io::io_context& server, Rbo::Server::Lobby& lobby, spdlog::logger& logger) {
     while (!(critical_stop || closed)) {
         try {
             server.run_for(std::chrono::seconds { 3 });
@@ -49,25 +49,25 @@ int main(const int argc, const char* argv[]) {
         return 1;
     }
 
-    spdlog::logger& logger { rboLogger("main") };
+    spdlog::logger& logger { Rbo::rboLogger("main") };
 
     logger.info("Lancement du serveur...");
-    io::io_context server;
+    Rbo::io::io_context server;
 
     try {
-        const LocalGameBuilder game_builder {
+        const Rbo::Server::LocalGameBuilder game_builder {
             "game/game.json", "game/chkpts.json", "game/scenes.json", "game/instructions"
         };
 
-        Lobby lobby {
+        Rbo::Server::Lobby lobby {
             server,
-            tcp::endpoint { ip == "ipv4" ? tcp::v4() : tcp::v6(), port },
+            Rbo::tcp::endpoint { ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port },
             game_builder,
             prepare_delay
         };
 
-        io::signal_set stop_handler { server, STOP_SIGS };
-        stop_handler.async_wait([&server, &lobby, &logger](const ErrCode err, const int sig) {
+        Rbo::io::signal_set stop_handler { server, STOP_SIGS };
+        stop_handler.async_wait([&server, &lobby, &logger](const Rbo::ErrCode err, const int sig) {
             std::cout << "\b\b";
 
             if (err) {
@@ -91,10 +91,10 @@ int main(const int argc, const char* argv[]) {
 
         server_t1.join();
         server_t2.join();
-    } catch (const ScriptLoadingError& err) {
+    } catch (const Rbo::Server::ScriptLoadingError& err) {
         logger.critical(err.what());
         return 2;
-    } catch (const GameLoadingError& err) {
+    } catch (const Rbo::Server::GameLoadingError& err) {
         logger.critical(err.what());
         return 2;
     }
