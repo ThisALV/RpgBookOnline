@@ -42,14 +42,14 @@ private:
 
     std::unordered_map<std::string, sol::table> usertypes_;
     std::unordered_map<std::string, sol::object> error_handlers_;
-    std::unordered_map<std::string, sol::function> builtin_funcs_;
+    std::unordered_map<std::string, sol::function> builtin_vars_;
 
-    template<typename Func>
-    void registerBuiltinFunc(const std::string& name, const Func& func) {
+    template<typename Var>
+    void registerBuiltinVar(const std::string& name, const Var& func) {
         lua_[name] = func;
-        builtin_funcs_[name] = lua_[name];
+        builtin_vars_[name] = lua_[name];
     }
-    void initLuaResources();
+    void initUsertypes();
 
     std::unordered_map<std::string, sol::object> errorHandlers() const;
     bool validLuaResources() const;

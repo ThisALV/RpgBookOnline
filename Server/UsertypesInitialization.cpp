@@ -12,7 +12,7 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
     return luaContainer<std::vector<T>>(v);
 }
 
-void InstructionsProvider::initLuaResources() {
+void InstructionsProvider::initUsertypes() {
     lua_.new_usertype<std::vector<std::string>>(
                 "StringVector", sol::constructors<std::vector<std::string>()>(),
                 "iterable", luaVector<std::string>);

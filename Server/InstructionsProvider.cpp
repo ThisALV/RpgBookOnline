@@ -32,8 +32,9 @@ const std::vector<std::string> usertypes {
 InstructionsProvider::InstructionsProvider(sol::state& lua, spdlog::logger& logger)
     : lua_ { std::move(lua) }, logger_ { &logger }
 {
-    initLuaResources();
-    registerBuiltinFunc("vote", vote);
+    initUsertypes();
+    registerBuiltinVar("vote", vote);
+    registerBuiltinVar("allPlayers", 0);
     lua_.create_named_table("errorHandlers");
 
     for (const std::string& type : usertypes)
@@ -65,8 +66,8 @@ InstructionsProvider::InstructionsProvider(sol::state& lua, spdlog::logger& logg
 bool InstructionsProvider::validLuaResources() const {
     return std::all_of(usertypes.cbegin(), usertypes.cend(), [this](const std::string& type) {
         return usertypes_.at(type) == lua_[type];
-    }) && std::all_of(builtin_funcs_.cbegin(), builtin_funcs_.cend(), [this](const auto& f) {
-        return f.second == lua_[f.first];
+    }) && std::all_of(builtin_vars_.cbegin(), builtin_vars_.cend(), [this](const auto& v) {
+        return v.second == lua_[v.first];
     }) && lua_["errorHandlers"].get_type() == sol::type::table && error_handlers_ == errorHandlers();
 }
 
