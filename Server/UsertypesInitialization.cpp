@@ -96,11 +96,12 @@ void InstructionsProvider::initUsertypes() {
     check_result_type["sessionEnd"] = sol::readonly(&PlayerCheckingResult::sessionEnd);
 
     sol::usertype<Gameplay> gameplay_type { lua_.new_usertype<Gameplay>("Gameplay") };
-    gameplay_type["global"] = static_cast<StatsManager&(Gameplay::*)()>(&Gameplay::global);
+    gameplay_type["global"] = &Gameplay::global;
     gameplay_type["game"] = &Gameplay::game;
     gameplay_type["rest"] = &Gameplay::rest;
     gameplay_type["checkpoint"] = &Gameplay::checkpoint;
-    gameplay_type["player"] = static_cast<Player&(Gameplay::*)(const byte)>(&Gameplay::player);
+    gameplay_type["player"] = &Gameplay::player;
+    gameplay_type["players"] = &Gameplay::players;
     gameplay_type["count"] = &Gameplay::count;
     gameplay_type["leader"] = &Gameplay::leader;
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;

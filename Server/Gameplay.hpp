@@ -16,18 +16,13 @@ public:
     Gameplay(Session& ctx) : ctx_ { ctx } {}
 
     StatsManager& global();
-    const StatsManager& global() const;
-
     const Game& game() const;
     const RestProperties& rest() const;
 
     std::string checkpoint(const std::string&);
 
     Player& player(const byte);
-    const Player& player(const byte) const;
-
-    Players players();
-    ConstPlayers players() const;
+    std::vector<byte> players() const;
     std::size_t count() const;
 
     byte leader() const;

@@ -35,10 +35,6 @@ StatsManager& Gameplay::global() {
     return ctx_.stats();
 }
 
-const StatsManager& Gameplay::global() const {
-    return ctx_.stats();
-}
-
 const Game& Gameplay::game() const {
     return ctx_.game();
 }
@@ -55,16 +51,15 @@ Player& Gameplay::player(const byte id) {
     return ctx_.player(id);
 }
 
-const Player& Gameplay::player(const byte id) const {
-    return ctx_.player(id);
-}
+std::vector<byte> Gameplay::players() const {
+    const Players players { ctx_.players() };
+    std::vector<byte> ids;
+    ids.resize(ctx_.count(), 0);
 
-Players Gameplay::players() {
-    return ctx_.players();
-}
+    std::transform(players.cbegin(), players.cend(), ids.begin(),
+                   [](const auto p) { return p.first; });
 
-ConstPlayers Gameplay::players() const {
-    return static_cast<const Session&>(ctx_).players();
+    return ids;
 }
 
 std::size_t Gameplay::count() const {
@@ -142,7 +137,7 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
 
     const bool leader_switch { leader() == id };
     if (leader_switch)
-        switchLeader(players().cbegin()->first);
+        switchLeader(*players().cbegin());
 
     return { true, leader_switch, end };
 }
