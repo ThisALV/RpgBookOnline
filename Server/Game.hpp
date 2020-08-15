@@ -53,6 +53,7 @@ struct Game {
     bool voteOnLeaderDeath;
     bool voteLeader;
 
+    const EventEffect& effect(const std::string& name) const { return eventEffects.at(name); }
     std::vector<std::string> player() const;
     std::vector<std::string> global() const;
     ItemsList itemsList() const;

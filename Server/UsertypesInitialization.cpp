@@ -84,6 +84,7 @@ void InstructionsProvider::initUsertypes() {
     game_type["voteLeader"] = sol::readonly(&Game::voteLeader);
     game_type["rest"] = sol::readonly(&Game::rest);
     game_type["effects"] = sol::readonly(&Game::eventEffects);
+    game_type["effect"] = &Game::effect;
 
     sol::usertype<PlayerCheckingResult> check_result_type {
         lua_.new_usertype<PlayerCheckingResult>("CheckingResult")
@@ -103,19 +104,37 @@ void InstructionsProvider::initUsertypes() {
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;
     gameplay_type["voteForLeader"] = &Gameplay::voteForLeader;
     gameplay_type["askReply"] = sol::overload(
+        [](Gameplay& ctx, const byte target, const byte min, const byte max) {
+            return ctx.askReply(target, min, max);
+        },
+        [](Gameplay& ctx, const byte target, const std::vector<byte>& possibilities) {
+            return ctx.askReply(target, possibilities);
+        },
         static_cast<Replies(Gameplay::*)(const byte, const byte, const byte, const bool)>(&Gameplay::askReply),
         static_cast<Replies(Gameplay::*)(const byte, const std::vector<byte>&, const bool)>(&Gameplay::askReply)
     );
-    gameplay_type["askConfirm"] = &Gameplay::askConfirm;
-    gameplay_type["askYesNo"] = &Gameplay::askYesNo;
+    gameplay_type["askConfirm"] = sol::overload(
+        [](Gameplay& ctx, const byte target) { return ctx.askConfirm(target); },
+        &Gameplay::askConfirm
+    );
+    gameplay_type["askYesNo"] = sol::overload(
+        [](Gameplay& ctx, const byte target) { return ctx.askYesNo(target); },
+        &Gameplay::askYesNo
+    );
     gameplay_type["checkPlayer"] = &Gameplay::checkPlayer;
     gameplay_type["checkGame"] = &Gameplay::checkGame;
-    gameplay_type["print"] = &Gameplay::print;
+    gameplay_type["print"] = sol::overload(
+        [](Gameplay& ctx, const std::string& text) { ctx.print(text); }, &Gameplay::print
+    );
     gameplay_type["printOptions"] = sol::overload(
+        [](Gameplay& ctx, const OptionsList& list) { ctx.printOptions(list); },
+        [](Gameplay& ctx, const std::vector<std::string>& list) { ctx.printOptions(list); },
         static_cast<void(Gameplay::*)(const OptionsList&, const byte)>(&Gameplay::printOptions),
         static_cast<void(Gameplay::*)(const std::vector<std::string>&, const byte, const byte)>(&Gameplay::printOptions)
     );
-    gameplay_type["printYesNo"] = &Gameplay::printYesNo;
+    gameplay_type["printYesNo"] = sol::overload(
+        [](Gameplay& ctx) { ctx.printYesNo(); }, &Gameplay::printYesNo
+    );
     gameplay_type["sendGlobalStat"] = &Gameplay::sendGlobalStat;
     gameplay_type["sendInfos"] = &Gameplay::sendInfos;
     gameplay_type["sendBattleInfos"] = &Gameplay::sendBattleInfos;

@@ -34,10 +34,10 @@ public:
     void voteForLeader();
 
     // ask - Throw : NoPlayerRemaining
-    Replies askReply(const byte, const byte, const byte, const bool wait = false);
-    Replies askReply(const byte, const std::vector<byte>&, const bool wait = false);
-    Replies askConfirm(const byte, const bool wait = false);
-    Replies askYesNo(const byte, const bool wait = false);
+    Replies askReply(const byte, const byte, const byte, const bool wait = true);
+    Replies askReply(const byte, const std::vector<byte>&, const bool wait = true);
+    Replies askConfirm(const byte, const bool wait = true);
+    Replies askYesNo(const byte, const bool wait = true);
 
     PlayerCheckingResult checkPlayer(const byte);
     bool checkGame();
