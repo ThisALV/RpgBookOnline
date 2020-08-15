@@ -42,11 +42,11 @@ private:
 
     std::unordered_map<std::string, sol::table> usertypes_;
     std::unordered_map<std::string, sol::object> error_handlers_;
-    std::unordered_map<std::string, sol::function> builtin_vars_;
+    std::unordered_map<std::string, sol::object> builtin_vars_;
 
     template<typename Var>
-    void registerBuiltinVar(const std::string& name, const Var& func) {
-        lua_[name] = func;
+    void registerBuiltinVar(const std::string& name, const Var& var) {
+        lua_[name] = var;
         builtin_vars_[name] = lua_[name];
     }
     void initUsertypes();
