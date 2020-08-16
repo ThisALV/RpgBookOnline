@@ -30,7 +30,7 @@ Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
     : id_ { counter_++ },
       logger_ { rboLogger("Lobby", id()) },
       lobby_io_ { lobby_io },
-      executor_ { lobby_io },
+      member_handling_ { lobby_io },
       new_players_acceptor_ { lobby_io, acceptor_endpt },
       prepare_delay_ { prepare_delay_ms },
       state_ { Closed },
@@ -86,6 +86,8 @@ bool Lobby::registered(const std::string& name) const {
 
 void Lobby::preparation() {
     logger_.info("Préparation de la session dans {} ms...", prepare_delay_.count());
+
+    state_ = Starting;
     prepare_timer_.expires_after(prepare_delay_);
     prepare_timer_.async_wait([this](const ErrCode err)
     {
@@ -93,8 +95,6 @@ void Lobby::preparation() {
             if (!(err == io::error::basic_errors::operation_aborted && isOpen())) {
                 cancelPreparation(true);
                 logger_.error("Annulation imprévue de la préparation : {}", err.message());
-
-                state_ = Open;
             }
 
             return;
@@ -102,8 +102,6 @@ void Lobby::preparation() {
 
         launchPreparation();
     });
-
-    state_ = Starting;
 
     LobbyDataFactory preparation_data;
     preparation_data.makeState(State::Preparing);
@@ -159,21 +157,25 @@ void Lobby::close(const bool crash) {
 
 void Lobby::acceptMember() {
     logger_.trace("En attente d'une connexion sur le port {}...", port());
-    new_players_acceptor_.async_accept(io::bind_executor(executor_,
+    new_players_acceptor_.async_accept(io::bind_executor(member_handling_,
                 std::bind(&Lobby::registerMember, this,
                           std::placeholders::_1, std::placeholders::_2)));
 }
 
 void Lobby::listenMember(const byte id) {
+    const std::lock_guard cancelling_lock { request_cancelling_ };
+    if (isPreparing())
+        return;
+
     logger_.trace("Écoute des requêtes de {}...", id);
     connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)),
-                                      io::bind_executor(executor_, std::bind(
+                                      io::bind_executor(member_handling_, std::bind(
                                               &Lobby::handleMemberRequest, this, id,
                                               std::placeholders::_1, std::placeholders::_2)));
 }
 
 void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
-    if (accept_err == io::error::basic_errors::operation_aborted && !isOpen()) {
+    if (accept_err == io::error::basic_errors::operation_aborted && isPreparing()) {
         logger_.trace("Annulation de l'inscription.");
         return;
     }
@@ -197,7 +199,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
 
     registering_.at(client_endpt).async_receive(
                 io::buffer(registering_buffers_.at(client_endpt)),
-                io::bind_executor(executor_, [this, client_endpt]
+                io::bind_executor(member_handling_, [this, client_endpt]
                                   (const ErrCode name_err, const std::size_t) mutable
     {
         if (name_err) {
@@ -282,7 +284,7 @@ enum struct MemberRequest : byte {
 };
 
 void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const std::size_t) {
-    if (request_err == io::error::basic_errors::operation_aborted && !isOpen()) {
+    if (request_err == io::error::basic_errors::operation_aborted && isPreparing()) {
         logger_.trace("Annulation de la gestion des requêtes de {}.", id);
         return;
     }
@@ -420,8 +422,11 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
 void Lobby::launchPreparation() {
     state_ = Preparing;
     new_players_acceptor_.cancel();
+
+    std::unique_lock cancelling_lock { request_cancelling_ };
     for (auto& connection : connections_)
         connection.second.cancel();
+    cancelling_lock.unlock();
 
     try {
         master_ = names().cbegin()->first;

@@ -29,7 +29,7 @@ target_include_directories(${LIB} PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(${LIB} PUBLIC nlohmann_json::nlohmann_json)
 
 target_include_directories(${EXEC} PUBLIC ${Boost_INCLUDE_DIR})
-target_link_libraries(${EXEC} PUBLIC ${LIB} spdlog::spdlog ${LUA_LIBRARIES} sol2::sol2 nlohmann_json::nlohmann_json stdc++fs)
+target_link_libraries(${EXEC} PUBLIC ${LIB} spdlog::spdlog ${LUA_LIBRARIES} sol2::sol2 nlohmann_json::nlohmann_json)
 
 target_compile_definitions(${EXEC} PUBLIC SOL_ALL_SAFETIES_ON SOL_PRINT_ERRORS=0)
 

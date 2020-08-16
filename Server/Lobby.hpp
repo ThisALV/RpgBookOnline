@@ -48,7 +48,7 @@ private:
     ulong id_;
     spdlog::logger& logger_;
     io::io_context& lobby_io_;
-    io::io_context::strand executor_;
+    io::io_context::strand member_handling_;
     tcp::acceptor new_players_acceptor_;
 
     MembersName players_;
@@ -60,6 +60,7 @@ private:
 
     std::chrono::milliseconds prepare_delay_;
     std::mutex close_;
+    std::mutex request_cancelling_;
     std::atomic<LobbyState> state_;
     io::steady_timer prepare_timer_;
     Session session_;
