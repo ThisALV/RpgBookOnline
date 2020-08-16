@@ -142,12 +142,14 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
         logger_.trace("Déplacement du socket du participant {}.", id);
 
         Player player {
-            id, participant.name,game().player(), game().itemsList(), game().bonuses
+            id, participant.name, game().player(), game().itemsList(), game().bonuses
         };
 
         players_.insert({ id, std::move(player) });
         connections_.insert({ id, std::move(participant.socket) });
     }
+
+    stats_ = { game().global() };
 
     SessionDataFactory start_msg;
     start_msg.makeData(DataType::Start);
@@ -173,14 +175,16 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             stats_.set(name, value);
             stats_.setHidden(name, hidden);
 
-            SessionDataFactory global_stat;
-            global_stat.makeGlobalStat(name, value);
-
-            sendToAll(global_stat.dataWithLength());
-
             const std::string stat_msg { initStatMsg(init, name, value) };
+            if (!hidden) {
+                SessionDataFactory global_stat;
+                global_stat.makeGlobalStat(name, value);
+
+                sendToAll(global_stat.dataWithLength());
+                interface.print(stat_msg);
+            }
+
             logger_.info("[Global stats] {}", stat_msg);
-            interface.print(stat_msg);
         }
 
         initPlayers(interface);
