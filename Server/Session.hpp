@@ -46,9 +46,6 @@ using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
 private:
-    inline static ulong counter_ { 0 };
-
-    ulong id_;
     io::io_context::strand executor_;
     spdlog::logger& logger_;
     StatsManager stats_;
@@ -84,9 +81,6 @@ public:
     Session& operator=(const Session&) = delete;
 
     bool operator==(const Session&) const = delete;
-
-    bool same(const Session& other) const { return id() == other.id(); }
-    ulong id() const { return id_; }
 
     // Throw : NoPlayerRemaining
     void start(Participants&, const std::string& = "", const bool = false);

@@ -27,8 +27,7 @@ std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) c
 
 Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
              const GameBuilder& game_builder, const ulong prepare_delay_ms)
-    : id_ { counter_++ },
-      logger_ { rboLogger("Lobby", id()) },
+    : logger_ { rboLogger("Lobby") },
       lobby_io_ { lobby_io },
       member_handling_ { lobby_io },
       new_players_acceptor_ { lobby_io, acceptor_endpt },

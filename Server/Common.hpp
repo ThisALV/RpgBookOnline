@@ -62,7 +62,7 @@ std::pair<std::string, std::string> splitItemEntry(const std::string&);
 bool contains(const std::vector<std::string>&, const std::string&);
 byte vote(const Replies&);
 
-spdlog::logger& rboLogger(const std::string&, const std::optional<ulong> = {});
+spdlog::logger& rboLogger(const std::string&);
 
 template<typename NumType> std::vector<byte> decompose(const NumType value) {
     const NumType byte_mask { 0xff };

@@ -101,9 +101,8 @@ void Session::removePlayer(const byte id) {
 }
 
 Session::Session(io::io_context& io, const GameBuilder& g_builder)
-    : id_ { counter_++ },
-      executor_ { io },
-      logger_ { rboLogger("Session", id()) },
+    : executor_ { io },
+      logger_ { rboLogger("Session") },
       game_ { g_builder() },
       first_state_ { true },
       running_ { false },

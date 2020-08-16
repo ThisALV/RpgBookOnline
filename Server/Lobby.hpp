@@ -43,9 +43,6 @@ private:
         Open, Starting, Preparing, Running, Closed
     };
 
-    inline static ulong counter_;
-
-    ulong id_;
     spdlog::logger& logger_;
     io::io_context& lobby_io_;
     io::io_context::strand member_handling_;
@@ -88,10 +85,14 @@ private:
 public:
     Lobby(io::io_context&, const tcp::endpoint&, const GameBuilder&, const ulong = 5);
 
+    Lobby(const Lobby&) = delete;
+    Lobby& operator=(const Lobby&) = delete;
+
+    bool operator==(const Lobby&) const = delete;
+
     void open();
     void close(const bool = false);
 
-    ulong id() const { return id_; }
     ushort port() const { return new_players_acceptor_.local_endpoint().port(); }
     bool registered(const byte id) const { return names().count(id) == 1; }
     bool registered(const std::string&) const;

@@ -32,11 +32,7 @@ void loggerErrorHandler(const std::string& err) {
     std::cerr << "Erreur de logging : " << err << std::endl;
 }
 
-spdlog::logger& rboLogger(const std::string& ctx, const std::optional<ulong> id) {
-    std::string name { ctx };
-    if (id)
-        name += '-' + std::to_string(*id);
-
+spdlog::logger& rboLogger(const std::string& name) {
     assert(name.length() <= 11);
     auto logger {
         std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { sink_file, sink_console })
