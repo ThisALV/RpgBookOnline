@@ -24,13 +24,18 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
         scripts_dir, fs::directory_options::skip_permission_denied
     };
 
-    for (const fs::directory_entry& script : scripts) {
-        logger_.trace("Exécution de {}...", script.path());
+    for (const fs::directory_entry& entry : scripts) {
+        if (!fs::is_regular_file(entry) || entry.path().extension() != ".lua") {
+            logger_.trace("{} ignoré", entry.path());
+            continue;
+        }
+
+        logger_.trace("Exécution de {}...", entry.path());
 
         try {
-            lua.script_file(script.path());
+            lua.script_file(entry.path());
         } catch (const sol::error& err) {
-            throw ScriptLoadingError { script, err.what() };
+            throw ScriptLoadingError { entry, err.what() };
         }
     }
 
