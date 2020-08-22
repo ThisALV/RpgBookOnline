@@ -10,6 +10,11 @@ const std::size_t LENGTH_SIZE { sizeof(word) };
 
 using DataBuffer = std::array<byte, MAX_LENGTH>;
 
+struct BufferOverflow : std::logic_error {
+    BufferOverflow() : std::logic_error {
+                           "Buffer dépassant " + std::to_string(MAX_LENGTH) + " octets" } {}
+};
+
 class Data {
 private:
     DataBuffer buffer_;
@@ -18,7 +23,7 @@ private:
     template<typename NumType>
     void putNumeric(const NumType value, const std::size_t offset, const bool refresh = true) {
         if (count() + sizeof(NumType) > MAX_LENGTH)
-            throw std::overflow_error { "buffer overflow" };
+            throw BufferOverflow {};
 
         std::size_t i { 0 };
         for (const byte b : decompose(value))

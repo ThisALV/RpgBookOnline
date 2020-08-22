@@ -82,7 +82,6 @@ public:
 
     bool operator==(const Session&) const = delete;
 
-    // Throw : NoPlayerRemaining
     void start(Participants&, const std::string& = "", const bool = false);
 
     void stop() { running_ = false; }
@@ -98,16 +97,13 @@ public:
 
     const GameBuilder& gameBuilder() const { return game_builer_; }
 
-    // request et send Throw : NoPlayerRemaining
     Replies request(const byte, const Data&, ReplyController, const bool);
     void sendTo(const byte, const Data&);
     void sendToAll(const Data&);
 
-    // Throw : NoPlayerRemaining
     void disconnect(const byte, const bool = false);
 
     byte leader() const { return leader_; }
-    // Throw : NePlayerRemaining
     void switchLeader(const byte);
 
     Player& player(const byte);

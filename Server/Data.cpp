@@ -12,7 +12,8 @@ Data::Data() {
 }
 
 Data::Data(const std::vector<byte>& data) : Data {} {
-    assert(data.size() <= MAX_LENGTH - LENGTH_SIZE);
+    if (data.size() > MAX_LENGTH - LENGTH_SIZE)
+        throw BufferOverflow {};
 
     std::size_t i { 0 };
     for (const byte b : data)
@@ -26,13 +27,15 @@ bool Data::operator==(const Data& rhs) const {
 }
 
 void Data::add(const byte b) {
-    assert(count() + 1 <= MAX_LENGTH);
+    if (count() + 1 > MAX_LENGTH)
+        throw BufferOverflow {};
 
     buffer_[bytes_++] = b;
 }
 
 void Data::put(const std::string& str) {
-    assert(count() + str.length() + sizeof(word) <= MAX_LENGTH);
+    if (count() + str.length() + sizeof(word) > MAX_LENGTH)
+        throw BufferOverflow {};
 
     putNumeric<word>(str.length());
     for (const std::size_t init { bytes_ }; bytes_ < (str.length() + init); bytes_++)
