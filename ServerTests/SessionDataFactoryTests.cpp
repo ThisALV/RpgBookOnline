@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE(Possibilities) {
 BOOST_AUTO_TEST_CASE(Options) {
     const Data expected {
         std::vector<byte> {
-            1, 1, 4, 0, 'Z', 'e', 'r', 'o', 0, 1, 'O', 'n', 'e', 0, 2, 'T', 'w', 'o', 0,
-            4, 'F', 'o', 'u', 'r', 0
+            1, 1, 4, 0, 0, 4, 'Z', 'e', 'r', 'o', 1, 0, 3, 'O', 'n', 'e', 2, 0, 3, 'T', 'w', 'o',
+            4, 0, 4, 'F', 'o', 'u', 'r'
         }
     };
     const OptionsList arg { { 0, "Zero" }, { 1, "One" }, { 2, "Two" }, { 4, "Four" } };

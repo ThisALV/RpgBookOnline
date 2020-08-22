@@ -32,12 +32,11 @@ void Data::add(const byte b) {
 }
 
 void Data::put(const std::string& str) {
-    assert(count() + str.length() + 1 <= MAX_LENGTH);
+    assert(count() + str.length() + sizeof(word) <= MAX_LENGTH);
 
+    putNumeric<word>(str.length());
     for (const std::size_t init { bytes_ }; bytes_ < (str.length() + init); bytes_++)
         buffer_[bytes_] = str[bytes_ - init];
-
-    add(0);
 }
 
 const Data& DataFactory::dataWithLength() {

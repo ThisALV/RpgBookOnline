@@ -56,26 +56,26 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(Put)
 
 BOOST_AUTO_TEST_CASE(EmptyString) {
-    const DataBuffer expected_buffer { 0, 0, 0 };
+    const DataBuffer expected_buffer { 0, 0, 0, 0 };
     const std::string arg { "" };
 
     Data data;
     data.put(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 1);
+    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
 BOOST_AUTO_TEST_CASE(String) {
     const DataBuffer expected_buffer {
-        0, 0, 'H', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!', 0
+        0, 0, 0, 12, 'H', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'
     };
     const std::string arg { "Hello world!" };
 
     Data data;
     data.put(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 1);
+    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
