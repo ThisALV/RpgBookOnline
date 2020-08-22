@@ -47,6 +47,7 @@ int StatsManager::get(const std::string& stat) const {
 }
 
 void StatsManager::setLimits(const std::string& stat, const int min, const int max) {
+    checkExists(stat);
     if (min > 0 || max < 0)
         throw InvalidLimit {};
 
