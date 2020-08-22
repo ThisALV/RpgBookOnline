@@ -73,6 +73,14 @@ struct ConsumeFixture : AddFixture {
     }
 };
 
+BOOST_AUTO_TEST_CASE(AddUnknownInventory) {
+    BOOST_CHECK_THROW(Player(0, "", {}, {}, {}).add("", "", 0), UnknownInventory);
+}
+
+BOOST_AUTO_TEST_CASE(AddUnknownItem) {
+    BOOST_CHECK_THROW(Player(0, "", {}, { { "inv1", {} } }, {}).add("inv1", "", 0), UnknownItem);
+}
+
 BOOST_FIXTURE_TEST_CASE(Add, AddFixture) {
     const bool done { player.add("inv1", "A", 5) };
     const StatsValues expected_stats { { "A", -15 } };
@@ -84,6 +92,14 @@ BOOST_FIXTURE_TEST_CASE(Add, AddFixture) {
     BOOST_CHECK(done);
     BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { player.stats().values() });
     BOOST_CHECK_EQUAL(expected_inventories, player.inventories());
+}
+
+BOOST_AUTO_TEST_CASE(ConsumeUnknownInventory) {
+    BOOST_CHECK_THROW(Player(0, "", {}, {}, {}).consume("", "", 0), UnknownInventory);
+}
+
+BOOST_AUTO_TEST_CASE(ConsumeUnknownItem) {
+    BOOST_CHECK_THROW(Player(0, "", {}, { { "inv1", {} } }, {}).consume("inv1", "", 0), UnknownItem);
 }
 
 BOOST_FIXTURE_TEST_CASE_WITH_DECOR(Consume, ConsumeFixture,
