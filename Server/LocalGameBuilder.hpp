@@ -30,8 +30,9 @@ private:
     fs::path game_;
     fs::path chkpts_;
     fs::path scenes_;
-    InstructionsProvider provider_;
     spdlog::logger& logger_;
+    sol::state exec_ctx_;
+    InstructionsProvider provider_;
 
 public:
     LocalGameBuilder(const fs::path&, const fs::path&, const fs::path&, const fs::path&);

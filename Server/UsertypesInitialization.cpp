@@ -15,32 +15,32 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
 }
 
 void InstructionsProvider::initUsertypes() {
-    lua_.new_usertype<std::vector<std::string>>(
+    ctx_.new_usertype<std::vector<std::string>>(
                 "StringVector", sol::constructors<std::vector<std::string>()>(),
                 "iterable", luaVector<std::string>);
-    lua_.new_usertype<std::vector<byte>>(
+    ctx_.new_usertype<std::vector<byte>>(
                 "ByteVector", sol::constructors<std::vector<byte>()>(),
                 "iterable", luaVector<byte>);
 
-    lua_.new_usertype<std::unordered_map<byte, std::string>>(
+    ctx_.new_usertype<std::unordered_map<byte, std::string>>(
                 "ByteWithString", sol::constructors<std::unordered_map<byte, std::string>()>(),
                 "iterable", luaContainer<std::unordered_map<byte, std::string>>);
-    lua_.new_usertype<std::unordered_map<byte, std::string>>(
+    ctx_.new_usertype<std::unordered_map<byte, std::string>>(
                 "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(),
                 "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
-    lua_.new_usertype<Effects>(
+    ctx_.new_usertype<Effects>(
                 "Effects", sol::constructors<Effects()>(),
                 "iterable", luaContainer<Effects>);
 
-    sol::usertype<RestProperties> rest_type { lua_.new_usertype<RestProperties>("RestProperties") };
+    sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
     rest_type["availables"] = sol::readonly(&RestProperties::availables);
 
-    sol::usertype<StatLimits> limits_type { lua_.new_usertype<StatLimits>("StatLimits") };
+    sol::usertype<StatLimits> limits_type { ctx_.new_usertype<StatLimits>("StatLimits") };
     limits_type["min"] = &StatLimits::min;
     limits_type["max"] = &StatLimits::max;
 
-    sol::usertype<StatsManager> stats_type { lua_.new_usertype<StatsManager>("StatsManager") };
+    sol::usertype<StatsManager> stats_type { ctx_.new_usertype<StatsManager>("StatsManager") };
     stats_type["get"] = &StatsManager::get;
     stats_type["change"] = &StatsManager::change;
     stats_type["set"] = &StatsManager::set;
@@ -50,7 +50,7 @@ void InstructionsProvider::initUsertypes() {
     stats_type["hidden"] = &StatsManager::hidden;
     stats_type["has"] = &StatsManager::has;
 
-    sol::usertype<Inventory> inv_type { lua_.new_usertype<Inventory>("Inventory") };
+    sol::usertype<Inventory> inv_type { ctx_.new_usertype<Inventory>("Inventory") };
     inv_type["add"] = &Inventory::add;
     inv_type["consume"] = &Inventory::consume;
     inv_type["size"] = &Inventory::size;
@@ -60,7 +60,7 @@ void InstructionsProvider::initUsertypes() {
     inv_type["maxSize"] = &Inventory::maxSize;
     inv_type["setMaxSize"] = &Inventory::setMaxSize;
 
-    sol::usertype<Player> player_type { lua_.new_usertype<Player>("Player") };
+    sol::usertype<Player> player_type { ctx_.new_usertype<Player>("Player") };
     player_type["same"] = &Player::same;
     player_type["id"] = &Player::id;
     player_type["name"] = &Player::name;
@@ -74,13 +74,13 @@ void InstructionsProvider::initUsertypes() {
         { "InventoryFull", EventEffect::ItemsChanges::InvFull },
         { "ItemEmpty", EventEffect::ItemsChanges::ItemEmpty }
     };
-    lua_.new_enum<EventEffect::ItemsChanges>("SimulationResult", results);
+    ctx_.new_enum<EventEffect::ItemsChanges>("SimulationResult", results);
 
-    sol::usertype<EventEffect> effect_type { lua_.new_usertype<EventEffect>("EventEffect") };
+    sol::usertype<EventEffect> effect_type { ctx_.new_usertype<EventEffect>("EventEffect") };
     effect_type["apply"] = &EventEffect::apply;
     effect_type["simulateItemsChanges"] = &EventEffect::simulateItemsChanges;
 
-    sol::usertype<Game> game_type { lua_.new_usertype<Game>("Game") };
+    sol::usertype<Game> game_type { ctx_.new_usertype<Game>("Game") };
     game_type["name"] = sol::readonly(&Game::name);
     game_type["voteOnLeaderDeath"] = sol::readonly(&Game::voteOnLeaderDeath);
     game_type["voteLeader"] = sol::readonly(&Game::voteLeader);
@@ -89,13 +89,13 @@ void InstructionsProvider::initUsertypes() {
     game_type["effect"] = &Game::effect;
 
     sol::usertype<PlayerCheckingResult> check_result_type {
-        lua_.new_usertype<PlayerCheckingResult>("CheckingResult")
+        ctx_.new_usertype<PlayerCheckingResult>("CheckingResult")
     };
     check_result_type["alive"] = sol::readonly(&PlayerCheckingResult::alive);
     check_result_type["leaderSwitch"] = sol::readonly(&PlayerCheckingResult::leaderSwitch);
     check_result_type["sessionEnd"] = sol::readonly(&PlayerCheckingResult::sessionEnd);
 
-    sol::usertype<Gameplay> gameplay_type { lua_.new_usertype<Gameplay>("Gameplay") };
+    sol::usertype<Gameplay> gameplay_type { ctx_.new_usertype<Gameplay>("Gameplay") };
     gameplay_type["global"] = &Gameplay::global;
     gameplay_type["game"] = &Gameplay::game;
     gameplay_type["rest"] = &Gameplay::rest;

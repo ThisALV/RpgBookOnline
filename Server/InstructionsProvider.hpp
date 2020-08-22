@@ -3,7 +3,7 @@
 
 #include "Common.hpp"
 
-#include "sol/sol.hpp"
+#include "TablesLock.hpp"
 
 namespace Rbo::Server {
 
@@ -31,43 +31,28 @@ private:
     using Instructions = std::unordered_map<std::string, LuaFunc>;
 
     struct LuaInstruction {
-        const InstructionsProvider* provider;
         LuaFunc func;
         std::vector<std::string> args;
 
         Next operator()(Gameplay&) const;
     };
 
-    sol::state lua_;
     Instructions instructions_;
-    spdlog::logger* logger_;
+    sol::state& ctx_;
+    spdlog::logger& logger_;
+    TablesLock resources_lock_;
 
-    std::unordered_map<std::string, sol::table> usertypes_;
-    std::unordered_map<std::string, sol::object> error_handlers_;
-    std::unordered_map<std::string, sol::object> builtin_vars_;
-
-    template<typename Var>
-    void registerBuiltinVar(const std::string& name, const Var& var) {
-        lua_[name] = var;
-        builtin_vars_[name] = lua_[name];
-    }
     void initUsertypes();
 
-    std::unordered_map<std::string, sol::object> errorHandlers() const;
-    bool validLuaResources() const;
-
 public:
-    InstructionsProvider() = default;
     InstructionsProvider(sol::state&, spdlog::logger&);
 
     InstructionsProvider(const InstructionsProvider&) = delete;
     InstructionsProvider& operator=(const InstructionsProvider&) = delete;
 
-    InstructionsProvider(InstructionsProvider&&) = default;
-    InstructionsProvider& operator=(InstructionsProvider&&) = default;
-
     bool operator==(const InstructionsProvider&) const = delete;
 
+    void load();
     Instruction get(const std::string&, const std::vector<std::string>&) const;
     bool has(const std::string& name) const { return instructions_.count(name) == 1; }
 };

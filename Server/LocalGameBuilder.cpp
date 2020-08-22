@@ -10,13 +10,8 @@ namespace Rbo::Server {
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)
     : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
-      logger_ { rboLogger("GameBuilder") }
+      logger_ { rboLogger("GameBuilder") }, exec_ctx_ {}, provider_ { exec_ctx_, logger_ }
 {
-    sol::state lua;
-    lua.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string,
-                       sol::lib::math, sol::lib::table);
-    lua.create_named_table("Rbo");
-
     if (!fs::is_directory(scripts_dir))
         throw std::invalid_argument { "Script dirs n'est pas un dossier" };
 
@@ -33,13 +28,13 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
         logger_.trace("Exécution de {}...", entry.path());
 
         try {
-            lua.script_file(entry.path());
+            exec_ctx_.script_file(entry.path());
         } catch (const sol::error& err) {
             throw ScriptLoadingError { entry, err.what() };
         }
     }
 
-    provider_ = InstructionsProvider { lua, logger_ };
+    provider_.load();
 }
 
 Game LocalGameBuilder::operator()() const {
