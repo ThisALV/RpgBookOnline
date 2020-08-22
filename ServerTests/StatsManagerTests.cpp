@@ -104,3 +104,19 @@ BOOST_FIXTURE_TEST_CASE(OffLimitsMin, ChangeFixture<>) {
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+struct UnknownStatFixture {
+    StatsManager manager;
+};
+
+BOOST_FIXTURE_TEST_SUITE(UnknownStatTests, UnknownStatFixture)
+
+BOOST_AUTO_TEST_CASE(Get) { BOOST_CHECK_THROW(manager.get(""), UnknownStat); }
+BOOST_AUTO_TEST_CASE(Set) { BOOST_CHECK_THROW(manager.set("", 0), UnknownStat); }
+BOOST_AUTO_TEST_CASE(Change) { BOOST_CHECK_THROW(manager.change("", 0), UnknownStat); }
+BOOST_AUTO_TEST_CASE(Limits) { BOOST_CHECK_THROW(manager.limits(""), UnknownStat); }
+BOOST_AUTO_TEST_CASE(SetLimits) { BOOST_CHECK_THROW(manager.setLimits("", 0, 0), UnknownStat); }
+BOOST_AUTO_TEST_CASE(Hidden) { BOOST_CHECK_THROW(manager.hidden(""), UnknownStat); }
+BOOST_AUTO_TEST_CASE(SetHidden) { BOOST_CHECK_THROW(manager.setHidden("", false), UnknownStat); }
+
+BOOST_AUTO_TEST_SUITE_END()
