@@ -98,6 +98,7 @@ public:
     bool registered(const std::string&) const;
     bool allMembersReady() const { return readyMembers().size() == names().size(); }
 
+    std::vector<byte> ids() const;
     const MembersName& names() const { return players_; }
     const MembersConnection& connections() const { return connections_; }
     const std::vector<byte>& readyMembers() const { return ready_members_; }

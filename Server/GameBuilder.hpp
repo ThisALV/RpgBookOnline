@@ -5,8 +5,6 @@
 
 namespace Rbo {
 
-const word INTRO { 0 };
-
 struct CheckpointLoadingError : std::exception {
     std::string msg;
 

@@ -7,6 +7,10 @@
 
 namespace Rbo::Server {
 
+std::default_random_engine LocalGameBuilder::chkpt_id_rd_ {
+    static_cast<ulong>(std::chrono::system_clock::now().time_since_epoch().count())
+};
+
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)
     : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
@@ -72,12 +76,70 @@ Game LocalGameBuilder::operator()() const {
     return game;
 }
 
-GameState LocalGameBuilder::load(const std::string&) const {
-    throw std::runtime_error { "Load : non implémentée" };
+GameState LocalGameBuilder::load(const std::string& name) const {
+    logger_.trace("Chargement des checkpoints dans {}.", chkpts_);
+    logger_.trace("Chargement de \"{}\".", name);
+
+    GameState state;
+    try {
+        std::ifstream in { chkpts_ };
+        json data;
+        in >> data;
+
+        if (in.fail())
+            throw GameLoadingError { "Erreur sur le flux d'entrée" };
+
+        const json& chkpt { data.at(name) };
+        chkpt.at("scene").get_to(state.scene);
+        chkpt.at("global").get_to(state.global);
+        chkpt.at("leader").get_to(state.leader);
+        chkpt.at("players").get_to(state.players);
+    } catch (const json::exception& err) {
+        throw GameLoadingError { err.what() };
+    }
+
+    return state;
 }
 
-std::string LocalGameBuilder::save(const std::string&, const GameState&) const {
-    throw std::runtime_error { "Save : non implémentée" };
+std::string LocalGameBuilder::save(const std::string& name, const GameState& state) const {
+    const std::string final_name { name + '_' +
+                std::to_string(std::uniform_int_distribution { 0, 5000 } (chkpt_id_rd_)) };
+
+    logger_.trace("Chargement des checkpoints dans {}.", chkpts_);
+    json data;
+    try {
+        std::ifstream in { chkpts_ };
+        in >> data;
+
+        if (in.fail())
+            throw GameLoadingError { "Erreur sur le flux d'entrée" };
+    } catch (const json::exception& err) {
+        throw GameLoadingError { err.what() };
+    }
+
+    json& chkpt { data[final_name] };
+    if (chkpt.is_object())
+        throw CheckpointAlreadyExists { final_name };
+
+    logger_.trace("Sauvegarde sur {}.", final_name);
+
+    try {
+        std::ofstream out { chkpts_ };
+
+        chkpt = json::object();
+        chkpt["scene"] = state.scene;
+        chkpt["global"] = state.global;
+        chkpt["leader"] = state.leader;
+        chkpt["players"] = state.players;
+
+        out << data.dump(4);
+        if (out.fail())
+            throw GameSavingError { "Erreur sur le flux de sortie" };
+    } catch (const json::exception& err) {
+        throw GameSavingError { err.what() };
+    }
+
+    return final_name;
 }
 
 Scene LocalGameBuilder::buildScene(const word id) const {

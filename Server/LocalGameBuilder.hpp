@@ -2,6 +2,7 @@
 #define LOCALGAMEBUILDER_HPP
 
 #include <filesystem>
+#include <random>
 #include "GameBuilder.hpp"
 #include "InstructionsProvider.hpp"
 
@@ -19,6 +20,16 @@ struct GameLoadingError : std::runtime_error {
         : std::runtime_error { "Impossible de charger le jeu : " + msg } {}
 };
 
+struct GameSavingError : std::runtime_error {
+    GameSavingError(const std::string& msg)
+        : std::runtime_error { "Impossible de sauvegarder le jeu : " + msg } {}
+};
+
+struct CheckpointAlreadyExists : std::logic_error {
+    CheckpointAlreadyExists(const std::string& name)
+        : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}
+};
+
 struct SceneLoadingError : std::runtime_error {
     SceneLoadingError(const word id, const std::string& msg)
         : std::runtime_error {
@@ -27,6 +38,8 @@ struct SceneLoadingError : std::runtime_error {
 
 class LocalGameBuilder : public GameBuilder {
 private:
+    static std::default_random_engine chkpt_id_rd_;
+
     fs::path game_;
     fs::path chkpts_;
     fs::path scenes_;

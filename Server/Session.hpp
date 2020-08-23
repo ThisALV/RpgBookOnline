@@ -36,6 +36,11 @@ struct InvalidIDs : std::logic_error {
     virtual const char* what() const noexcept override;
 };
 
+struct IntroductionCheckpoint : std::logic_error {
+    IntroductionCheckpoint()
+        : std::logic_error { "Sauvegarde durant la scène d'introduction " + std::to_string(INTRO) } {}
+};
+
 struct Particpant {
     std::string name;
     tcp::socket socket;
@@ -88,7 +93,7 @@ public:
     bool running() const { return running_; }
     void reset();
 
-    std::string checkpoint(const std::string&) const;
+    std::string checkpoint(const std::string&, const word) const;
 
     const Game& game() const { return game_; }
 

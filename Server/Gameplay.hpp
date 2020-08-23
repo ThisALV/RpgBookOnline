@@ -19,7 +19,7 @@ public:
     const Game& game() const;
     const RestProperties& rest() const;
 
-    std::string checkpoint(const std::string&);
+    std::string checkpoint(const std::string&, const word);
 
     Player& player(const byte);
     std::vector<byte> players() const;

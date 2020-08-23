@@ -83,6 +83,7 @@ class Gameplay;
 class Game;
 
 const byte ALL_PLAYERS { 0 };
+const word INTRO { 0 };
 
 using Next = std::optional<word>;
 using Instruction = std::function<Next(Gameplay&)>;

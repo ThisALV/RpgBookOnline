@@ -83,6 +83,16 @@ bool Lobby::registered(const std::string& name) const {
     return std::find_if(b, e, [&name](const auto& p) -> bool { return p.second == name; }) != e;
 }
 
+std::vector<byte> Lobby::ids() const {
+    std::vector<byte> ids;
+    ids.resize(names().size());
+
+    std::transform(names().cbegin(), names().cend(), ids.begin(),
+                   [](const auto& member) -> byte { return member.first; });
+
+    return ids;
+}
+
 void Lobby::preparation() {
     logger_.info("Préparation de la session dans {} ms...", prepare_delay_.count());
 
@@ -143,13 +153,7 @@ void Lobby::close(const bool crash) {
     const std::lock_guard close_guard { close_ };
 
     if (!crash) {
-        std::vector<byte> ids;
-        ids.resize(names().size());
-
-        std::transform(names().cbegin(), names().cend(), ids.begin(),
-                       [](const auto& member) -> byte { return member.first; });
-
-        for (const byte id : ids)
+        for (const byte id : ids())
             disconnect(id);
     }
 }
@@ -504,9 +508,10 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name,
             const auto cb { run.expectedIDs.cbegin() };
             const auto ce { run.expectedIDs.cend() };
 
-            for (const auto& connection : connections_) {
-                if (std::find(cb, ce, connection.first) == ce)
-                    disconnect(connection.first);
+
+            for (const byte id : ids()) {
+                if (std::find(cb, ce, id) == ce)
+                    disconnect(id);
             }
 
             if (names().count(master_) == 0)
@@ -536,7 +541,7 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_particip
         session_.start(participants, chkpt_name, missing_participants);
         logger_.info("Fin de la session.");
     } catch (const CheckpointLoadingError& err) {
-        logger_.error("Impossible de charger le checkpoint \"{}\".", chkpt_name);
+        logger_.error("Impossible de charger le checkpoint \"{}\" : {}", chkpt_name, err.what());
         return { SessionResult::CheckpointLoadingError, std::move(participants) };
     } catch (const InvalidIDs& err) {
         Run run;

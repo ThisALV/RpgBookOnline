@@ -227,7 +227,6 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
                 break;
             }
         }
-        first_state_ = false;
 
         if (!invalid_participants)
             invalid_participants = count() > state.players.size();
@@ -269,6 +268,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
 
 Next Session::playScene(Gameplay& interface, const word id) {
     logger_.info("Passage à la scène {}.", id);
+    current_scene_ = id;
     const Scene scene { gameBuilder().buildScene(id) };
 
     SessionDataFactory switch_msg;
@@ -389,6 +389,7 @@ void Session::reset() {
     last_states_.clear();
     current_scene_ = 0;
     running_ = false;
+    first_state_ = true;
 }
 
 void Session::switchLeader(const byte id) {
@@ -401,7 +402,10 @@ void Session::switchLeader(const byte id) {
     sendToAll(switch_data.dataWithLength());
 }
 
-std::string Session::checkpoint(const std::string& chkpt_name) const {
+std::string Session::checkpoint(const std::string& chkpt_name, const word id) const {
+    if (current_scene_ == INTRO)
+        throw IntroductionCheckpoint {};
+
     PlayersStates states;
     std::transform(players_.cbegin(), players_.cend(), std::inserter(states, states.begin()),
                    [](const auto& state) -> PlayersStates::value_type
@@ -419,7 +423,7 @@ std::string Session::checkpoint(const std::string& chkpt_name) const {
         return { id, PlayerState { stats, inventories, inventoriesMaxCapacity } };
     });
 
-    return gameBuilder().save(chkpt_name, { current_scene_, stats().raw(), leader(), states });
+    return gameBuilder().save(chkpt_name, { id, stats().raw(), leader(), states });
 }
 
 Players Session::players() {
