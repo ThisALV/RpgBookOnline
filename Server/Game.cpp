@@ -29,8 +29,7 @@ void EventEffect::apply(Player& target) const {
     using ItemEntry = std::pair<std::string, int>;
 
     std::vector<ItemEntry> ordered_items_changes { itemsChanges.size() };
-    std::transform(itemsChanges.begin(), itemsChanges.end(), ordered_items_changes.begin(),
-                   [](const auto& c) -> ItemEntry { return { c.first, c.second }; });
+    std::copy(itemsChanges.cbegin(), itemsChanges.cend(), ordered_items_changes.begin());
     std::partition(ordered_items_changes.begin(), ordered_items_changes.end(),
                    [](const auto& c) -> bool { return c.second < 0; });
 
