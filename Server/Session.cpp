@@ -218,20 +218,26 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             sendToAll(global_stat.dataWithLength());
         }
 
-        bool invalid_participants { false };
-        for (const auto& [id, p_state] : state.players) {
-            if (players_.count(id) == 1) {
-                restaurePlayer(id, p_state);
-            } else if (!missing_participants) {
-                invalid_participants = true;
+        ParticipantsValidity participants_validity { ParticipantsValidity::Ok };
+        for (const auto& player : players_) {
+            if (state.players.count(player.first) == 0) {
+                participants_validity = ParticipantsValidity::UnknownPlayer;
                 break;
             }
         }
 
-        if (!invalid_participants)
-            invalid_participants = count() > state.players.size();
+        if (participants_validity == ParticipantsValidity::Ok) {
+            for (const auto& [id, p_state] : state.players) {
+                if (players_.count(id) == 1) {
+                    restaurePlayer(id, p_state);
+                } else if (!missing_participants) {
+                    participants_validity = ParticipantsValidity::LessMembers;
+                    break;
+                }
+            }
+        }
 
-        if (invalid_participants) {
+        if (participants_validity != ParticipantsValidity::Ok) {
             end(participants);
 
             std::vector<byte> expected_players;
@@ -240,7 +246,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             std::transform(state.players.cbegin(), state.players.cend(), expected_players.begin(),
                            [](const auto& ps) -> byte { return ps.first; });
 
-            throw InvalidIDs { expected_players };
+            throw InvalidIDs { expected_players, participants_validity };
         }
 
         beginning = state.scene;

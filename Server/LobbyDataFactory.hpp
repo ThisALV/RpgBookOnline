@@ -16,7 +16,7 @@ enum struct YesNoQuestion : byte {
 };
 
 enum struct SessionResult : byte {
-    Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayers
+    Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer
 };
 
 bool isParametersError(const SessionResult);

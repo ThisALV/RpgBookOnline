@@ -27,11 +27,19 @@ struct CancelledRequest : std::exception {
     const char* what() const noexcept override;
 };
 
+enum struct ParticipantsValidity {
+    Ok, UnknownPlayer, LessMembers
+};
+
 struct InvalidIDs : std::logic_error {
     std::vector<byte> expectedIDs;
+    ParticipantsValidity errType;
 
-    InvalidIDs(const std::vector<byte>& expected_ids)
-        : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids } {}
+    InvalidIDs(const std::vector<byte>& expected_ids, const ParticipantsValidity type)
+        : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type }
+    {
+        assert(type != ParticipantsValidity::Ok);
+    }
 
     virtual const char* what() const noexcept override;
 };

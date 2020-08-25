@@ -504,7 +504,7 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name,
             makeSession(new_ckpt);
         } else if (run.result == SessionResult::LessMembers && askYesNo(YesNoQuestion::MissingParticipants)) {
             makeSession(new_ckpt, true);
-        } else if (run.result == SessionResult::UnknownPlayers && askYesNo(YesNoQuestion::KickUnknownPlayers)) {
+        } else if (run.result == SessionResult::UnknownPlayer && askYesNo(YesNoQuestion::KickUnknownPlayers)) {
             const auto cb { run.expectedIDs.cbegin() };
             const auto ce { run.expectedIDs.cend() };
 
@@ -548,12 +548,9 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_particip
         run.expectedIDs = err.expectedIDs;
         logger_.debug("expectedIDs={}", err.expectedIDs);
 
-        const std::size_t count { names().size() };
-        const std::size_t expected_count { err.expectedIDs.size() };
-
-        if (count >= expected_count) {
+        if (err.errType == ParticipantsValidity::UnknownPlayer) {
             logger_.error("IDs inconnus dans les participants.");
-            return { SessionResult::UnknownPlayers, std::move(participants), err.expectedIDs };
+            return { SessionResult::UnknownPlayer, std::move(participants), err.expectedIDs };
         } else {
             logger_.error("Moins de participants que prévu.");
             return { SessionResult::LessMembers, std::move(participants), err.expectedIDs };
