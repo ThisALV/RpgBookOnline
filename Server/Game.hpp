@@ -27,6 +27,10 @@ struct RestProperties {
 };
 
 struct Condition {
+    using Operator = std::function<bool(const int, const int)>;
+
+    static const std::unordered_map<std::string, Operator> operators;
+
     std::string stat;
     std::string op;
     int value;
@@ -66,6 +70,9 @@ struct Game {
     bool hasStat(const std::string& stat) const { return playerStats.count(stat) == 1; }
     bool hasEffect(const std::string& name) const { return eventEffects.count(name) == 1; }
     bool hasItem(const std::string&) const;
+
+private:
+    static std::vector<std::string> getNames(const StatsInitializers&);
 };
 
 } // namespace Rbo

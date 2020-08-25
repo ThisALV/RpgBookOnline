@@ -30,6 +30,10 @@ private:
     using LuaFunc = sol::function;
     using Instructions = std::unordered_map<std::string, LuaFunc>;
 
+    static std::vector<byte> getIDs(const Replies&);
+    static std::tuple<byte, byte> reply(const Replies&);
+    static bool isInstruction(const sol::object&, const sol::object&);
+
     struct LuaInstruction {
         LuaFunc func;
         std::vector<std::string> args;

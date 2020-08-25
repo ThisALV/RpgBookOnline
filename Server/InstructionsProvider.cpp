@@ -5,7 +5,7 @@
 
 namespace Rbo::Server {
 
-std::vector<byte> getIDs(const Replies& replies) {
+std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
     std::vector<byte> ids;
     ids.resize(replies.size(), 0);
     std::transform(replies.cbegin(), replies.cend(), ids.begin(),
@@ -14,7 +14,7 @@ std::vector<byte> getIDs(const Replies& replies) {
     return ids;
 }
 
-std::tuple<byte, byte> reply(const Replies& replies) {
+std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
     if (replies.size() != 1)
         throw std::invalid_argument { "Pour récupérer une réponse unique, il faut 1 réponse" };
 
@@ -22,7 +22,7 @@ std::tuple<byte, byte> reply(const Replies& replies) {
     return std::make_tuple(reply->first, reply->second);
 }
 
-bool isInstruction(const sol::object& key, const sol::object& value) {
+bool InstructionsProvider::isInstruction(const sol::object& key, const sol::object& value) {
     return key.get_type() == sol::type::string && value.get_type() == sol::type::function;
 }
 

@@ -5,6 +5,8 @@
 
 namespace Rbo {
 
+namespace Controllers {
+
 void confirmController(const byte reply) {
     if (reply != 0)
         throw InvalidReply { ReplyValidity::NotConfirmError };
@@ -30,6 +32,8 @@ struct PossibilitiesController {
             throw InvalidReply { ReplyValidity::OutOfRangeError };
     }
 };
+
+} // namespace Controllers
 
 StatsManager& Gameplay::global() {
     return ctx_.stats();
@@ -90,28 +94,32 @@ Replies Gameplay::askReply(const byte target, const byte min, const byte max, co
     SessionDataFactory data_factory;
     data_factory.makeRange(min, max);
 
-    return ctx_.request(target, data_factory.dataWithLength(), RangeController { min, max }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(),
+                        Controllers::RangeController { min, max }, wait);
 }
 
 Replies Gameplay::askReply(const byte target, const std::vector<byte>& range, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makePossibilities(range);
 
-    return ctx_.request(target, data_factory.dataWithLength(), PossibilitiesController { range }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(),
+                        Controllers::PossibilitiesController { range }, wait);
 }
 
 Replies Gameplay::askConfirm(const byte target, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makeRequest(Request::Confirm);
 
-    return ctx_.request(target, data_factory.dataWithLength(), confirmController, wait);
+    return ctx_.request(target, data_factory.dataWithLength(),
+                        Controllers::confirmController, wait);
 }
 
 Replies Gameplay::askYesNo(const byte target, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makeRequest(Request::YesNo);
 
-    return ctx_.request(target, data_factory.dataWithLength(), RangeController { 0, 1 }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(),
+                        Controllers::RangeController { 0, 1 }, wait);
 }
 
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {

@@ -1,8 +1,6 @@
 #include "Common.hpp"
 
 #include <iostream>
-#include <cassert>
-#include <random>
 #include <algorithm>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
@@ -17,11 +15,15 @@
 
 namespace Rbo {
 
+ulong now() {
+    return std::chrono::system_clock::now().time_since_epoch().count();
+}
+
+namespace Sinks {
+
 auto sink_file {
     std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-                "logs/"
-                + std::to_string(std::chrono::system_clock::now().time_since_epoch().count())
-                + ".log", true)
+                "logs/" + std::to_string(now()) + ".log", true)
 };
 
 auto sink_console { std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
@@ -32,23 +34,29 @@ void loggerErrorHandler(const std::string& err) {
     std::cerr << "Erreur de logging : " << err << std::endl;
 }
 
+} // namespace Sinks
+
 spdlog::logger& rboLogger(const std::string& name) {
     assert(name.length() <= 11);
     auto logger {
-        std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { sink_file, sink_console })
+        std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { Sinks::sink_file, Sinks::sink_console })
     };
 
     spdlog::register_logger(logger);
 
     logger->set_level(LOG_LEVEL);
     logger->flush_on(LOG_LEVEL);
-    logger->set_pattern(log_format);
-    logger->set_error_handler(loggerErrorHandler);
+    logger->set_pattern(Sinks::log_format);
+    logger->set_error_handler(Sinks::loggerErrorHandler);
 
     return *spdlog::get(name);
 }
 
-std::default_random_engine rd;
+namespace Vote {
+
+std::default_random_engine rd { now() };
+
+} // namespace Vote
 
 byte vote(const Replies& replies) {
     assert(!replies.empty());
@@ -80,7 +88,7 @@ byte vote(const Replies& replies) {
         return winners.at(0);
 
     const std::size_t winner {
-        std::uniform_int_distribution<std::size_t>{ 0, winners.size() - 1 }(rd)
+        std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (Vote::rd)
     };
 
     return winners.at(winner);
@@ -93,22 +101,26 @@ InvalidReply::InvalidReply(const ReplyValidity err_type)
     assert(isInvalid(type));
 }
 
-std::default_random_engine rd_engine;
-std::uniform_int_distribution<uint> rd_distributor { 1, 6 };
+std::default_random_engine DiceFormula::rd_ { now() };
+std::uniform_int_distribution<uint> DiceFormula::rd_distributor_ { 1, 6 };
 
 int DiceFormula::operator()() const {
     int result { 0 };
 
     for (uint i { 0 }; i < dices; i++)
-        result += rd_distributor(rd_engine);
+        result += rd_distributor_(rd_);
 
     return result + bonus;
 }
 
+namespace ItemEntry {
+
 const char ITEM_SEP { '/' };
 
+} // namespace ItemEntry
+
 std::string itemEntry(const std::string& inv, const std::string& item) {
-    return inv + ITEM_SEP + item;
+    return inv + ItemEntry::ITEM_SEP + item;
 }
 
 std::pair<std::string, std::string> splitItemEntry(const std::string& str) {
@@ -117,7 +129,7 @@ std::pair<std::string, std::string> splitItemEntry(const std::string& str) {
     const auto cb { str.cbegin() };
     const auto ce { str.cend() };
 
-    const auto inv_end { std::find(cb, ce, ITEM_SEP) };
+    const auto inv_end { std::find(cb, ce, ItemEntry::ITEM_SEP) };
 
     assert(inv_end != ce);
 

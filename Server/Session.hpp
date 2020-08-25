@@ -59,6 +59,9 @@ using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
 private:
+    static void logPlayerError(spdlog::logger&, const byte, const std::string&);
+    static std::string initStatMsg(const DiceFormula&, const std::string&, const int);
+
     io::io_context::strand executor_;
     spdlog::logger& logger_;
     StatsManager stats_;

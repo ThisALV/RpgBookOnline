@@ -32,6 +32,9 @@ struct Run {
 
 class Lobby {
 private:
+    static void logMemberError(spdlog::logger&, const byte, const ErrCode&);
+    static void logRegisteringError(spdlog::logger&, const tcp::endpoint, const ErrCode&);
+
     struct RemoteEndpointHash {
         std::size_t operator()(const tcp::endpoint&) const;
     };

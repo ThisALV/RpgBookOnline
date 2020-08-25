@@ -6,6 +6,8 @@
 
 namespace Rbo::Server {
 
+namespace AsContainer {
+
 template<typename Container> sol::as_container_t<Container> luaContainer(Container& c) {
     return sol::as_container(c);
 }
@@ -14,7 +16,12 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
     return luaContainer<std::vector<T>>(v);
 }
 
+} // namespace AsContainer
+
+
 void InstructionsProvider::initUsertypes() {
+    using namespace AsContainer;
+
     ctx_.new_usertype<std::vector<std::string>>(
                 "StringVector", sol::constructors<std::vector<std::string>()>(),
                 "iterable", luaVector<std::string>);

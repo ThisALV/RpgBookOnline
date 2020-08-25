@@ -5,9 +5,7 @@
 
 namespace Rbo {
 
-using Operator = std::function<bool(const int, const int)>;
-
-const std::unordered_map<std::string, Operator> operators {
+const std::unordered_map<std::string, Condition::Operator> Condition::operators {
     { "==", std::equal_to {} },
     { "!=", std::not_equal_to {} },
     { "<=", std::less_equal {} },
@@ -149,14 +147,14 @@ Game::Validity Game::validity() const {
 
     const bool valid_death_conditions = std::all_of(
                 deathConditions.cbegin(), deathConditions.cend(), [this]
-                (const auto& c) { return operators.count(c.op) == 1 && hasStat(c.stat); });
+                (const auto& c) { return Condition::operators.count(c.op) == 1 && hasStat(c.stat); });
 
     if (!valid_death_conditions)
         return Validity::DeathConditions;
 
     const bool valid_end_conditions = std::all_of(
                 gameEndConditions.cbegin(), gameEndConditions.cend(), [this]
-                (const auto& c) { return operators.count(c.op) == 1 && hasGlobal(c.stat); });
+                (const auto& c) { return Condition::operators.count(c.op) == 1 && hasGlobal(c.stat); });
 
     if (!valid_end_conditions)
         return Validity::GameEndConditions;
@@ -198,7 +196,7 @@ std::string Game::getMessage(const Validity validity) {
     return "Cela ne doit pas arrivé";
 }
 
-std::vector<std::string> getNames(const StatsInitializers& stats) {
+std::vector<std::string> Game::getNames(const StatsInitializers& stats) {
     std::vector<std::string> names { stats.size() };
     std::transform(stats.cbegin(), stats.cend(), names.begin(),
                    [](const auto& stat) -> std::string { return stat.first; });

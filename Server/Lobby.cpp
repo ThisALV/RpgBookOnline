@@ -7,11 +7,13 @@
 
 namespace Rbo::Server {
 
-void logMemberError(spdlog::logger& logger, const byte id, const ErrCode& err) {
+void Lobby::logMemberError(spdlog::logger& logger, const byte id, const ErrCode& err) {
     logger.error("Membre {} : {}", id, err.message());
 }
 
-void logRegisteringError(spdlog::logger& logger, const tcp::endpoint client, const ErrCode& err) {
+void Lobby::logRegisteringError(spdlog::logger& logger, const tcp::endpoint client,
+                                const ErrCode& err)
+{
     logger.error("Inscription de {} : {}", client, err.message());
 }
 

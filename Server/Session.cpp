@@ -56,11 +56,13 @@ const char* CancelledRequest::what() const noexcept {
     return "CancelledRequest";
 }
 
-void logPlayerError(spdlog::logger& logger, const byte player, const std::string& err) {
+void Session::logPlayerError(spdlog::logger& logger, const byte player,
+                             const std::string& err)
+{
     logger.error("Player {} : {}", player, err);
 }
 
-std::string initStatMsg(const DiceFormula& init, const std::string& name, const int value) {
+std::string Session::initStatMsg(const DiceFormula& init, const std::string& name, const int value) {
     std::string msg { name + " vaut " };
     if (init.dices == 0)
         msg += std::to_string(init.bonus);

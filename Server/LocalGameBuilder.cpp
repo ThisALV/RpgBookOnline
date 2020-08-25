@@ -7,9 +7,7 @@
 
 namespace Rbo::Server {
 
-std::default_random_engine LocalGameBuilder::chkpt_id_rd_ {
-    static_cast<ulong>(std::chrono::system_clock::now().time_since_epoch().count())
-};
+std::default_random_engine LocalGameBuilder::chkpt_id_rd_ { now() };
 
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)

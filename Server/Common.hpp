@@ -7,6 +7,7 @@
 #include <vector>
 #include <functional>
 #include <optional>
+#include <random>
 #include "spdlog/fwd.h"
 
 namespace Rbo {
@@ -22,6 +23,10 @@ struct DiceFormula {
     int operator()() const;
     int min() const { return dices + bonus; }
     int max() const { return dices * 6 + bonus; };
+
+private:
+    static std::default_random_engine rd_;
+    static std::uniform_int_distribution<uint> rd_distributor_;
 };
 
 struct ItemBonus {
@@ -57,6 +62,7 @@ using OptionsList = std::map<byte, std::string>;
 using Replies = std::map<byte, byte>;
 using ReplyController = std::function<void(const byte)>;
 
+ulong now();
 std::string itemEntry(const std::string&, const std::string&);
 std::pair<std::string, std::string> splitItemEntry(const std::string&);
 bool contains(const std::vector<std::string>&, const std::string&);
