@@ -76,10 +76,15 @@ void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& chan
     data_.put(changes_data.dump());
 }
 
-void SessionDataFactory::makeGlobalStat(const std::string stat, const int value) {
+void SessionDataFactory::makeGlobalStat(const std::string stat, const int min, const int max,
+                                        const int value, const bool hidden)
+{
     makeData(DataType::GlobalStat);
-    data_.putNumeric(value);
     data_.put(stat);
+    data_.putNumeric(min);
+    data_.putNumeric(max);
+    data_.putNumeric(value);
+    data_.add(hidden ? 1 : 0);
 }
 
 void SessionDataFactory::makeDie(const byte id) {

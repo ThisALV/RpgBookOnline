@@ -100,4 +100,17 @@ BOOST_AUTO_TEST_CASE(BattleInit) {
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
+BOOST_AUTO_TEST_CASE(GlobalStat) {
+    const Data expected {
+        std::vector<byte> {
+            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0, 0, 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 1
+        }
+    };
+
+    SessionDataFactory factory;
+    factory.makeGlobalStat("test", 0, 468, 2020, true);
+
+    BOOST_CHECK_EQUAL(expected, factory.data());
+}
+
 BOOST_AUTO_TEST_SUITE_END()

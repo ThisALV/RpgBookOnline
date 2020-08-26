@@ -180,7 +180,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             const std::string stat_msg { initStatMsg(init, name, value) };
             if (!hidden) {
                 SessionDataFactory global_stat;
-                global_stat.makeGlobalStat(name, value);
+                interface.sendGlobalStat(name);
 
                 sendToAll(global_stat.dataWithLength());
                 interface.print(stat_msg);
@@ -215,7 +215,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             stats().set(name, value);
 
             SessionDataFactory global_stat;
-            global_stat.makeGlobalStat(name, value);
+            interface.sendGlobalStat(name);
 
             sendToAll(global_stat.dataWithLength());
         }

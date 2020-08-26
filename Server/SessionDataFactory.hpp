@@ -39,7 +39,7 @@ struct SessionDataFactory : DataFactory {
     void makePlain(const std::string&);
     void makeOptions(const OptionsList&);
     void makeInfos(const byte, const PlayerStateChanges&);
-    void makeGlobalStat(const std::string, const int);
+    void makeGlobalStat(const std::string, const int, const int, const int, const bool);
     void makeDie(const byte);
     void makeSwitch(const word);
     void makeReply(const byte, const byte);
