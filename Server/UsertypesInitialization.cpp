@@ -18,7 +18,6 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
 
 } // namespace AsContainer
 
-
 void InstructionsProvider::initUsertypes() {
     using namespace AsContainer;
 
@@ -29,10 +28,10 @@ void InstructionsProvider::initUsertypes() {
                 "ByteVector", sol::constructors<std::vector<byte>()>(),
                 "iterable", luaVector<byte>);
 
-    ctx_.new_usertype<std::unordered_map<byte, std::string>>(
-                "ByteWithString", sol::constructors<std::unordered_map<byte, std::string>()>(),
-                "iterable", luaContainer<std::unordered_map<byte, std::string>>);
-    ctx_.new_usertype<std::unordered_map<byte, std::string>>(
+    ctx_.new_usertype<std::map<byte, std::string>>(
+                "ByteWithString", sol::constructors<std::map<byte, std::string>()>(),
+                "iterable", luaContainer<std::map<byte, std::string>>);
+    ctx_.new_usertype<std::unordered_map<std::string, std::string>>(
                 "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(),
                 "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
     ctx_.new_usertype<Effects>(
@@ -73,8 +72,8 @@ void InstructionsProvider::initUsertypes() {
     player_type["name"] = &Player::name;
     player_type["add"] = &Player::add;
     player_type["consume"] = &Player::consume;
-    player_type["inventory"] = static_cast<Inventory&(Player::*)(const std::string&)>(&Player::inventory);
-    player_type["stats"] = static_cast<StatsManager&(Player::*)()>(&Player::stats);
+    player_type["inventory"] = sol::resolve<Inventory&(const std::string&)>(&Player::inventory);
+    player_type["stats"] = sol::resolve<StatsManager&()>(&Player::stats);
 
     const std::initializer_list<std::pair<std::string_view, EventEffect::ItemsChanges>> results {
         { "Ok", EventEffect::ItemsChanges::Ok },
@@ -120,8 +119,8 @@ void InstructionsProvider::initUsertypes() {
         [](Gameplay& ctx, const byte target, const std::vector<byte>& possibilities) {
             return ctx.askReply(target, possibilities);
         },
-        static_cast<Replies(Gameplay::*)(const byte, const byte, const byte, const bool)>(&Gameplay::askReply),
-        static_cast<Replies(Gameplay::*)(const byte, const std::vector<byte>&, const bool)>(&Gameplay::askReply)
+        sol::resolve<Replies(const byte, const byte, const byte, const bool)>(&Gameplay::askReply),
+        sol::resolve<Replies(const byte, const std::vector<byte>&, const bool)>(&Gameplay::askReply)
     );
     gameplay_type["askConfirm"] = sol::overload(
         [](Gameplay& ctx, const byte target) { return ctx.askConfirm(target); },
@@ -139,8 +138,8 @@ void InstructionsProvider::initUsertypes() {
     gameplay_type["printOptions"] = sol::overload(
         [](Gameplay& ctx, const OptionsList& list) { ctx.printOptions(list); },
         [](Gameplay& ctx, const std::vector<std::string>& list) { ctx.printOptions(list); },
-        static_cast<void(Gameplay::*)(const OptionsList&, const byte)>(&Gameplay::printOptions),
-        static_cast<void(Gameplay::*)(const std::vector<std::string>&, const byte, const byte)>(&Gameplay::printOptions)
+        sol::resolve<void(const OptionsList&, const byte)>(&Gameplay::printOptions),
+        sol::resolve<void(const std::vector<std::string>&, const byte, const byte)>(&Gameplay::printOptions)
     );
     gameplay_type["printYesNo"] = sol::overload(
         [](Gameplay& ctx) { ctx.printYesNo(); }, &Gameplay::printYesNo
