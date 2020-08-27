@@ -7,7 +7,7 @@
 
 namespace Rbo::Server {
 
-std::default_random_engine LocalGameBuilder::chkpt_id_rd_ { now() };
+std::mt19937_64 LocalGameBuilder::chkpt_id_rd_ { now() };
 
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)
@@ -30,7 +30,7 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
         logger_.trace("Exécution de {}...", entry.path());
 
         try {
-            exec_ctx_.script_file(entry.path());
+            exec_ctx_.script_file(entry.path().string());
         } catch (const sol::error& err) {
             throw ScriptLoadingError { entry, err.what() };
         }

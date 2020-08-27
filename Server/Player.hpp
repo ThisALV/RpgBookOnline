@@ -99,4 +99,21 @@ public:
 
 } // namespace Rbo
 
+template<typename Output> Output& operator<<(Output& out, const Rbo::Player& player) {
+    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name()
+        << "\"; stats=" << player.stats().values() << " inventories=[";
+    for (const auto& [name, inventory] : player.inventories())
+        out << " \"" << name << "\"=" << inventory << ';';
+
+    return out << " ] ]";
+}
+
+template<typename Output>
+Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
+    return out << "[ maxSize="
+               << (inventory.limited() ? std::string { "Inf" }
+                                       : std::to_string(*inventory.maxSize()))
+               << "; size=" << inventory.size() << " ]";
+}
+
 #endif // PLAYER_HPP

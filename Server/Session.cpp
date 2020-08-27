@@ -9,47 +9,17 @@
 #include "Gameplay.hpp"
 #include "ReplyHandler.hpp"
 
-template<typename Output>
-Output& operator<<(Output& out, const Rbo::StatsValues& stats) {
-    out << '[';
-    for (const auto& [name, value] : stats)
-        out << " \"" << name << "\"=" << value << ';';
-
-    return out << " ]";
-}
-
-template<typename Output> Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
-    return out << "[ maxSize="
-               << (inventory.limited() ? std::string { "Inf" }
-                                       : std::to_string(*inventory.maxSize()))
-               << "; size=" << inventory.size() << " ]";
-}
-
-template<typename Output> Output& operator<<(Output& out, const Rbo::Player& player) {
-    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name()
-        << "\"; stats=" << player.stats().values() << " inventories=[";
-    for (const auto& [name, inventory] : player.inventories())
-        out << " \"" << name << "\"=" << inventory << ';';
-
-    return out << " ] ]";
-}
-
-template<typename Output> Output& operator<<(Output& out, const Rbo::Replies& replies) {
-    out << '[';
-    for (const auto [id, reply] : replies)
-        out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
-
-    return out << " ]";
-}
-
 namespace Rbo {
 
-const char* InvalidIDs::what() const noexcept {
-    std::string msg { "Expected IDs :" };
+InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids,
+                       const ParticipantsValidity type)
+    : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type }
+{
+    assert(type != ParticipantsValidity::Ok);
+
+    msg = "Expected IDs :";
     for (const byte expected : expectedIDs)
         msg += ' ' + std::to_string(expected) + ';';
-
-    return msg.c_str();
 }
 
 const char* CancelledRequest::what() const noexcept {

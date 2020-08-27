@@ -35,13 +35,11 @@ struct InvalidIDs : std::logic_error {
     std::vector<byte> expectedIDs;
     ParticipantsValidity errType;
 
-    InvalidIDs(const std::vector<byte>& expected_ids, const ParticipantsValidity type)
-        : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type }
-    {
-        assert(type != ParticipantsValidity::Ok);
-    }
+    std::string msg;
 
-    virtual const char* what() const noexcept override;
+    InvalidIDs(const std::vector<byte>&, const ParticipantsValidity);
+
+    virtual const char* what() const noexcept override { return msg.data(); }
 };
 
 struct IntroductionCheckpoint : std::logic_error {
@@ -135,5 +133,13 @@ public:
 };
 
 } // namespace Rbo
+
+template<typename Output> Output& operator<<(Output& out, const Rbo::Replies& replies) {
+    out << '[';
+    for (const auto [id, reply] : replies)
+        out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
+
+    return out << " ]";
+}
 
 #endif // SESSION_HPP

@@ -38,7 +38,7 @@ struct SceneLoadingError : std::runtime_error {
 
 class LocalGameBuilder : public GameBuilder {
 private:
-    static std::default_random_engine chkpt_id_rd_;
+    static std::mt19937_64 chkpt_id_rd_;
 
     fs::path game_;
     fs::path chkpts_;

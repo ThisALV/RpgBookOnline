@@ -1,6 +1,9 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include <stdexcept>
+#include <array>
+#include <iterator>
 #include <string>
 #include <unordered_map>
 #include <map>
@@ -9,6 +12,10 @@
 #include <optional>
 #include <random>
 #include "spdlog/fwd.h"
+
+using ushort = std::uint16_t;
+using uint = std::uint32_t;
+using ulong = std::uint64_t;
 
 namespace Rbo {
 
@@ -25,7 +32,7 @@ struct DiceFormula {
     int max() const { return dices * 6 + bonus; };
 
 private:
-    static std::default_random_engine rd_;
+    static std::mt19937_64 rd_;
     static std::uniform_int_distribution<uint> rd_distributor_;
 };
 
