@@ -5,13 +5,13 @@
 #include "LocalGameBuilder.hpp"
 
 #ifdef NDEBUG // En Debug, GDB interprête SIGINT
-#define STOP_SIGS SIGINT, SIGTERM
+#define BASIC_STOP_SIGS SIGINT, SIGTERM
 #else
-#define STOP_SIGS SIGTERM
+#define BASIC_STOP_SIGS SIGTERM
 #endif
 
 #ifdef SIGHUP // Windows ne fournit pas SIGHUP
-#define STOP_SIGS STOP_SIGS, SIGHUP
+#define STOP_SIGS BASIC_STOP_SIGS, SIGHUP
 #endif
 
 int main(const int argc, const char* argv[]) {
