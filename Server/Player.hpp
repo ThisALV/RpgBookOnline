@@ -105,15 +105,17 @@ template<typename Output> Output& operator<<(Output& out, const Rbo::Player& pla
     for (const auto& [name, inventory] : player.inventories())
         out << " \"" << name << "\"=" << inventory << ';';
 
-    return out << " ] ]";
+    out << " ] ]";
+    return out;
 }
 
 template<typename Output>
 Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
-    return out << "[ maxSize="
-               << (inventory.limited() ? std::string { "Inf" }
-                                       : std::to_string(*inventory.maxSize()))
-               << "; size=" << inventory.size() << " ]";
+    out << "[ maxSize=" << (inventory.limited() ? std::string { "Inf" }
+                                                : std::to_string(*inventory.maxSize()))
+        << "; size=" << inventory.size() << " ]";
+
+    return out;
 }
 
 #endif // PLAYER_HPP

@@ -30,14 +30,14 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
     const sol::function_result result { func(interface, sol::as_container(args)) };
 
     if (!result.valid()) {
-        const sol::error err { result };
+        const sol::error err { result.get<std::string>() };
         if (std::string { err.what() } == "CancelledRequest")
             return {};
 
         throw err;
     }
 
-    const sol::optional<Next> next { result };
+    const auto next { result.get<sol::optional<Next>>() };
     return next ? *next : Next {};
 }
 
@@ -70,8 +70,8 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
 
 void InstructionsProvider::load() {
     sol::table global { resources_lock_.get(ctx_.globals()).as<sol::table>() };
-    sol::table error_handlers { global["ErrorHandlers"] };
-    sol::table rbo { global["Rbo"] };
+    sol::table error_handlers { global["ErrorHandlers"].get<sol::table>() };
+    sol::table rbo { global["Rbo"].get<sol::table>() };
     for (const auto [key, value] : rbo) {
         if (!isInstruction(key, value))
             continue;
