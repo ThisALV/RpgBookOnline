@@ -29,6 +29,11 @@ public:
         assert(threads >= 2);
     }
 
+    LobbyExecutor(const LobbyExecutor&) = delete;
+    LobbyExecutor& operator=(const LobbyExecutor&) = delete;
+
+    bool operator==(const LobbyExecutor&) const = delete;
+
     bool start();
     void stop();
 };

@@ -75,8 +75,8 @@ public:
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
 
-    Player(Player&&) noexcept = default;
-    Player& operator=(Player&&) noexcept = default;
+    Player(Player&&) = default;
+    Player& operator=(Player&&) = default;
 
     bool operator==(const Player&) const = delete;
 

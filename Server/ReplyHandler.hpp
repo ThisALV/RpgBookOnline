@@ -38,8 +38,8 @@ public:
 
     bool operator==(const ReplyHandler&) const = delete;
 
-    ReplyHandler(ReplyHandler&&) noexcept = default;
-    ReplyHandler& operator=(ReplyHandler&&) noexcept = default;
+    ReplyHandler(ReplyHandler&&) = default;
+    ReplyHandler& operator=(ReplyHandler&&) = default;
 
     void handle(const ErrCode, const std::size_t);
 
