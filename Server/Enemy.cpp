@@ -2,6 +2,16 @@
 
 namespace Rbo {
 
+std::vector<std::string> namesOf(const GroupDescriptor& group) {
+    std::vector<std::string> names;
+    names.resize(group.size());
+
+    std::transform(group.cbegin(), group.cend(), names.begin(),
+                   [](const auto& e) { return e.first; });
+
+    return names;
+}
+
 Enemy::Enemy(const EnemyDescriptor& descriptor)
     : stats_ { std::vector<std::string> { "hp", "skill" } }
 {
@@ -10,6 +20,14 @@ Enemy::Enemy(const EnemyDescriptor& descriptor)
 
     stats_.set("hp", descriptor.hp);
     stats_.set("skill", descriptor.skill);
+}
+
+EnemyPtr Enemy::create(const EnemyDescriptor& enemy) {
+    struct AccessibleEnemy : Enemy {
+        AccessibleEnemy(const EnemyDescriptor& enemy) : Enemy { enemy } {}
+    };
+
+    return std::make_shared<AccessibleEnemy>(enemy);
 }
 
 void Enemy::hit(const int dmg) {

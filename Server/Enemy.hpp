@@ -1,16 +1,22 @@
 #ifndef ENEMY_HPP
 #define ENEMY_HPP
 
+#include <memory>
 #include "StatsManager.hpp"
 
 namespace Rbo {
+
+class Enemy;
+
+using EnemyPtr = std::shared_ptr<Enemy>;
 
 class Enemy {
 private:
     StatsManager stats_;
 
-public:
     Enemy(const EnemyDescriptor&);
+public:
+    static EnemyPtr create(const EnemyDescriptor&);
 
     Enemy(const Enemy&) = delete;
     Enemy& operator=(const Enemy&) = delete;
@@ -27,7 +33,9 @@ public:
     void unbuff(const int);
 };
 
-using EnemiesGroup = std::map<byte, Enemy>;
+using EnemiesGroup = std::unordered_map<std::string, EnemyPtr>;
+
+std::vector<std::string> namesOf(const GroupDescriptor&);
 
 } // namespace Rbo
 

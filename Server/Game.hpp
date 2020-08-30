@@ -62,6 +62,9 @@ struct Game {
     bool voteLeader;
 
     const EventEffect& effect(const std::string& name) const { return eventEffects.at(name); }
+    const EnemyDescriptor& enemy(const std::string& name) const { return enemies.at(name); }
+    const GroupDescriptor& group(const std::string& name) const { return groups.at(name); }
+
     std::vector<std::string> player() const;
     std::vector<std::string> global() const;
     ItemsList itemsList() const;

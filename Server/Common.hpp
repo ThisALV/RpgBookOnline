@@ -166,7 +166,7 @@ struct InventoryDescriptor {
 using StatsDescriptors = std::unordered_map<std::string, StatInitilizer>;
 using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
 
-using GroupDescriptor = std::map<std::string, std::string>;
+using GroupDescriptor = std::unordered_map<std::string, std::string>;
 
 } // namespace Rbo
 

@@ -3,6 +3,7 @@
 #include "Gameplay.hpp"
 #include "Player.hpp"
 #include "Game.hpp"
+#include "Enemy.hpp"
 
 namespace Rbo::Server {
 
@@ -37,6 +38,9 @@ void InstructionsProvider::initUsertypes() {
     ctx_.new_usertype<Effects>(
                 "Effects", sol::constructors<Effects()>(),
                 "iterable", luaContainer<Effects>);
+    ctx_.new_usertype<EnemiesGroup>(
+                "Group", sol::constructors<EnemiesGroup()>(),
+                "iterable", luaContainer<EnemiesGroup>);
 
     sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
@@ -86,13 +90,23 @@ void InstructionsProvider::initUsertypes() {
     effect_type["apply"] = &EventEffect::apply;
     effect_type["simulateItemsChanges"] = &EventEffect::simulateItemsChanges;
 
+    sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy", "create", &Enemy::create) };
+    enemy_type["alive"] = &Enemy::alive;
+    enemy_type["hp"] = &Enemy::hp;
+    enemy_type["skill"] = &Enemy::skill;
+    enemy_type["hit"] = &Enemy::hit;
+    enemy_type["heal"] = &Enemy::heal;
+    enemy_type["buff"] = &Enemy::buff;
+    enemy_type["unbuff"] = &Enemy::unbuff;
+
     sol::usertype<Game> game_type { ctx_.new_usertype<Game>("Game") };
     game_type["name"] = sol::readonly(&Game::name);
     game_type["voteOnLeaderDeath"] = sol::readonly(&Game::voteOnLeaderDeath);
     game_type["voteLeader"] = sol::readonly(&Game::voteLeader);
     game_type["rest"] = sol::readonly(&Game::rest);
-    game_type["effects"] = sol::readonly(&Game::eventEffects);
     game_type["effect"] = &Game::effect;
+    game_type["enemy"] = &Game::enemy;
+    game_type["group"] = &Game::group;
 
     sol::usertype<PlayerCheckingResult> check_result_type {
         ctx_.new_usertype<PlayerCheckingResult>("CheckingResult")
