@@ -2,6 +2,7 @@
 
 #include "spdlog/logger.h"
 #include "Gameplay.hpp"
+//#include "Enemy.hpp"
 
 namespace Rbo::Server {
 
@@ -30,7 +31,7 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
     const sol::function_result result { func(interface, sol::as_container(args)) };
 
     if (!result.valid()) {
-        const sol::error err { result.get<std::string>() };
+        const sol::error err { result.get<sol::error>() };
         if (std::string { err.what() } == "CancelledRequest")
             return {};
 
@@ -60,6 +61,7 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
     ctx_["getIDs"] = getIDs;
     ctx_["reply"] = reply;
     ctx_["vote"] = vote;
+    //ctx_["namesOf"] = namesOf;
     ctx_["allPlayers"] = 0;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
