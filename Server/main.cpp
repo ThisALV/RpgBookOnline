@@ -12,6 +12,8 @@
 
 #ifdef SIGHUP // Windows ne fournit pas SIGHUP
 #define STOP_SIGS BASIC_STOP_SIGS, SIGHUP
+#else
+#define STOP_SIGS BASIC_STOP_SIGS
 #endif
 
 int main(const int argc, const char* argv[]) {
