@@ -42,13 +42,9 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(Add)
 
-BOOST_DATA_TEST_CASE(Byte, dataset::xrange(25) ^ dataset::random(
-                         (dataset::seed = 0,
-                          dataset::distribution = std::uniform_int_distribution<byte> {})),
-                     i, value)
+BOOST_DATA_TEST_CASE(Byte, dataset::xrange(25))
 {
-    BOOST_TEST_MESSAGE(std::to_string(i));
-
+    const byte value { static_cast<byte>(sample) };
     const DataBuffer expected_buffer { 0, 0, value };
 
     Data data;
