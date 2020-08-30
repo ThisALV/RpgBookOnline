@@ -216,14 +216,14 @@ void Gameplay::sendInfos(const byte id) {
 
 void Gameplay::sendBattleInfos(const GroupDescriptor& entities) {
     SessionDataFactory data_factory;
-    data_factory.makeBattleInit(entities);
+    data_factory.makeBattleInit(entities, game().enemies);
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }
 
-void Gameplay::sendBattleAtk(const byte p_id, const byte e_id, const s_byte dmg) {
+void Gameplay::sendBattleAtk(const byte p_id, const std::string& enemy, const int dmg) {
     SessionDataFactory data_factory;
-    data_factory.makeAtk(p_id, e_id, dmg);
+    data_factory.makeAtk(p_id, enemy, dmg);
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }

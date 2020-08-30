@@ -1,8 +1,6 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
 
-#include "Common.hpp"
-
 #include "StatsManager.hpp"
 
 namespace Rbo {

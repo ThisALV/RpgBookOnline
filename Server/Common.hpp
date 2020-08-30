@@ -46,8 +46,7 @@ struct ItemBonus {
 using ItemsBonuses = std::unordered_map<std::string, ItemBonus>;
 
 struct EnemyDescriptor {
-    std::string name;
-    int endurance;
+    int hp;
     int skill;
 };
 
@@ -167,7 +166,7 @@ struct InventoryDescriptor {
 using StatsDescriptors = std::unordered_map<std::string, StatInitilizer>;
 using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
 
-using GroupDescriptor = std::map<byte, EnemyDescriptor>;
+using GroupDescriptor = std::map<std::string, std::string>;
 
 } // namespace Rbo
 

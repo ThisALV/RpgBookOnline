@@ -87,15 +87,19 @@ BOOST_AUTO_TEST_CASE(Infos) {
 
 BOOST_AUTO_TEST_CASE(BattleInit) {
     Data expected { std::vector<byte> { 8, 0 } };
-    expected.put(R"({"0":{"hp":45,"name":"EnemyA","skill":16},"1":{"hp":46,"name":"EnemyB","skill":17}})");
+    expected.put(R"({"A":{"hp":45,"skill":16},"B":{"hp":46,"skill":17}})");
 
-    const EnemyInitializers arg {
-        { 0, { "EnemyA", 45, 16 } },
-        { 1, { "EnemyB", 46, 17 } }
+    const std::unordered_map<std::string, EnemyDescriptor> enemies {
+        { "EnemyA", { 45, 16 } },
+        { "EnemyB", { 46, 17 } }
+    };
+    const GroupDescriptor group {
+        { "A", "EnemyA" },
+        { "B", "EnemyB" }
     };
 
     SessionDataFactory factory;
-    factory.makeBattleInit(arg);
+    factory.makeBattleInit(group, enemies);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

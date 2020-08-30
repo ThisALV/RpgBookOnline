@@ -49,6 +49,11 @@ inline void from_json(const json& data, EventEffect& effect) {
     data.at("items").get_to(effect.itemsChanges);
 }
 
+inline void from_json(const json& data, EnemyDescriptor& enemy) {
+    data.at("hp").get_to(enemy.hp);
+    data.at("skill").get_to(enemy.skill);
+}
+
 inline void from_json(const json& data, RestProperties& rest) {
     data.at("givables").get_to(rest.givables);
     data.at("availables").get_to(rest.availables);

@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_SUITE(GameTests)
 BOOST_AUTO_TEST_SUITE(Valid)
 
 BOOST_AUTO_TEST_CASE(InitialInventoriesFull) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "A" },
         InventoryContent {
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesFull) {
 }
 
 BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         DiceFormula { 2, 2 },
         std::vector<std::string> { "A", "B" },
         InventoryContent { { { "A", 2 }, { "B", 3 } } }
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
 }
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
 }
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "B" },
         InventoryContent {}
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
 }
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
 }
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
@@ -264,6 +264,13 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
     game.eventEffects.insert({ "evt1", effect });
 
     BOOST_CHECK_EQUAL(Game::Validity::Effects, game.validity());
+}
+
+BOOST_AUTO_TEST_CASE(GroupsUnknownEnemy) {
+    Game game;
+    game.groups.insert({ "1", { { "1", "EnemyA" }, { "2", "EnemyB" } } });
+
+    BOOST_CHECK_EQUAL(Game::Validity::Groups, game.validity());
 }
 
 BOOST_AUTO_TEST_CASE(RestGivablesUnknownItem) {
@@ -282,7 +289,7 @@ BOOST_AUTO_TEST_CASE(RestAvailablesUnknownItem) {
 }
 
 BOOST_AUTO_TEST_CASE(RestAvailablesUnknownEffect) {
-    const InventoryInitializer inventory {
+    const InventoryDescriptor inventory {
         std::optional<DiceFormula> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
@@ -327,15 +334,15 @@ BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownOperator) {
 }
 
 BOOST_AUTO_TEST_CASE(Ok) {
-    StatsInitializers global {
+    StatsDescriptors global {
         { "1", { DiceFormula { 2, 0 }, StatLimits { -15, 15 }, false, false } },
         { "2", {} }
     };
-    StatsInitializers player {
+    StatsDescriptors player {
         { "a", { DiceFormula { 1, 0 }, StatLimits { -10, 10 }, true, true } },
         { "b", {} }
     };
-    InventoriesInitializers inventories {
+    InventoriesDescriptors inventories {
         { "inv1", { DiceFormula { 1, 2 }, { "A", "B" }, InventoryContent { { "A", 3 } } } },
         { "inv2", { std::optional<DiceFormula> {}, { "A" }, InventoryContent {} } }
     };
@@ -347,6 +354,14 @@ BOOST_AUTO_TEST_CASE(Ok) {
     Effects effects {
         { "evt1", { { { "b", 99 } }, {} } },
         { "evt2", { {}, { { itemEntry("inv1", "A"), 1 } } } }
+    };
+    std::unordered_map<std::string, EnemyDescriptor> enemies {
+        { "EnemyA", { 45, 15 } },
+        { "EnemyB", { 46, 46 } }
+    };
+    std::unordered_map<std::string, GroupDescriptor> groups {
+        { "GroupA", { { "1", "EnemyA" }, { "2", "EnemyA" } } },
+        { "GroupB", { { "1", "EnemyB" }, { "2", "EnemyB" } } }
     };
     RestProperties rest {
         { itemEntry("inv1", "A"), itemEntry("inv2", "A") },
@@ -362,8 +377,8 @@ BOOST_AUTO_TEST_CASE(Ok) {
     const Game game {
         "TestGame",
         std::move(global), std::move(player), std::move(inventories), std::move(bonuses),
-        std::move(effects), std::move(rest), std::move(deathConditions),
-        std::move(gameEndConditions), true, true
+        std::move(effects), std::move(enemies), std::move(groups), std::move(rest),
+        std::move(deathConditions), std::move(gameEndConditions), true, true
     };
 
     BOOST_CHECK_EQUAL(Game::Validity::Ok, game.validity());

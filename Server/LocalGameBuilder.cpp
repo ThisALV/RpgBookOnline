@@ -57,6 +57,8 @@ Game LocalGameBuilder::operator()() const {
         data.at("inventories").get_to(game.playerInventories);
         data.at("bonuses").get_to(game.bonuses);
         data.at("effects").get_to(game.eventEffects);
+        data.at("enemies").get_to(game.enemies);
+        data.at("groups").get_to(game.groups);
         data.at("rest").get_to(game.rest);
         data.at("playerDeath").get_to(game.deathConditions);
         data.at("gameEnd").get_to(game.gameEndConditions);

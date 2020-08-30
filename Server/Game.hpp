@@ -40,8 +40,8 @@ struct Condition {
 
 struct Game {
     enum struct Validity {
-        Ok, InitialInventories, Bonuses, Effects, RestGivables, RestAvailables, DeathConditions,
-        GameEndConditions
+        Ok, InitialInventories, Bonuses, Effects, Groups, RestGivables,
+        RestAvailables, DeathConditions, GameEndConditions
     };
 
     static std::string getMessage(const Validity);
@@ -53,6 +53,8 @@ struct Game {
 
     ItemsBonuses bonuses;
     Effects eventEffects;
+    std::unordered_map<std::string, EnemyDescriptor> enemies;
+    std::unordered_map<std::string, GroupDescriptor> groups;
     RestProperties rest;
     std::vector<Condition> deathConditions;
     std::vector<Condition> gameEndConditions;

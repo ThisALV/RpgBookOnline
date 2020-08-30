@@ -50,7 +50,7 @@ public:
     void sendGlobalStat(const std::string&);
     void sendInfos(const byte);
     void sendBattleInfos(const GroupDescriptor&);
-    void sendBattleAtk(const byte, const byte, const s_byte);
+    void sendBattleAtk(const byte, const std::string&, const int);
     void endBattle();
 };
 

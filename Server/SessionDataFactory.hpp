@@ -45,8 +45,9 @@ struct SessionDataFactory : DataFactory {
     void makeReply(const byte, const byte);
     void makeValidation(const ReplyValidity);
     void makeBattleInfos(const BattleInfo);
-    void makeBattleInit(const GroupDescriptor&);
-    void makeAtk(const byte, const byte, const s_byte);
+    void makeBattleInit(const GroupDescriptor&,
+                        const std::unordered_map<std::string, EnemyDescriptor>&);
+    void makeAtk(const byte, const std::string&, const int);
     void makeCrash(const byte);
     void makeLeaderSwitch(const byte);
 };

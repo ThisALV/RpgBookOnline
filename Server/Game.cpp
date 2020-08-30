@@ -131,6 +131,17 @@ Game::Validity Game::validity() const {
     if (!valid_effects)
         return Validity::Effects;
 
+    const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(),
+                                          [this](const auto& g)
+    {
+        return std::all_of(g.second.cbegin(), g.second.cend(), [this](const auto& e) {
+            return enemies.count(e.second) == 1;
+        });
+    });
+
+    if (!valid_groups)
+        return Validity::Groups;
+
     const bool valid_rest_givables = std::all_of(
                 rest.givables.cbegin(), rest.givables.cend(),
                 [this](const auto& i) { return hasItem(i); });
@@ -183,6 +194,8 @@ std::string Game::getMessage(const Validity validity) {
         return "Bonus invalides : statistiques ou objets inconnus";
     case Validity::Effects:
         return "Effets invalides : statistiques inconnues";
+    case Validity::Groups:
+        return "Groupes d'ennemis invalides : ennemis inconnus";
     case Validity::RestGivables:
         return "Objets à donner pendant repos invalides : objets inconnus";
     case Validity::RestAvailables:
