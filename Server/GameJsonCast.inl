@@ -33,7 +33,7 @@ inline void from_json(const json& data, StatInitilizer& stat) {
     data.at("hidden").get_to(stat.hidden);
 }
 
-inline void from_json(const json& data, InventoryInitializer& inv) {
+inline void from_json(const json& data, InventoryDescriptor& inv) {
     data.at("limit").get_to(inv.limit);
     data.at("items").get_to(inv.items);
     data.at("initial").get_to(inv.initialStuff);

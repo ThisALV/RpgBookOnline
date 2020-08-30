@@ -47,9 +47,9 @@ struct Game {
     static std::string getMessage(const Validity);
 
     std::string name;
-    StatsInitializers globalStats;
-    StatsInitializers playerStats;
-    InventoriesInitializers playerInventories;
+    StatsDescriptors globalStats;
+    StatsDescriptors playerStats;
+    InventoriesDescriptors playerInventories;
 
     ItemsBonuses bonuses;
     Effects eventEffects;
@@ -72,7 +72,7 @@ struct Game {
     bool hasItem(const std::string&) const;
 
 private:
-    static std::vector<std::string> getNames(const StatsInitializers&);
+    static std::vector<std::string> getNames(const StatsDescriptors&);
 };
 
 } // namespace Rbo

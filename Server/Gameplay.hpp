@@ -49,7 +49,7 @@ public:
     // send et end - Throw : NoPlayerRemaining
     void sendGlobalStat(const std::string&);
     void sendInfos(const byte);
-    void sendBattleInfos(const EnemyInitializers&);
+    void sendBattleInfos(const GroupDescriptor&);
     void sendBattleAtk(const byte, const byte, const s_byte);
     void endBattle();
 };

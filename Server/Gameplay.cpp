@@ -214,7 +214,7 @@ void Gameplay::sendInfos(const byte id) {
     ctx_.sendToAll(data_factory.dataWithLength());
 }
 
-void Gameplay::sendBattleInfos(const EnemyInitializers& entities) {
+void Gameplay::sendBattleInfos(const GroupDescriptor& entities) {
     SessionDataFactory data_factory;
     data_factory.makeBattleInit(entities);
 

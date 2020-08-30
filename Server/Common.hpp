@@ -45,7 +45,7 @@ struct ItemBonus {
 
 using ItemsBonuses = std::unordered_map<std::string, ItemBonus>;
 
-struct EnemyInitializer {
+struct EnemyDescriptor {
     std::string name;
     int endurance;
     int skill;
@@ -158,16 +158,16 @@ struct StatInitilizer {
     bool hidden;
 };
 
-struct InventoryInitializer {
+struct InventoryDescriptor {
     std::optional<DiceFormula> limit;
     std::vector<std::string> items;
     InventoryContent initialStuff;
 };
 
-using StatsInitializers = std::unordered_map<std::string, StatInitilizer>;
-using InventoriesInitializers = std::unordered_map<std::string, InventoryInitializer>;
+using StatsDescriptors = std::unordered_map<std::string, StatInitilizer>;
+using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
 
-using EnemyInitializers = std::map<byte, EnemyInitializer>;
+using GroupDescriptor = std::map<byte, EnemyDescriptor>;
 
 } // namespace Rbo
 

@@ -80,7 +80,7 @@ Game::Validity Game::validity() const {
     const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(),
                                              [](const auto& i)
     {
-        const InventoryInitializer& inv { i.second };
+        const InventoryDescriptor& inv { i.second };
 
         uint init_size { 0 };
         return std::all_of(inv.initialStuff.cbegin(), inv.initialStuff.cend(),
@@ -196,7 +196,7 @@ std::string Game::getMessage(const Validity validity) {
     return "Cela ne doit pas arrivé";
 }
 
-std::vector<std::string> Game::getNames(const StatsInitializers& stats) {
+std::vector<std::string> Game::getNames(const StatsDescriptors& stats) {
     std::vector<std::string> names { stats.size() };
     std::transform(stats.cbegin(), stats.cend(), names.begin(),
                    [](const auto& stat) -> std::string { return stat.first; });

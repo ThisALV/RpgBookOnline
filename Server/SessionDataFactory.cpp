@@ -113,7 +113,7 @@ void SessionDataFactory::makeBattleInfos(const BattleInfo type) {
     data_.add(type);
 }
 
-void SessionDataFactory::makeBattleInit(const EnemyInitializers& group) {
+void SessionDataFactory::makeBattleInit(const GroupDescriptor& group) {
     json infos;
     for (const auto& [id, enemy] : group) {
         infos[std::to_string(id)] = {
