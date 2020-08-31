@@ -19,7 +19,7 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
 
 } // namespace AsContainer
 
-void InstructionsProvider::initUsertypes() {
+void InstructionsProvider::initBuiltins() {
     using namespace AsContainer;
 
     ctx_.new_usertype<std::vector<std::string>>(
@@ -163,6 +163,15 @@ void InstructionsProvider::initUsertypes() {
     gameplay_type["sendBattleInfos"] = &Gameplay::sendBattleInfos;
     gameplay_type["sendBattleAtk"] = &Gameplay::sendBattleAtk;
     gameplay_type["sendBattleEnd"] = &Gameplay::endBattle;
+
+    ctx_["getIDs"] = getIDs;
+    ctx_["reply"] = reply;
+    ctx_["vote"] = vote;
+    ctx_["namesOf"] = namesOf;
+    ctx_["allPlayers"] = 0;
+    ctx_["setmetatable"] = sol::nil;
+    ctx_["getmetatable"] = sol::nil;
+    ctx_["print"] = sol::nil;
 }
 
 } // namespace Rbo::Server

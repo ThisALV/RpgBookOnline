@@ -46,7 +46,7 @@ private:
     spdlog::logger& logger_;
     TablesLock resources_lock_;
 
-    void initUsertypes();
+    void initBuiltins();
 
 public:
     InstructionsProvider(sol::state&, spdlog::logger&);

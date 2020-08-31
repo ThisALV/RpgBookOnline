@@ -56,16 +56,7 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
 
     ctx_.create_named_table("Rbo");
     ctx_.create_named_table("ErrorHandlers");
-
-    initUsertypes();
-    ctx_["getIDs"] = getIDs;
-    ctx_["reply"] = reply;
-    ctx_["vote"] = vote;
-    ctx_["namesOf"] = namesOf;
-    ctx_["allPlayers"] = 0;
-    ctx_["setmetatable"] = sol::nil;
-    ctx_["getmetatable"] = sol::nil;
-    ctx_["print"] = sol::nil;
+    initBuiltins();
 
     resources_lock_(global);
 }

@@ -19,7 +19,7 @@ set(INCLUDE include/Rbo)
 set(SOURCES Common.cpp AsioCommon.cpp StatsManager.cpp SessionDataFactory.cpp Data.cpp Session.cpp ReplyHandler.cpp Game.cpp Enemy.cpp Player.cpp Gameplay.cpp)
 set(HEADERS Common.hpp AsioCommon.hpp StatsManager.hpp SessionDataFactory.hpp Data.hpp Session.hpp ReplyHandler.hpp Game.hpp Enemy.hpp GameBuilder.hpp Player.hpp Gameplay.hpp)
 
-set(SERV_SOURCES Lobby.cpp LobbyDataFactory.cpp LocalGameBuilder.cpp InstructionsProvider.cpp UsertypesInitialization.cpp TablesLock.cpp main.cpp LobbyExecutor.cpp GameJsonCast.inl)
+set(SERV_SOURCES Lobby.cpp LobbyDataFactory.cpp LocalGameBuilder.cpp InstructionsProvider.cpp LuaBuiltinsInitialization.cpp TablesLock.cpp main.cpp LobbyExecutor.cpp GameJsonCast.inl)
 set(SERV_HEADERS Lobby.hpp LobbyDataFactory.hpp LocalGameBuilder.hpp InstructionsProvider.hpp TablesLock.hpp LobbyExecutor.hpp)
 
 add_executable(${EXEC} ${SERV_SOURCES} ${SERV_HEADERS})
