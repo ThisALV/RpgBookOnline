@@ -134,6 +134,8 @@ struct Stat {
 
 using Stats = std::unordered_map<std::string, Stat>;
 
+class EventEffect;
+
 struct PlayerStateChanges {
     std::unordered_map<std::string, Stat> statsChanges;
     std::unordered_map<std::string, std::unordered_map<std::string, int>> itemsChanges;

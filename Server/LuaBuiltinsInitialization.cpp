@@ -1,4 +1,4 @@
-#include "LocalGameBuilder.hpp"
+#include "InstructionsProvider.hpp"
 
 #include "Gameplay.hpp"
 #include "Player.hpp"
@@ -18,6 +18,49 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
 }
 
 } // namespace AsContainer
+
+std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
+    std::vector<byte> ids;
+    ids.resize(replies.size(), 0);
+    std::transform(replies.cbegin(), replies.cend(), ids.begin(),
+                   [](const auto r) { return r.first; });
+
+    return ids;
+}
+
+std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
+    if (replies.size() != 1)
+        throw std::invalid_argument { "Pour récupérer une réponse unique, il faut 1 réponse" };
+
+    const auto reply { replies.cbegin() };
+    return std::make_tuple(reply->first, reply->second);
+}
+
+void InstructionsProvider::assertArgs(const bool assertion) {
+    if (!assertion)
+        throw std::invalid_argument { "Arguments invalides" };
+}
+
+bool InstructionsProvider::toBoolean(const std::string& str) {
+    if (str == "true")
+        return true;
+    else if (str == "false")
+        return false;
+
+    throw std::invalid_argument { "Convertion de \"" + str + "\" en booléen impossible" };
+}
+
+void InstructionsProvider::applyToGlobal(Gameplay& ctx, const EventEffect& effect) {
+    if (!effect.itemsChanges.empty())
+        throw std::logic_error { "La session ne possède pas d'inventaires ni d'objets" };
+
+    for (const auto& [stat, change] : effect.statsChanges) {
+        ctx.global().change(stat, change);
+
+        if (!ctx.global().hidden(stat))
+            ctx.sendGlobalStat(stat);
+    }
+}
 
 void InstructionsProvider::initBuiltins() {
     using namespace AsContainer;
@@ -168,7 +211,10 @@ void InstructionsProvider::initBuiltins() {
     ctx_["reply"] = reply;
     ctx_["vote"] = vote;
     ctx_["namesOf"] = namesOf;
-    ctx_["allPlayers"] = 0;
+    ctx_["assertArgs"] = assertArgs;
+    ctx_["toBoolean"] = toBoolean;
+    ctx_["applyToGlobal"] = applyToGlobal;
+    ctx_["ALL_PLAYERS"] = 0;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
     ctx_["print"] = sol::nil;
