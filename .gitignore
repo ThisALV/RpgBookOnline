@@ -6,7 +6,6 @@ Doxyfile
 CMakeLists.txt.user
 /Server/Notes/
 /Server/game/instructions/Custom.lua
-/game/
-*.json
+/Server/game/*.json
 **/.vscode/
 *.log
