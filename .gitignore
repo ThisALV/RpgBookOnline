@@ -7,5 +7,6 @@ CMakeLists.txt.user
 /Server/Notes/
 /Server/game/instructions/Custom.lua
 /Server/game/*.json
+/Server/game/*.lua
 **/.vscode/
 *.log

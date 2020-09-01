@@ -30,12 +30,6 @@ struct CheckpointAlreadyExists : std::logic_error {
         : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}
 };
 
-struct SceneLoadingError : std::runtime_error {
-    SceneLoadingError(const word id, const std::string& msg)
-        : std::runtime_error {
-              "Impossible de charger la scène " + std::to_string(id) + " : " + msg } {}
-};
-
 class LocalGameBuilder : public GameBuilder {
 private:
     static std::mt19937_64 chkpt_id_rd_;
@@ -45,6 +39,7 @@ private:
     fs::path scenes_;
     spdlog::logger& logger_;
     sol::state exec_ctx_;
+    sol::table scenes_table_;
     InstructionsProvider provider_;
 
 public:

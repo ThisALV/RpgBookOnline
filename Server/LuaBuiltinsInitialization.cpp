@@ -217,7 +217,9 @@ void InstructionsProvider::initBuiltins() {
     ctx_["ALL_PLAYERS"] = 0;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
+#ifdef NDEBUG
     ctx_["print"] = sol::nil;
+#endif
 }
 
 } // namespace Rbo::Server

@@ -48,7 +48,7 @@ int main(const int argc, const char* argv[]) {
         logger.info("Lancement du serveur...");
 
         const Rbo::Server::LocalGameBuilder game_builder {
-            "game/game.json", "game/chkpts.json", "game/scenes.json", "game/instructions"
+            "game/game.json", "game/chkpts.json", "game/scenes.lua", "game/instructions"
         };
 
         Rbo::io::io_context server;

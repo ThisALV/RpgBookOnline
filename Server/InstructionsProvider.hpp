@@ -39,7 +39,7 @@ private:
 
     struct LuaInstruction {
         LuaFunc func;
-        std::vector<std::string> args;
+        sol::table args;
 
         Next operator()(Gameplay&) const;
     };
@@ -60,7 +60,7 @@ public:
     bool operator==(const InstructionsProvider&) const = delete;
 
     void load();
-    Instruction get(const std::string&, const std::vector<std::string>&) const;
+    Instruction get(const std::string&, const sol::table) const;
     bool has(const std::string& name) const { return instructions_.count(name) == 1; }
 };
 

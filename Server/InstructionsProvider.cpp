@@ -11,7 +11,7 @@ bool InstructionsProvider::isInstruction(const sol::object& key, const sol::obje
 }
 
 Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const {
-    const sol::function_result result { func(interface, sol::as_container(args)) };
+    const sol::function_result result { func(interface, args) };
 
     if (!result.valid()) {
         const sol::error err { result.get<sol::error>() };
@@ -31,6 +31,8 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
     ctx_.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string,
                         sol::lib::math, sol::lib::table);
 
+    initBuiltins();
+
     sol::table global { ctx_.globals() };
     for (const auto [key, value] : global) {
         if (value.get_type() == sol::type::table && value != global && value != ctx_[sol::env_key])
@@ -39,7 +41,6 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
 
     ctx_.create_named_table("Rbo");
     ctx_.create_named_table("ErrorHandlers");
-    initBuiltins();
 
     resources_lock_(global);
 }
@@ -68,9 +69,7 @@ void InstructionsProvider::load() {
     resources_lock_(rbo);
 }
 
-Instruction InstructionsProvider::get(const std::string& name,
-                                      const std::vector<std::string>& args) const
-{
+Instruction InstructionsProvider::get(const std::string& name, const sol::table args) const {
     if (instructions_.count(name) == 0)
         throw UnknownInstruction { name };
 

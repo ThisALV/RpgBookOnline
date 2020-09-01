@@ -14,6 +14,13 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
     : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
       logger_ { rboLogger("GameBuilder") }, exec_ctx_ {}, provider_ { exec_ctx_, logger_ }
 {
+    logger_.trace("Chargement des scènes...");
+    try {
+        scenes_table_ = exec_ctx_.script_file(scenes_.string()).get<sol::table>();
+    } catch (const sol::error& err) {
+        throw GameLoadingError { err.what() };
+    }
+
     if (!fs::is_directory(scripts_dir))
         throw std::invalid_argument { "Script dirs n'est pas un dossier" };
 
@@ -28,7 +35,6 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
         }
 
         logger_.trace("Exécution de {}...", entry.path());
-
         try {
             exec_ctx_.script_file(entry.path().string());
         } catch (const sol::error& err) {
@@ -147,21 +153,12 @@ Scene LocalGameBuilder::buildScene(const word id) const {
 
     Scene scene;
     try {
-        std::ifstream in { scenes_ };
-        json scenes;
-        in >> scenes;
-
-        if (in.fail())
-            throw SceneLoadingError { id, "Erreur sur le flux d'entrée" };
-
-        for (const json& instruction : scenes.at(std::to_string(id))) {
-            const json& name { instruction.at("cmd") };
-            const json& args { instruction.at("args") };
-
-            scene.push_back(provider_.get(name.get<std::string>(),
-                                          args.get<std::vector<std::string>>()));
+        for (const auto obj : scenes_table_[id].get<sol::table>()) {
+            const sol::table instruction { obj.second.as<sol::table>() };
+            scene.push_back(provider_.get(instruction["cmd"].get<std::string>(),
+                            instruction["args"].get<sol::table>()));
         }
-    } catch (const json::exception& err) {
+    } catch (const sol::error& err) {
         throw GameLoadingError { err.what() };
     }
 

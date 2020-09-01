@@ -35,7 +35,7 @@ public:
     bool operator==(const TablesLock&) const = delete;
 
     void operator()(sol::table);
-    sol::object get(const sol::table key) { return index_[key]; }
+    sol::table get(const sol::table key) { return index_[key].get<sol::table>(); }
 };
 
 } // namespace Rbo::Server
