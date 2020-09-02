@@ -33,6 +33,11 @@ target_link_libraries(${EXEC} PUBLIC ${LIB} spdlog::spdlog ${LUA_LIBRARIES} sol2
 
 target_compile_definitions(${EXEC} PUBLIC SOL_ALL_SAFETIES_ON SOL_PRINT_ERRORS=0)
 
+if(WIN32)
+    target_compile_definitions(${LIB} PUBLIC _WIN32_WINNT=0x0601)
+    target_compile_definitions(${EXEC} PUBLIC _WIN32_WINNT=0x0601)
+endif()
+
 install(FILES ${HEADERS} DESTINATION ${INCLUDE})
 install(FILES ${SERV_HEADERS} DESTINATION ${INCLUDE})
 install(TARGETS ${LIB} LIBRARY)
