@@ -25,6 +25,11 @@ struct GameSavingError : std::runtime_error {
         : std::runtime_error { "Impossible de sauvegarder le jeu : " + msg } {}
 };
 
+struct SceneLoadingError : std::runtime_error {
+    SceneLoadingError(const word id, const std::string& msg)
+        : std::runtime_error { "Impossible de charger la scène " + std::to_string(id) + " : " + msg } {}
+};
+
 struct CheckpointAlreadyExists : std::logic_error {
     CheckpointAlreadyExists(const std::string& name)
         : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}

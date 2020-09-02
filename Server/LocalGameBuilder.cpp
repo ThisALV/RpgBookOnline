@@ -152,14 +152,23 @@ Scene LocalGameBuilder::buildScene(const word id) const {
     logger_.trace("Construction de la scène {}...", id);
 
     Scene scene;
-    try {
-        for (const auto obj : scenes_table_[id].get<sol::table>()) {
-            const sol::table instruction { obj.second.as<sol::table>() };
-            scene.push_back(provider_.get(instruction["cmd"].get<std::string>(),
-                            instruction["args"].get<sol::table>()));
-        }
-    } catch (const sol::error& err) {
-        throw GameLoadingError { err.what() };
+    const sol::object scene_obj { scenes_table_[id].get<sol::object>() };
+    if (scene_obj.get_type() != sol::type::table)
+        throw SceneLoadingError { id, "Scène inexistante" };
+
+    for (const auto instruction_entry : scene_obj.as<sol::table>()) {
+        if (instruction_entry.second.get_type() != sol::type::table)
+            throw SceneLoadingError { id,
+                    "Entrée n'étant pas une table parmis les instructions" };
+
+        const sol::table instruction { instruction_entry.second.as<sol::table>() };
+        const sol::object name { instruction["cmd"].get<sol::object>() };
+        const sol::object args { instruction["args"].get<sol::object>() };
+
+        if (name.get_type() != sol::type::string || args.get_type() != sol::type::table)
+            throw SceneLoadingError { id, "Instruction invalide : cmd != string ou args != table" };
+
+        scene.push_back(provider_.get(name.as<std::string>(), args.as<sol::table>()));
     }
 
     logger_.trace("Construction effectuée.");
