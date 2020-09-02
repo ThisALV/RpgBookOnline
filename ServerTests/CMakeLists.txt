@@ -21,7 +21,14 @@ foreach(TEST ${TESTS})
 
     add_executable(${EXEC} ${NAME}.cpp Common.cpp Common.hpp)
     target_include_directories(${EXEC} PUBLIC ${Boost_INCLUDE_DIR})
-    target_link_libraries(${EXEC} PUBLIC Boost::unit_test_framework rbo spdlog::spdlog)
+    target_link_libraries(${EXEC} PUBLIC Boost::unit_test_framework spdlog::spdlog)
+
+    if (WIN32)
+        target_link_libraries(${EXEC} PUBLIC "$ENV{ProgramFiles}/Server/lib/rbo.lib")
+        target_include_directories(${EXEC} PUBLIC "$ENV{ProgramFiles}/Server/include")
+    else()
+        target_link_libraries(${EXEC} PUBLIC rbo)
+    endif()
 endforeach()
 
 target_link_libraries(session-data-factory-tests PUBLIC nlohmann_json::nlohmann_json)
