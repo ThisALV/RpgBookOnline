@@ -92,7 +92,7 @@ public:
     const StatsManager& stats() const { return stats_; }
 
     const PlayerInventories& inventories() const { return inventories_; }
-    const ItemsBonuses statsBonus() const { return bonuses_; }
+    const ItemsBonuses& statsBonus() const { return bonuses_; }
 };
 
 } // namespace Rbo
