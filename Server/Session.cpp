@@ -339,7 +339,7 @@ void Session::restaurePlayer(const byte id, const PlayerState& state) {
     Player& target { player(id) };
 
     for (const auto& [name, stat] : state.stats) {
-        const StatInitilizer& stat_infos { game().playerStats.at(name) };
+        const StatDescriptor& stat_infos { game().playerStats.at(name) };
         const auto [min, max] { stat_infos.limits };
         assert(!(stat.value < min || stat.value > max));
 

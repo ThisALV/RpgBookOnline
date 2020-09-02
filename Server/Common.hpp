@@ -19,9 +19,53 @@ using ulong = std::uint64_t;
 
 namespace Rbo {
 
+class StatsManager;
+class Player;
+class Inventory;
+class Gameplay;
+class EventEffect;
+class Game;
+
+struct ItemBonus;
+struct Stat;
+struct StatDescriptor;
+struct InventoryDescriptor;
+struct PlayerState;
+
 using byte = std::uint8_t;
 using s_byte = std::int8_t;
 using word = std::uint16_t;
+
+enum struct ReplyValidity : byte;
+
+using OptionsList = std::map<byte, std::string>;
+using Replies = std::map<byte, byte>;
+using ReplyController = std::function<void(const byte)>;
+
+using Next = std::optional<word>;
+using Instruction = std::function<Next(Gameplay&)>;
+using Scene = std::vector<Instruction>;
+using SceneBuilder = std::function<Scene(const Game&, const word)>;
+
+using Players = std::map<byte, Player*>;
+using ConstPlayers = std::map<byte, const Player*>;
+
+using InventorySize = std::optional<uint>;
+using InventoryContent = std::unordered_map<std::string, uint>;
+using PlayerInventories = std::unordered_map<std::string, Inventory>;
+using ItemsList = std::unordered_map<std::string, std::vector<std::string>>;
+using ItemsBonuses = std::unordered_map<std::string, ItemBonus>;
+
+using StatsValues = std::unordered_map<std::string, int>;
+using StatValueLimits = std::numeric_limits<int>;
+using Stats = std::unordered_map<std::string, Stat>;
+
+using PlayersStates = std::map<byte, PlayerState>;
+
+using StatsDescriptors = std::unordered_map<std::string, StatDescriptor>;
+using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
+
+using GroupDescriptor = std::unordered_map<std::string, std::string>;
 
 struct DiceFormula {
     uint dices;
@@ -43,14 +87,10 @@ struct ItemBonus {
     bool operator==(const ItemBonus&) const;
 };
 
-using ItemsBonuses = std::unordered_map<std::string, ItemBonus>;
-
 struct EnemyDescriptor {
     int hp;
     int skill;
 };
-
-enum struct ReplyValidity : byte;
 
 struct InvalidReply : std::logic_error {
     ReplyValidity type;
@@ -64,9 +104,46 @@ struct PlayerCheckingResult {
     bool sessionEnd;
 };
 
-using OptionsList = std::map<byte, std::string>;
-using Replies = std::map<byte, byte>;
-using ReplyController = std::function<void(const byte)>;
+struct StatLimits {
+    int min { StatValueLimits::min() };
+    int max { StatValueLimits::max() };
+
+    bool operator==(const StatLimits&) const;
+};
+
+struct Stat {
+    int value { 0 };
+    StatLimits limits;
+    bool hidden { false };
+
+    bool operator==(const Stat&) const;
+    bool operator!=(const Stat& rhs) const { return !(*this == rhs); }
+};
+
+struct PlayerStateChanges {
+    std::unordered_map<std::string, Stat> statsChanges;
+    std::unordered_map<std::string, std::unordered_map<std::string, int>> itemsChanges;
+    std::unordered_map<std::string, std::size_t> capacitiesChanges;
+};
+
+struct PlayerState {
+    Stats stats;
+    std::unordered_map<std::string, InventoryContent> inventories;
+    std::unordered_map<std::string, InventorySize> inventoriesMaxCapacity;
+};
+
+struct StatDescriptor {
+    DiceFormula initialValue;
+    StatLimits limits;
+    bool capped;
+    bool hidden;
+};
+
+struct InventoryDescriptor {
+    std::optional<DiceFormula> limit;
+    std::vector<std::string> items;
+    InventoryContent initialStuff;
+};
 
 ulong now();
 std::string itemEntry(const std::string&, const std::string&);
@@ -89,86 +166,8 @@ template<typename NumType> std::vector<byte> decompose(const NumType value) {
     return bytes;
 }
 
-class Player;
-
-class Gameplay;
-class Game;
-
 const byte ALL_PLAYERS { 0 };
 const word INTRO { 0 };
-
-using Next = std::optional<word>;
-using Instruction = std::function<Next(Gameplay&)>;
-using Scene = std::vector<Instruction>;
-using Options = std::map<std::string, word>;
-using SceneBuilder = std::function<Scene(const Game&, const word)>;
-
-using Players = std::map<byte, Player*>;
-using ConstPlayers = std::map<byte, const Player*>;
-
-class Inventory;
-
-using InventorySize = std::optional<uint>;
-using InventoryContent = std::unordered_map<std::string, uint>;
-using PlayerInventories = std::unordered_map<std::string, Inventory>;
-using ItemsList = std::unordered_map<std::string, std::vector<std::string>>;
-
-using StatsValues = std::unordered_map<std::string, int>;
-using StatValueLimits = std::numeric_limits<int>;
-
-struct StatLimits {
-    int min { StatValueLimits::min() };
-    int max { StatValueLimits::max() };
-
-    bool operator==(const StatLimits&) const;
-};
-
-struct Stat {
-    int value { 0 };
-    StatLimits limits;
-    bool hidden { false };
-
-    bool operator==(const Stat&) const;
-    bool operator!=(const Stat& rhs) const { return !(*this == rhs); }
-};
-
-using Stats = std::unordered_map<std::string, Stat>;
-
-class EventEffect;
-
-struct PlayerStateChanges {
-    std::unordered_map<std::string, Stat> statsChanges;
-    std::unordered_map<std::string, std::unordered_map<std::string, int>> itemsChanges;
-    std::unordered_map<std::string, std::size_t> capacitiesChanges;
-};
-
-struct PlayerState {
-    Stats stats;
-    std::unordered_map<std::string, InventoryContent> inventories;
-    std::unordered_map<std::string, InventorySize> inventoriesMaxCapacity;
-};
-
-using PlayersStates = std::map<byte, PlayerState>;
-
-class StatsManager;
-
-struct StatInitilizer {
-    DiceFormula initialValue;
-    StatLimits limits;
-    bool capped;
-    bool hidden;
-};
-
-struct InventoryDescriptor {
-    std::optional<DiceFormula> limit;
-    std::vector<std::string> items;
-    InventoryContent initialStuff;
-};
-
-using StatsDescriptors = std::unordered_map<std::string, StatInitilizer>;
-using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
-
-using GroupDescriptor = std::unordered_map<std::string, std::string>;
 
 } // namespace Rbo
 

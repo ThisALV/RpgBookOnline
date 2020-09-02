@@ -23,7 +23,7 @@ inline void from_json(const json& data, DiceFormula& formula) {
     data.at("bonus").get_to(formula.bonus);
 }
 
-inline void from_json(const json& data, StatInitilizer& stat) {
+inline void from_json(const json& data, StatDescriptor& stat) {
     const json& limits { data.at("limits") };
 
     data.at("formula").get_to(stat.initialValue);
