@@ -31,13 +31,13 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
     ctx_.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string,
                         sol::lib::math, sol::lib::table);
 
-    initBuiltins();
-
     sol::table global { ctx_.globals() };
     for (const auto [key, value] : global) {
         if (value.get_type() == sol::type::table && value != global && value != ctx_[sol::env_key])
             resources_lock_(global[key]);
     }
+
+    initBuiltins();
 
     ctx_.create_named_table("Rbo");
     ctx_.create_named_table("ErrorHandlers");
