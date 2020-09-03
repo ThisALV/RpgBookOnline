@@ -26,16 +26,13 @@ add_executable(${EXEC} ${SERV_SOURCES} ${SERV_HEADERS})
 add_library(${LIB} STATIC ${SOURCES} ${HEADERS})
 
 target_include_directories(${LIB} PUBLIC ${Boost_INCLUDE_DIR})
-target_link_libraries(${LIB} PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries(${LIB} PRIVATE nlohmann_json::nlohmann_json PUBLIC spdlog::spdlog)
 
-target_include_directories(${EXEC} PUBLIC ${Boost_INCLUDE_DIR})
-target_link_libraries(${EXEC} PUBLIC ${LIB} spdlog::spdlog ${LUA_LIBRARIES} sol2::sol2 nlohmann_json::nlohmann_json)
-
-target_compile_definitions(${EXEC} PUBLIC SOL_ALL_SAFETIES_ON SOL_PRINT_ERRORS=0)
+target_link_libraries(${EXEC} PRIVATE ${LIB} ${LUA_LIBRARIES} sol2::sol2 nlohmann_json::nlohmann_json)
+target_compile_definitions(${EXEC} PRIVATE SOL_ALL_SAFETIES_ON SOL_PRINT_ERRORS=0)
 
 if(WIN32)
     target_compile_definitions(${LIB} PUBLIC _WIN32_WINNT=0x0601)
-    target_compile_definitions(${EXEC} PUBLIC _WIN32_WINNT=0x0601)
 endif()
 
 install(FILES ${HEADERS} DESTINATION ${INCLUDE})
