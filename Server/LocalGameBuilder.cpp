@@ -162,11 +162,11 @@ Scene LocalGameBuilder::buildScene(const word id) const {
                     "Entrée n'étant pas une table parmis les instructions" };
 
         const sol::table instruction { instruction_entry.second.as<sol::table>() };
-        const sol::object name { instruction["cmd"].get<sol::object>() };
-        const sol::object args { instruction["args"].get<sol::object>() };
+        const sol::object name { instruction[1].get<sol::object>() };
+        const sol::object args { instruction[2].get<sol::object>() };
 
         if (name.get_type() != sol::type::string || args.get_type() != sol::type::table)
-            throw SceneLoadingError { id, "Instruction invalide : cmd != string ou args != table" };
+            throw SceneLoadingError { id, "Instruction invalide : [1] != string ou [2] != table" };
 
         scene.push_back(provider_.get(name.as<std::string>(), args.as<sol::table>()));
     }
