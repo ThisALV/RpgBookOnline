@@ -26,6 +26,8 @@ function Rbo.PathChoice(interface, args)
     local list = StringVector:new():iterable()
     local options = {}
     for scene, text in pairs(args.paths) do
+        assertArgs(isNum(scene) and isStr(text))
+
         table.insert(options, scene)
         list:add(text.." -> "..scene)
     end
@@ -34,6 +36,11 @@ function Rbo.PathChoice(interface, args)
     local selected = vote(interface:askReply(ALL_PLAYERS, 1, #list, args.wait))
 
     return options[selected]
+end
+
+function Rbo.Checkpoint(interface, args)
+    local name = interface:checkpoint(args.name)
+    interface:print("Sauvegarde sur \""..name.."\".")
 end
 
 function Rbo.EventTo(interface, args)
