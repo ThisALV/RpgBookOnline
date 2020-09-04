@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE Player
 
-#include "Common.hpp"
+#include <Rbo/Tests/Common.hpp>
 
 #include "boost/test/unit_test.hpp"
 #include "Rbo/Player.hpp"

@@ -10,6 +10,7 @@ set(RBO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
 add_subdirectory(src)
 add_subdirectory(server)
+add_subdirectory(tests)
 
 target_compile_definitions(server PRIVATE SOL_ALL_SAFETIES_ON=1 SOL_PRINT_ERRORS=0)
 

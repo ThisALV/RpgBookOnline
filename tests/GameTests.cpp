@@ -1,6 +1,6 @@
 ﻿#define BOOST_TEST_MODULE Game
 
-#include "Common.hpp"
+#include <Rbo/Tests/Common.hpp>
 
 #include "boost/test/unit_test.hpp"
 #include "Rbo/Game.hpp"
@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
     };
 
     Game game;
-    game.playerStats.insert({ "a", StatInitilizer {} });
+    game.playerStats.insert({ "a", StatDescriptor {} });
     game.playerInventories.insert({ "inv1", inventory });
     game.bonuses.insert({ itemEntry("inv1", "A"), ItemBonus { "a", 3 } });
 
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
     };
 
     Game game;
-    game.playerStats.insert({ "a", StatInitilizer {} });
+    game.playerStats.insert({ "a", StatDescriptor {} });
     game.playerInventories.insert({ "inv1", inventory });
     game.eventEffects.insert({ "evt1", effect });
 
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(DeathConditionsUnknownStat) {
 
 BOOST_AUTO_TEST_CASE(DeathConditionsUnknownOperator) {
     Game game;
-    game.playerStats.insert({ "a", StatInitilizer {} });
+    game.playerStats.insert({ "a", StatDescriptor {} });
     game.deathConditions.push_back(Condition { "a", "===", 5 });
 
     BOOST_CHECK_EQUAL(Game::Validity::DeathConditions, game.validity());
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownStat) {
 
 BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownOperator) {
     Game game;
-    game.globalStats.insert({ "1", StatInitilizer {} });
+    game.globalStats.insert({ "1", StatDescriptor {} });
     game.gameEndConditions.push_back(Condition { "1", "===", 5 });
 
     BOOST_CHECK_EQUAL(Game::Validity::GameEndConditions, game.validity());

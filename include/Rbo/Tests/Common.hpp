@@ -17,7 +17,7 @@ template<typename Outputable> struct OutputWrapper {
 };
 
 using StatsWrapper = OutputWrapper<StatsValues>;
-using InventoriesWrapper = OutputWrapper<Rbo/PlayerInventories>;
+using InventoriesWrapper = OutputWrapper<PlayerInventories>;
 
 template<typename Outputable>
 std::ostream& operator<<(std::ostream& out, OutputWrapper<Outputable> wrapper) {
