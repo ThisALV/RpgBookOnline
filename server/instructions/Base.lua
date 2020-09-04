@@ -47,11 +47,12 @@ end
 
 function Rbo.EventTo(interface, args)
     local target = args.target
-    assertArgs((target == "global" or target == "all" or target == "leader" or isStr(target) == "number") and type(args.effect))
+    assertArgs((target == "global" or target == "all" or target == "leader" or isStr(target) == "number") and type(args.effect) == "string")
     local effect = interface:game():effect(args.effect)
 
     if target == "global" then
-        applyToGlobal(interface, args.effect)
+        applyToGlobal(interface, effect)
+        interface:checkGame()
         return
     end
 

@@ -61,9 +61,9 @@ struct Game {
     bool voteOnLeaderDeath;
     bool voteLeader;
 
-    const EventEffect& effect(const std::string& name) const { return eventEffects.at(name); }
-    const EnemyDescriptor& enemy(const std::string& name) const { return enemies.at(name); }
-    const GroupDescriptor& group(const std::string& name) const { return groups.at(name); }
+    const EventEffect& effect(const std::string&) const;
+    const EnemyDescriptor& enemy(const std::string&) const;
+    const GroupDescriptor& group(const std::string&) const;
 
     std::vector<std::string> player() const;
     std::vector<std::string> global() const;

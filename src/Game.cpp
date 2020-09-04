@@ -76,6 +76,28 @@ bool Condition::test(const StatsManager& stats) const {
     return operators.at(op)(stats.get(stat), value);
 }
 
+const EventEffect& Game::effect(const std::string& name) const {
+    if (eventEffects.count(name) == 0)
+        throw std::out_of_range { "Effet \"" + name + "\" inconnu" };
+
+    return eventEffects.at(name);
+}
+
+const EnemyDescriptor& Game::enemy(const std::string& name) const {
+    if (enemies.count(name) == 0)
+        throw std::out_of_range { "Descipteur d'ennemi \"" + name + "\" inconnu" };
+
+    return enemies.at(name);
+}
+
+const GroupDescriptor& Game::group(const std::string& name) const {
+    if (groups.count(name) == 0)
+        throw std::out_of_range { "Descipteur de groupe d'ennemis \""
+                                  + name + "\" inconnu" };
+
+    return groups.at(name);
+}
+
 Game::Validity Game::validity() const {
     const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(),
                                              [](const auto& i)
