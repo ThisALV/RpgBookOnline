@@ -39,7 +39,9 @@ function Rbo.PathChoice(interface, args)
 end
 
 function Rbo.Checkpoint(interface, args)
-    local name = interface:checkpoint(args.name)
+    assertArgs(isStr(args.name) and isNum(args.scene))
+
+    local name = interface:checkpoint(args.name, args.scene)
     interface:print("Sauvegarde sur \""..name.."\".")
 end
 
