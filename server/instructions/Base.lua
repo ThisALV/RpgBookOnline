@@ -78,13 +78,15 @@ function Rbo.EventTo(interface, args)
 end
 
 function Rbo.ActionVote(interface, args)
-    assertArgs(isStr(args.text) == "string" and type(args.effect))
+    assertArgs(isStr(args.text) and isStr(args.effect))
 
     interface:print(args.text)
-    local selected = vote(interface:askReply(ALL_PLAYERS, getIDs()))
-    local effect = interface:effect(args.effect)
+    local selected = vote(interface:askReply(ALL_PLAYERS, interface:players()))
+    local effect = interface:game():effect(args.effect)
 
     effect:apply(interface:player(selected))
+    interface:sendInfos(selected)
+    interface:checkPlayer(selected)
 end
 
 local function dices(i)
@@ -101,7 +103,7 @@ local function evalTarget(interface, target)
     if target == "leader" then
         target_id = interface:leader()
     elseif target == "vote" then
-        target_id = vote(interface:askReply(ALL_PLAYERS, getIDs()))
+        target_id = vote(interface:askReply(ALL_PLAYERS, interface:players()))
     else
         target_id = tonumber(target)
     end
