@@ -61,10 +61,12 @@ void Session::disconnect(const byte id, const bool crash) {
     if (leader() == id)
         switchLeader(players_.cbegin()->first);
 
-    SessionDataFactory data_factory;
-    data_factory.makeCrash(id);
+    if (crash) {
+        SessionDataFactory data_factory;
+        data_factory.makeCrash(id);
 
-    sendToAll(data_factory.dataWithLength());
+        sendToAll(data_factory.dataWithLength());
+    }
 }
 
 void Session::removePlayer(const byte id) {
@@ -529,7 +531,7 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         }
     }
 
-    // Méthode de connexion différente pour éviter d'essayer d'envoyer des paquets
+    // Méthode de déconnexion différente pour éviter d'essayer d'envoyer des paquets
     // d'informations aux joueurs ayant crash
     for (const byte player : ctx.errorIDs)
         removePlayer(player);

@@ -136,8 +136,8 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
     SessionDataFactory dead;
     dead.makeDie(id);
 
-    ctx_.disconnect(id);
     ctx_.sendToAll(dead.dataWithLength());
+    ctx_.disconnect(id);
 
     const bool end { !ctx_.playersRemaining() };
     if (end)
