@@ -50,6 +50,7 @@ private:
     io::io_context& lobby_io_;
     io::io_context::strand member_handling_;
     tcp::acceptor new_players_acceptor_;
+    tcp::endpoint acceptor_endpt_;
 
     MembersName players_;
     MembersConnection connections_;
@@ -96,7 +97,7 @@ public:
     void open();
     void close(const bool = false);
 
-    ushort port() const { return new_players_acceptor_.local_endpoint().port(); }
+    ushort port() const { return acceptor_endpt_.port(); }
     bool registered(const byte id) const { return names().count(id) == 1; }
     bool registered(const std::string&) const;
     bool allMembersReady() const { return readyMembers().size() == names().size(); }

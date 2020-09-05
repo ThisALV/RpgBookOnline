@@ -32,7 +32,8 @@ Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
     : logger_ { rboLogger("Lobby") },
       lobby_io_ { lobby_io },
       member_handling_ { lobby_io },
-      new_players_acceptor_ { lobby_io, acceptor_endpt },
+      new_players_acceptor_ { lobby_io },
+      acceptor_endpt_ { acceptor_endpt },
       prepare_delay_ { prepare_delay_ms },
       state_ { Closed },
       prepare_timer_ { lobby_io },
@@ -136,6 +137,11 @@ void Lobby::cancelPreparation(const bool crash) {
 void Lobby::open() {
     logger_.info("Ouverture sur le port {}.", port());
     state_ = Open;
+
+    new_players_acceptor_.open(acceptor_endpt_.protocol());
+    new_players_acceptor_.set_option(tcp::acceptor::reuse_address { true });
+    new_players_acceptor_.bind(acceptor_endpt_);
+    new_players_acceptor_.listen();
 
     LobbyDataFactory open_data;
     open_data.makeState(State::Open);
@@ -426,7 +432,7 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
 
 void Lobby::launchPreparation() {
     state_ = Preparing;
-    new_players_acceptor_.cancel();
+    new_players_acceptor_.close();
 
     std::unique_lock cancelling_lock { request_cancelling_ };
     for (auto& connection : connections_)
