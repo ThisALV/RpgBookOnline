@@ -47,7 +47,7 @@ end
 
 function Rbo.EventTo(interface, args)
     local target = args.target
-    assertArgs((target == "global" or target == "all" or target == "leader" or isStr(target) == "number") and type(args.effect) == "string")
+    assertArgs((target == "global" or target == "all" or target == "leader" or isNum(target)) and type(args.effect) == "string")
     local effect = interface:game():effect(args.effect)
 
     if target == "global" then
@@ -58,7 +58,7 @@ function Rbo.EventTo(interface, args)
 
     local targets = ByteVector:new():iterable()
     if target == "all" then
-        targets = getIDs()
+        targets = interface:players():iterable()
     else
         targets:add(target == "leader" and interface:leader() or target)
     end
