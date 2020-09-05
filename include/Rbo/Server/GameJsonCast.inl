@@ -11,7 +11,7 @@ namespace Rbo { // Doivent être dans le même ns que leur type pour fonctionner
 using json = nlohmann::json;
 
 template<typename T> void to_json(json& data, const std::optional<T>& opt) {
-    data = opt ? json { *opt } : json { nullptr };
+    data = opt ? json(*opt) : json(nullptr);
 }
 
 template<typename T> void from_json(const json& data, std::optional<T>& opt) {
