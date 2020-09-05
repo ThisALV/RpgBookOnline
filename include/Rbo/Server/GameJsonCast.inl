@@ -107,6 +107,21 @@ inline void from_json(const json& data, PlayerState& player) {
     }
 }
 
+inline void to_json(json& data, const std::map<byte, PlayerState>& players) {
+    data = json::object();
+    for (const auto [id, state] : players)
+        data[std::to_string(id)] = state;
+}
+
+inline void from_json(const json& data, std::map<byte, PlayerState>& players) {
+    for (const auto [id, player] : data.get<json::object_t>()) {
+        PlayerState state;
+        player.get_to(state);
+
+        players.insert({ static_cast<byte>(std::stoi(id)), std::move(state) });
+    }
+}
+
 } // namespace Rbo::Server
 
 #endif // GAMEJSONCAST_INL
