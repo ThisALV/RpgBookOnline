@@ -39,6 +39,7 @@ private:
     static void applyToGlobal(Gameplay&, const EventEffect&);
     static bool isInstruction(const sol::object&, const sol::object&);
     static uint dices(const uint, const uint);
+    static byte votePlayer(Gameplay&, const byte = ALL_PLAYERS);
 
     struct LuaInstruction {
         LuaFunc func;

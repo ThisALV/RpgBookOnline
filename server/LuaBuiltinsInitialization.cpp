@@ -74,6 +74,20 @@ uint InstructionsProvider::dices(const uint dices, const uint max) {
     return result;
 }
 
+byte InstructionsProvider::votePlayer(Gameplay& interface, const byte target) {
+    const std::vector<byte> ids { interface.players() };
+
+    OptionsList options;
+    std::transform(ids.cbegin(), ids.cend(), std::inserter(options, options.begin()),
+                   [&interface](const byte id) -> OptionsList::value_type
+    {
+        return { id, interface.player(id).name() };
+    });
+
+    interface.printOptions(options, target);
+    return vote(interface.askReply(target, ids));
+}
+
 void InstructionsProvider::initBuiltins() {
     using namespace AsContainer;
 
@@ -227,6 +241,9 @@ void InstructionsProvider::initBuiltins() {
     ctx_["toBoolean"] = toBoolean;
     ctx_["applyToGlobal"] = applyToGlobal;
     ctx_["dices"] = dices;
+    ctx_["votePlayer"] = sol::overload(
+                [](Gameplay& interface) { return votePlayer(interface); }, votePlayer
+    );
     ctx_["ALL_PLAYERS"] = 0;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
