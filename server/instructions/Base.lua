@@ -6,6 +6,10 @@ local function isNum(var)
     return type(var) == "number"
 end
 
+local function isBool(var)
+    return type(var) == "boolean"
+end
+
 function Rbo.Text(interface, args)
     assertArgs(isStr(args.text))
 
@@ -89,15 +93,6 @@ function Rbo.ActionVote(interface, args)
     interface:checkPlayer(selected)
 end
 
-local function dices(i)
-    local result = 0
-    for j = 1, i do
-        result = result + math.random(1, 6)
-    end
-
-    return result
-end
-
 local function evalTarget(interface, target)
     local target_id
     if target == "leader" then
@@ -116,8 +111,14 @@ function Rbo.Test(interface, args)
     
     interface:print(args.text)
     local target_id = evalTarget(interface, args.target)
+    if args.wait == nil or args.wait == true then
+        interface:askConfirm(target_id)
+    end
+    
+    local result = dices(args.dices, 6)
+    print(result)
     local value = interface:player(target_id):stats():get(args.stat)
-    return value <= dices(args.dices) and args.success or args.failure
+    return value >= result and args.success or args.failure
 end
 
 function Rbo.IfHas(interface, args)
@@ -125,6 +126,10 @@ function Rbo.IfHas(interface, args)
     
     interface:print(args.text)
     local target_id = evalTarget(interface, args.target)
+    if args.wait == nil or args.wait == true then
+        interface:askConfirm(target_id)
+    end
+
     local count = interface:player(target_id):inventory(args.inv):count(args.item)
     return count >= args.qty and args.yes or args.no
 end

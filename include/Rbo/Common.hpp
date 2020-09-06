@@ -36,6 +36,8 @@ using byte = std::uint8_t;
 using s_byte = std::int8_t;
 using word = std::uint16_t;
 
+using RandomEngine = std::mt19937_64;
+
 enum struct ReplyValidity : byte;
 
 using OptionsList = std::map<byte, std::string>;
@@ -76,7 +78,7 @@ struct DiceFormula {
     int max() const { return dices * 6 + bonus; };
 
 private:
-    static std::mt19937_64 rd_;
+    static RandomEngine rd_;
     static std::uniform_int_distribution<uint> rd_distributor_;
 };
 

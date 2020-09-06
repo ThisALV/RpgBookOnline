@@ -54,7 +54,7 @@ spdlog::logger& rboLogger(const std::string& name) {
 
 namespace Vote {
 
-std::mt19937_64 rd { now() };
+RandomEngine rd { now() };
 
 } // namespace Vote
 
@@ -101,7 +101,7 @@ InvalidReply::InvalidReply(const ReplyValidity err_type)
     assert(isInvalid(type));
 }
 
-std::mt19937_64 DiceFormula::rd_ { now() };
+RandomEngine DiceFormula::rd_ { now() };
 std::uniform_int_distribution<uint> DiceFormula::rd_distributor_ { 1, 6 };
 
 int DiceFormula::operator()() const {

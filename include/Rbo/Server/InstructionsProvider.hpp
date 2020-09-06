@@ -30,12 +30,15 @@ private:
     using LuaFunc = sol::function;
     using Instructions = std::unordered_map<std::string, LuaFunc>;
 
+    static RandomEngine dices_rd_;
+
     static std::vector<byte> getIDs(const Replies&);
     static std::tuple<byte, byte> reply(const Replies&);
     static void assertArgs(const bool);
     static bool toBoolean(const std::string&);
     static void applyToGlobal(Gameplay&, const EventEffect&);
     static bool isInstruction(const sol::object&, const sol::object&);
+    static uint dices(const uint, const uint);
 
     struct LuaInstruction {
         LuaFunc func;

@@ -37,7 +37,7 @@ struct CheckpointAlreadyExists : std::logic_error {
 
 class LocalGameBuilder : public GameBuilder {
 private:
-    static std::mt19937_64 chkpt_id_rd_;
+    static RandomEngine chkpt_id_rd_;
 
     fs::path game_;
     fs::path chkpts_;

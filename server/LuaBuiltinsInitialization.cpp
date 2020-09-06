@@ -62,6 +62,18 @@ void InstructionsProvider::applyToGlobal(Gameplay& ctx, const EventEffect& effec
     }
 }
 
+RandomEngine InstructionsProvider::dices_rd_ { now() };
+
+uint InstructionsProvider::dices(const uint dices, const uint max) {
+    std::uniform_int_distribution<uint> dice { 1, max };
+
+    uint result { 0 };
+    for (uint i { 0 }; i < dices; i++)
+        result += dice(dices_rd_);
+
+    return result;
+}
+
 void InstructionsProvider::initBuiltins() {
     using namespace AsContainer;
 
@@ -214,6 +226,7 @@ void InstructionsProvider::initBuiltins() {
     ctx_["assertArgs"] = assertArgs;
     ctx_["toBoolean"] = toBoolean;
     ctx_["applyToGlobal"] = applyToGlobal;
+    ctx_["dices"] = dices;
     ctx_["ALL_PLAYERS"] = 0;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;

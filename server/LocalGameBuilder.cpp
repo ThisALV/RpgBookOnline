@@ -7,7 +7,7 @@
 
 namespace Rbo::Server {
 
-std::mt19937_64 LocalGameBuilder::chkpt_id_rd_ { now() };
+RandomEngine LocalGameBuilder::chkpt_id_rd_ { now() };
 
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
                                    const fs::path& scenes, const fs::path& scripts_dir)
