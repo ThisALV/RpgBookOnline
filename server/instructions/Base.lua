@@ -6,10 +6,6 @@ local function isNum(var)
     return type(var) == "number"
 end
 
-local function isBool(var)
-    return type(var) == "boolean"
-end
-
 function Rbo.Text(interface, args)
     assertArgs(isStr(args.text))
 
@@ -93,43 +89,59 @@ function Rbo.ActionVote(interface, args)
     interface:checkPlayer(selected)
 end
 
-local function evalTarget(interface, target)
-    local target_id
-    if target == "leader" then
-        target_id = interface:leader()
-    elseif target == "vote" then
-        target_id = vote(interface:askReply(ALL_PLAYERS, interface:players()))
-    else
-        target_id = tonumber(target)
-    end
-
-    return target_id
-end
-
 function Rbo.Test(interface, args)
-    assertArgs(isStr(args.text) and (args.target == "leader" or args.target == "vote" or isNum(args.target)) and isStr(args.stat) and isNum(args.dices) and isNum(args.success) and isNum(args.failure))
+    local leader = args.target == "leader"
+    local vote = args.target == "vote"
+    assertArgs(isStr(args.text) and (leader or vote or isNum(args.target)) and isStr(args.stat) and isNum(args.dices) and isNum(args.success) and isNum(args.failure))
     
     interface:print(args.text)
-    local target_id = evalTarget(interface, args.target)
+    local target_id
+    if leader then
+        target_id = interface:leader()
+    elseif vote then
+        target_id = votePlayer()
+    else
+        target_id = tonumber(args.target)
+    end
     if args.wait == nil or args.wait == true then
         interface:askConfirm(target_id)
     end
     
-    local result = dices(args.dices, 6)
-    print(result)
     local value = interface:player(target_id):stats():get(args.stat)
-    return value >= result and args.success or args.failure
+    return value >= dices(args.dices, 6) and args.success or args.failure
 end
 
 function Rbo.IfHas(interface, args)
-    assertArgs(isStr(args.text) and (args.target == "leader" or args.target == "vote" or isNum(args.target)) and isStr(args.inv) and isStr(args.item) and isNum(args.qty) and isNum(args.yes) and isNum(args.no))
-    
+    local global = args.target == "global"
+    local leader = args.target == "leader"
+    local vote = args.target == "vote"
+    assertArgs(not(args.consumed and global) and isStr(args.text) and (global or leader or vote or isNum(args.target)) and isStr(args.inv) and isStr(args.item) and isNum(args.qty) and isNum(args.yes) and isNum(args.no))
+
     interface:print(args.text)
-    local target_id = evalTarget(interface, args.target)
-    if args.wait == nil or args.wait == true then
-        interface:askConfirm(target_id)
+    local targets = ByteVector:new():iterable()
+    if global then
+        targets = interface:players():iterable()
+    elseif leader then
+        targets:add(interface:leader())
+    elseif vote then
+        targets:add(votePlayer())
+    else
+        targets:add(args.target)
     end
 
-    local count = interface:player(target_id):inventory(args.inv):count(args.item)
-    return count >= args.qty and args.yes or args.no
+    if args.wait == nil or args.wait == true then
+        interface:askConfirm(global and ALL_PLAYERS or targets:get(1))
+    end
+
+    local count = 0
+    for i = 1, #targets do
+        count = count + interface:player(targets:get(i)):inventory(args.inv):count(args.item)
+    end
+
+    local has = count >= args.qty
+    if has and args.consumed then
+        targets:get(1):consume(args.inv, args.item, args.qty)
+    end
+    
+    return has and args.yes or args.no
 end
