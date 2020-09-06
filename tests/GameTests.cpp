@@ -12,7 +12,7 @@ std::ostream& operator<<(std::ostream& out, const EventEffect::ItemsChanges resu
     return out << static_cast<int>(result);
 }
 
-std::ostream& operator<<(std::ostream& out, const Game::Validity result) {
+std::ostream& operator<<(std::ostream& out, const Game::Error result) {
     return out << static_cast<int>(result);
 }
 
@@ -184,7 +184,9 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesFull) {
     Game game;
     game.playerInventories.insert({ "inv1", inventory });
 
-    BOOST_CHECK_EQUAL(Game::Validity::InitialInventories, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::InitialInventories, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
@@ -197,7 +199,9 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
     Game game;
     game.playerInventories.insert({ "inv1", inventory });
 
-    BOOST_CHECK_EQUAL(Game::Validity::InitialInventories, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::InitialInventories, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
@@ -211,7 +215,9 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
     game.playerInventories.insert({ "inv1", inventory });
     game.bonuses.insert({ itemEntry("inv1", "A"), ItemBonus { "a", 3 } });
 
-    BOOST_CHECK_EQUAL(Game::Validity::Bonuses, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Bonuses, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
@@ -226,7 +232,9 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
     game.playerInventories.insert({ "inv1", inventory });
     game.bonuses.insert({ itemEntry("inv1", "A"), ItemBonus { "a", 3 } });
 
-    BOOST_CHECK_EQUAL(Game::Validity::Bonuses, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Bonuses, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
@@ -244,7 +252,9 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
     game.playerInventories.insert({ "inv1", inventory });
     game.eventEffects.insert({ "evt1", effect });
 
-    BOOST_CHECK_EQUAL(Game::Validity::Effects, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Effects, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
@@ -263,21 +273,27 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
     game.playerInventories.insert({ "inv1", inventory });
     game.eventEffects.insert({ "evt1", effect });
 
-    BOOST_CHECK_EQUAL(Game::Validity::Effects, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Effects, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(GroupsUnknownEnemy) {
     Game game;
     game.groups.insert({ "1", { { "1", "EnemyA" }, { "2", "EnemyB" } } });
 
-    BOOST_CHECK_EQUAL(Game::Validity::Groups, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Groups, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(RestGivablesUnknownItem) {
     Game game;
     game.rest.givables.push_back(itemEntry("inv1", "A"));
 
-    BOOST_CHECK_EQUAL(Game::Validity::RestGivables, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::RestGivables, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(RestAvailablesUnknownItem) {
@@ -285,7 +301,9 @@ BOOST_AUTO_TEST_CASE(RestAvailablesUnknownItem) {
     game.eventEffects.insert({ "evt1", EventEffect {} });
     game.rest.availables.insert({ itemEntry("inv1", "A"), "evt1" });
 
-    BOOST_CHECK_EQUAL(Game::Validity::RestAvailables, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::RestAvailables, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(RestAvailablesUnknownEffect) {
@@ -300,14 +318,18 @@ BOOST_AUTO_TEST_CASE(RestAvailablesUnknownEffect) {
     game.eventEffects.insert({ "evt1", EventEffect {} });
     game.rest.availables.insert({ itemEntry("inv1", "A"), "evt2" });
 
-    BOOST_CHECK_EQUAL(Game::Validity::RestAvailables, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::RestAvailables, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(DeathConditionsUnknownStat) {
     Game game;
     game.deathConditions.push_back(Condition { "a", "!=", 5 });
 
-    BOOST_CHECK_EQUAL(Game::Validity::DeathConditions, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::DeathConditions, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(DeathConditionsUnknownOperator) {
@@ -315,14 +337,18 @@ BOOST_AUTO_TEST_CASE(DeathConditionsUnknownOperator) {
     game.playerStats.insert({ "a", StatDescriptor {} });
     game.deathConditions.push_back(Condition { "a", "===", 5 });
 
-    BOOST_CHECK_EQUAL(Game::Validity::DeathConditions, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::DeathConditions, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownStat) {
     Game game;
     game.gameEndConditions.push_back(Condition { "1", ">=", 5 });
 
-    BOOST_CHECK_EQUAL(Game::Validity::GameEndConditions, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::GameEndConditions, validity.back());
 }
 
 BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownOperator) {
@@ -330,7 +356,21 @@ BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownOperator) {
     game.globalStats.insert({ "1", StatDescriptor {} });
     game.gameEndConditions.push_back(Condition { "1", "===", 5 });
 
-    BOOST_CHECK_EQUAL(Game::Validity::GameEndConditions, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(1, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::GameEndConditions, validity.back());
+}
+
+BOOST_AUTO_TEST_CASE(EffectUnknownStatAndBonusUnknownItem) {
+    Game game;
+    game.globalStats.insert({ "a", {} });
+    game.eventEffects.insert({ "eff1", EventEffect { { { "none", 0 } }, {} } });
+    game.bonuses.insert({ itemEntry("inv0", "none"), ItemBonus { "a", 0 } });
+
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK_EQUAL(2, validity.size());
+    BOOST_CHECK_EQUAL(Game::Error::Effects, validity.back());
+    BOOST_CHECK_EQUAL(Game::Error::Bonuses, validity.front());
 }
 
 BOOST_AUTO_TEST_CASE(Ok) {
@@ -381,7 +421,8 @@ BOOST_AUTO_TEST_CASE(Ok) {
         std::move(deathConditions), std::move(gameEndConditions), true, true
     };
 
-    BOOST_CHECK_EQUAL(Game::Validity::Ok, game.validity());
+    const std::vector<Game::Error> validity { game.validity() };
+    BOOST_CHECK(validity.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -71,9 +71,8 @@ Game LocalGameBuilder::operator()() const {
         data.at("voteOnLeaderDeath").get_to(game.voteOnLeaderDeath);
         data.at("voteLeader").get_to(game.voteLeader);
 
-        const Game::Validity validity { game.validity() };
-        if (validity != Game::Validity::Ok)
-            throw GameLoadingError { Game::getMessage(validity) };
+        for (const Game::Error err : game.validity())
+            logger_.warn("Erreur dans le jeu : {}", Game::getMessage(err));
     } catch (const json::exception& err) {
         throw GameLoadingError { err.what() };
     }

@@ -39,12 +39,12 @@ struct Condition {
 };
 
 struct Game {
-    enum struct Validity {
-        Ok, InitialInventories, Bonuses, Effects, Groups, RestGivables,
+    enum struct Error {
+        InitialInventories, Bonuses, Effects, Groups, RestGivables,
         RestAvailables, DeathConditions, GameEndConditions
     };
 
-    static std::string getMessage(const Validity);
+    static std::string getMessage(const Error);
 
     std::string name;
     StatsDescriptors globalStats;
@@ -69,7 +69,7 @@ struct Game {
     std::vector<std::string> global() const;
     ItemsList itemsList() const;
 
-    Validity validity() const;
+    std::vector<Error> validity() const;
 
     bool hasGlobal(const std::string& stat) const { return globalStats.count(stat) == 1; }
     bool hasStat(const std::string& stat) const { return playerStats.count(stat) == 1; }

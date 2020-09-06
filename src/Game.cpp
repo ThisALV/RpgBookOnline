@@ -98,7 +98,9 @@ const GroupDescriptor& Game::group(const std::string& name) const {
     return groups.at(name);
 }
 
-Game::Validity Game::validity() const {
+std::vector<Game::Error> Game::validity() const {
+    std::vector<Error> errors;
+
     const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(),
                                              [](const auto& i)
     {
@@ -119,14 +121,14 @@ Game::Validity Game::validity() const {
     });
 
     if (!valid_init_invs)
-        return Validity::InitialInventories;
+        errors.push_back(Error::InitialInventories);
 
     const bool valid_bonuses = std::all_of(
                 bonuses.cbegin(), bonuses.cend(),
                 [this](const auto& b) { return hasItem(b.first) && hasStat(b.second.stat); });
 
     if (!valid_bonuses)
-        return Validity::Bonuses;
+        errors.push_back(Error::Bonuses);
 
     const bool valid_effects = std::all_of(eventEffects.cbegin(), eventEffects.cend(),
                                            [this](const auto& e)
@@ -151,7 +153,7 @@ Game::Validity Game::validity() const {
     });
 
     if (!valid_effects)
-        return Validity::Effects;
+        errors.push_back(Error::Effects);
 
     const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(),
                                           [this](const auto& g)
@@ -162,37 +164,37 @@ Game::Validity Game::validity() const {
     });
 
     if (!valid_groups)
-        return Validity::Groups;
+        errors.push_back(Error::Groups);
 
     const bool valid_rest_givables = std::all_of(
                 rest.givables.cbegin(), rest.givables.cend(),
                 [this](const auto& i) { return hasItem(i); });
 
     if (!valid_rest_givables)
-        return Validity::RestGivables;
+        errors.push_back(Error::RestGivables);
 
     const bool valid_rest_availables = std::all_of(
                 rest.availables.cbegin(), rest.availables.cend(),
                 [this](const auto& a) { return hasItem(a.first) && hasEffect(a.second); });
 
     if (!valid_rest_availables)
-        return Validity::RestAvailables;
+        errors.push_back(Error::RestAvailables);
 
     const bool valid_death_conditions = std::all_of(
                 deathConditions.cbegin(), deathConditions.cend(), [this]
                 (const auto& c) { return Condition::operators.count(c.op) == 1 && hasStat(c.stat); });
 
     if (!valid_death_conditions)
-        return Validity::DeathConditions;
+        errors.push_back(Error::DeathConditions);
 
     const bool valid_end_conditions = std::all_of(
                 gameEndConditions.cbegin(), gameEndConditions.cend(), [this]
                 (const auto& c) { return Condition::operators.count(c.op) == 1 && hasGlobal(c.stat); });
 
     if (!valid_end_conditions)
-        return Validity::GameEndConditions;
+        errors.push_back(Error::GameEndConditions);
 
-    return Validity::Ok;
+    return errors;
 }
 
 bool Game::hasItem(const std::string& entry) const {
@@ -206,29 +208,27 @@ bool Game::hasItem(const std::string& entry) const {
     return std::find(items_begin, items_end, item) != items_end;
 }
 
-std::string Game::getMessage(const Validity validity) {
-    switch (validity) {
-    case Validity::Ok:
-        return "Valide";
-    case Validity::InitialInventories:
+std::string Game::getMessage(const Error Error) {
+    switch (Error) {
+    case Error::InitialInventories:
         return "Inventaires initiaux invalides : manque de place ou par objets inconnus";
-    case Validity::Bonuses:
+    case Error::Bonuses:
         return "Bonus invalides : statistiques ou objets inconnus";
-    case Validity::Effects:
+    case Error::Effects:
         return "Effets invalides : statistiques inconnues";
-    case Validity::Groups:
+    case Error::Groups:
         return "Groupes d'ennemis invalides : ennemis inconnus";
-    case Validity::RestGivables:
+    case Error::RestGivables:
         return "Objets à donner pendant repos invalides : objets inconnus";
-    case Validity::RestAvailables:
+    case Error::RestAvailables:
         return "Objets à utiliser pendant repos invalides : objets ou effets inconnus";
-    case Validity::DeathConditions:
+    case Error::DeathConditions:
         return "Conditions de morts invalides : statistiques ou opérateurs inconnus";
-    case Validity::GameEndConditions:
+    case Error::GameEndConditions:
         return "Conditions de fin invalides : statistiques ou opérateurs inconnus";
     }
 
-    return "Cela ne doit pas arrivé";
+    return "Cela ne doit pas arriver";
 }
 
 std::vector<std::string> Game::getNames(const StatsDescriptors& stats) {
