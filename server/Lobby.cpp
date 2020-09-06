@@ -354,9 +354,11 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 }
 
 void Lobby::sendToAllMasterHandling(const Data& data) {
+    const bool was_here { names().count(master_) == 1 };
+
     sendToAll(data);
 
-    if (names().count(master_) == 0)
+    if (was_here && names().count(master_) == 0)
         throw MasterDisconnected { master_ };
 }
 
