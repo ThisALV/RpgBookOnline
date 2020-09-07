@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(Infos) {
               { "inv1", { { "A", 5 }, { "B", -4 } } },
               { "inv2", { { "A", -1 } } }
         } },
-        { "inventoriesMaxCapacity", { { "inv2", 55 } } },
+        { "inventoriesMaxCapacity", { { "inv1", nullptr }, { "inv2", 55 } } },
         { "stats", {
               { "a", { { "hidden", false }, { "limits", default_limits }, { "value", 1 } } },
               { "b", { { "hidden", false }, { "limits", default_limits }, { "value", 2 } } }
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(Infos) {
             { "inv1", { { "A", 5 }, { "B", -4 } } },
             { "inv2", { { "A", -1 } } }
         },
-        { { "inv2", 55 } }
+        { { "inv1", {} }, { "inv2", 55 } }
     };
 
     SessionDataFactory factory;

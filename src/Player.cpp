@@ -104,7 +104,7 @@ uint Inventory::size() const {
     return std::accumulate(content().cbegin(), content().cend(), 0, accumulate);
 }
 
-bool Inventory::setMaxSize(const InventorySize& capacity) {
+bool Inventory::setMaxSize(const InventorySize capacity) {
     const bool ok { !capacity || (*capacity >= size()) };
     if (ok)
         size_ = capacity;

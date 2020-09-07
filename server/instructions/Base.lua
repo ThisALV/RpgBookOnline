@@ -124,7 +124,7 @@ function Rbo.IfHas(interface, args)
     elseif leader then
         targets:add(interface:leader())
     elseif vote then
-        targets:add(votePlayer())
+        targets:add(votePlayer(interface))
     else
         targets:add(args.target)
     end
@@ -140,7 +140,7 @@ function Rbo.IfHas(interface, args)
 
     local has = count >= args.qty
     if has and args.consumed then
-        targets:get(1):consume(args.inv, args.item, args.qty)
+        interface:player(targets:get(1)):consume(args.inv, args.item, args.qty)
     end
     
     return has and args.yes or args.no

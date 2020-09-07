@@ -470,11 +470,10 @@ PlayerStateChanges Session::getChanges(const byte id) {
                 inventories[name][item] = qty;
             }
         }
-    }
 
-    for (const auto& [name, inv_max_capacity] : capacities) {
+        const InventorySize inv_max_capacity { inv.maxSize() };
         if (first_state_ || inv_max_capacity != capacities.at(name)) {
-            changes.capacitiesChanges[name] = inv_max_capacity ? inv_max_capacity.value() : 0;
+            changes.capacitiesChanges[name] = inv_max_capacity;
             capacities[name] = inv_max_capacity;
         }
     }

@@ -3,7 +3,7 @@
 #include <fstream>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
-#include <Rbo/Server/GameJsonCast.inl>
+#include <Rbo/GameJsonCast.inl>
 
 namespace Rbo::Server {
 

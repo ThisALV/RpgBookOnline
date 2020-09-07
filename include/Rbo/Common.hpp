@@ -125,7 +125,7 @@ struct Stat {
 struct PlayerStateChanges {
     std::unordered_map<std::string, Stat> statsChanges;
     std::unordered_map<std::string, std::unordered_map<std::string, int>> itemsChanges;
-    std::unordered_map<std::string, std::size_t> capacitiesChanges;
+    std::unordered_map<std::string, InventorySize> capacitiesChanges;
 };
 
 struct PlayerState {

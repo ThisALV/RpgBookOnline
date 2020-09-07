@@ -31,7 +31,7 @@ public:
 
     bool limited() const { return size_.has_value(); }
     InventorySize maxSize() const { return size_; }
-    bool setMaxSize(const InventorySize&);
+    bool setMaxSize(const InventorySize);
 
     const InventoryContent& content() const { return content_; }
 

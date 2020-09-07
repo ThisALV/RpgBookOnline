@@ -1,6 +1,7 @@
 ﻿#include <Rbo/SessionDataFactory.hpp>
 
 #include <nlohmann/json.hpp>
+#include <Rbo/GameJsonCast.inl>
 
 namespace Rbo {
 
@@ -56,19 +57,12 @@ void SessionDataFactory::makeOptions(const OptionsList& options) {
 void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& changes) {
     json changes_data = json::object({
         { "inventories", changes.itemsChanges },
-        { "inventoriesMaxCapacity", changes.capacitiesChanges },
-        { "stats", json::object({}) }
+        { "stats", changes.statsChanges },
+        { "inventoriesMaxCapacity", json::object() }
     });
 
-    for (const auto& [name, stat] : changes.statsChanges) {
-        assert(!stat.hidden);
-
-        changes_data["stats"][name] = json::object({
-            { "limits", { { "min", stat.limits.min }, { "max", stat.limits.max } } },
-            { "value", stat.value },
-            { "hidden", stat.hidden }
-        });
-    }
+    for (const auto& [inv, capacity] : changes.capacitiesChanges)
+        changes_data.at("inventoriesMaxCapacity")[inv] = capacity ? json(*capacity) : json(nullptr);
 
     makeData(DataType::Infos);
     data_.add(id);
