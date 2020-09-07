@@ -322,9 +322,13 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
         if (initial.empty())
             continue;
 
-        assert(std::accumulate(initial.cbegin(), initial.cend(), 0,
+#ifndef NDEBUG
+        const InventorySize capacity { target.inventory(name).maxSize() };
+#endif
+        assert(!capacity ||
+               std::accumulate(initial.cbegin(), initial.cend(), 0,
                                [](const std::size_t s, const auto& i) { return s + i.second; })
-               <= target.inventory(name).maxSize());
+               <= capacity);
 
         std::string initial_msg { name + " - contenu initial :" };
         for (const auto& [item, qty] : initial) {
