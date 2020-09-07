@@ -336,7 +336,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
             initial_msg += ' ' + item + '*' + std::to_string(qty);
         }
 
-        logger_.info("[Player {} inventories] {}", initial_msg);
+        logger_.info("[Player {} inventories] {}", target.id(), initial_msg);
         interface.print(initial_msg);
     }
 }

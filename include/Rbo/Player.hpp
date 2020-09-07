@@ -109,8 +109,8 @@ template<typename Output> Output& operator<<(Output& out, const Rbo::Player& pla
 
 template<typename Output>
 Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
-    out << "[ maxSize=" << (inventory.limited() ? std::string { "Inf" }
-                                                : std::to_string(*inventory.maxSize()))
+    out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" }
+                                                 : std::to_string(*inventory.maxSize()))
         << "; size=" << inventory.size() << " ]";
 
     return out;
