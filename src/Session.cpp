@@ -240,6 +240,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
         logger_.debug("player:{}={}", id, player);
         interface.sendInfos(id);
     }
+    first_state_ = false;
 
     for (Next next { beginning }; next && running(); next = playScene(interface, *next));
 
@@ -462,10 +463,8 @@ PlayerStateChanges Session::getChanges(const byte id) {
     }
 
     for (const auto& [name, inv] : p.inventories()) {
-        const InventoryContent& content { inv.content() };
-
         for (const auto& [item, qty] : inv.content()) {
-            if (first_state_ || qty != content.at(item)) {
+            if (first_state_ || qty != inventories.at(name).at(item)) {
                 changes.itemsChanges[name][item] = qty;
                 inventories[name][item] = qty;
             }
