@@ -9,3 +9,4 @@ CMakeLists.txt.user
 /server/instructions/Custom.lua
 **/.vscode/
 *.log
+__pycache__/
