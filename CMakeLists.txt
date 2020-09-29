@@ -8,9 +8,12 @@ set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(RBO_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 
-add_subdirectory(src)
+add_subdirectory(rbo)
 add_subdirectory(server)
-add_subdirectory(tests)
+
+if(RBO_TESTS_ENABLED)
+    add_subdirectory(tests)
+endif()
 
 target_compile_definitions(server PRIVATE SOL_ALL_SAFETIES_ON=1 SOL_PRINT_ERRORS=0)
 
@@ -21,4 +24,3 @@ endif()
 install(DIRECTORY "${RBO_INCLUDE_DIR}" TYPE INCLUDE)
 install(TARGETS rbo LIBRARY)
 install(TARGETS server RUNTIME)
-
