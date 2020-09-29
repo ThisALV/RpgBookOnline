@@ -5,8 +5,9 @@
 namespace Rbo {
 
 StatsManager::StatsManager(const std::vector<std::string>& stats) {
-    std::transform(stats.cbegin(), stats.cend(), std::inserter(stats_, stats_.begin()),
-                   [](const std::string& stat) { return Stats::value_type { stat, {} }; });
+    std::transform(stats.cbegin(), stats.cend(), std::inserter(stats_, stats_.begin()), [](const std::string& stat) {
+        return Stats::value_type { stat, {} };
+    });
 }
 
 bool StatsManager::operator==(const StatsManager& rhs) const {
@@ -72,8 +73,7 @@ bool StatsManager::hidden(const std::string& stat) const {
 
 StatsValues StatsManager::values() const {
     StatsValues values;
-    std::transform(stats_.cbegin(), stats_.cend(), std::inserter(values, values.begin()),
-                   [](const auto& s) { return StatsValues::value_type { s.first, s.second.value }; });
+    std::transform(stats_.cbegin(), stats_.cend(), std::inserter(values, values.begin()), [](const auto& s) { return StatsValues::value_type { s.first, s.second.value }; });
 
     return values;
 }

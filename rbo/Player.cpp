@@ -5,9 +5,7 @@
 
 namespace Rbo {
 
-void Player::refreshBonuses(const BonusAction action, const std::string& inv,
-                            const std::string& item, const uint qty)
-{
+void Player::refreshBonuses(const BonusAction action, const std::string& inv, const std::string& item, const uint qty) {
     const std::string bonus_key { itemEntry(inv, item) };
     if (statsBonus().count(bonus_key) == 1) {
         const ItemBonus& bonus { statsBonus().at(bonus_key) };
@@ -16,10 +14,7 @@ void Player::refreshBonuses(const BonusAction action, const std::string& inv,
     }
 }
 
-Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats,
-               const ItemsList& inventories, const ItemsBonuses& bonuses)
-    : id_ { id }, name_ { name }, stats_ { stats }, bonuses_ { bonuses }
-{
+Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonuses& bonuses) : id_ { id }, name_ { name }, stats_ { stats }, bonuses_ { bonuses } {
     for (const auto& [name, items] : inventories)
         inventories_.insert({ name, Inventory { items } });
 }
@@ -54,12 +49,8 @@ const Inventory& Player::inventory(const std::string &inv) const {
     return inventories().at(inv);
 }
 
-Inventory::Inventory(const std::vector<std::string>& items, const InventorySize& size)
-    : size_ { size }
-{
-    std::transform(items.cbegin(), items.cend(), std::inserter(content_, content_.end()),
-                   [](const std::string& item) -> InventoryContent::value_type
-    {
+Inventory::Inventory(const std::vector<std::string>& items, const InventorySize& size) : size_ { size } {
+    std::transform(items.cbegin(), items.cend(), std::inserter(content_, content_.end()), [](const std::string& item) -> InventoryContent::value_type {
         return { item, 0 };
     });
 }

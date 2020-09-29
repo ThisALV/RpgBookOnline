@@ -60,8 +60,9 @@ std::vector<byte> Gameplay::players() const {
     std::vector<byte> ids;
     ids.resize(ctx_.count(), 0);
 
-    std::transform(players.cbegin(), players.cend(), ids.begin(),
-                   [](const auto p) { return p.first; });
+    std::transform(players.cbegin(), players.cend(), ids.begin(), [](const auto p) {
+        return p.first;
+    });
 
     return ids;
 }
@@ -84,8 +85,9 @@ void Gameplay::voteForLeader() {
     std::vector<byte> ids;
     ids.resize(players.size(), 0);
 
-    std::transform(players.cbegin(), players.cend(), ids.begin(),
-                   [](const auto p) -> byte { return p.first; });
+    std::transform(players.cbegin(), players.cend(), ids.begin(), [](const auto p) -> byte {
+        return p.first;
+    });
 
     switchLeader(vote(askReply(ALL_PLAYERS, ids, true)));
 }
@@ -94,32 +96,28 @@ Replies Gameplay::askReply(const byte target, const byte min, const byte max, co
     SessionDataFactory data_factory;
     data_factory.makeRange(min, max);
 
-    return ctx_.request(target, data_factory.dataWithLength(),
-                        Controllers::RangeController { min, max }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { min, max }, wait);
 }
 
 Replies Gameplay::askReply(const byte target, const std::vector<byte>& range, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makePossibilities(range);
 
-    return ctx_.request(target, data_factory.dataWithLength(),
-                        Controllers::PossibilitiesController { range }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { range }, wait);
 }
 
 Replies Gameplay::askConfirm(const byte target, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makeRequest(Request::Confirm);
 
-    return ctx_.request(target, data_factory.dataWithLength(),
-                        Controllers::confirmController, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, wait);
 }
 
 Replies Gameplay::askYesNo(const byte target, const bool wait) {
     SessionDataFactory data_factory;
     data_factory.makeRequest(Request::YesNo);
 
-    return ctx_.request(target, data_factory.dataWithLength(),
-                        Controllers::RangeController { 0, 1 }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, wait);
 }
 
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
@@ -152,9 +150,7 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
 
 bool Gameplay::checkGame() {
     const std::vector<Condition>& conditions { game().gameEndConditions };
-    const bool g_continue = std::none_of(conditions.cbegin(), conditions.cend(),
-                                        [this](const auto& c) -> bool
-    {
+    const bool g_continue = std::none_of(conditions.cbegin(), conditions.cend(), [this](const auto& c) -> bool {
         return c.test(global());
     });
 
@@ -178,9 +174,7 @@ void Gameplay::printOptions(const OptionsList& options, const byte target) {
     ctx_.sendTo(target, data_factory.dataWithLength());
 }
 
-void Gameplay::printOptions(const std::vector<std::string>& options, const byte target,
-                           const byte begin)
-{
+void Gameplay::printOptions(const std::vector<std::string>& options, const byte target, const byte begin) {
     OptionsList list;
     std::size_t i { begin };
     for (const std::string& option : options)

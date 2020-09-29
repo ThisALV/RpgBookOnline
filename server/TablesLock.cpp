@@ -5,9 +5,7 @@ namespace Rbo::Server {
 void TablesLock::initMetatable() {
     using sol::meta_function;
 
-    metatable_[meta_function::index] =
-            [this](const sol::table target, const sol::object key) -> sol::object
-    {
+    metatable_[meta_function::index] = [this](const sol::table target, const sol::object key) -> sol::object {
         if (index_[target] == sol::nil)
             throw UnknownConstTable {};
 

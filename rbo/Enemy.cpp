@@ -6,8 +6,9 @@ std::vector<std::string> namesOf(const GroupDescriptor& group) {
     std::vector<std::string> names;
     names.resize(group.size());
 
-    std::transform(group.cbegin(), group.cend(), names.begin(),
-                   [](const auto& e) { return e.first; });
+    std::transform(group.cbegin(), group.cend(), names.begin(), [](const auto& e) {
+        return e.first;
+    });
 
     return names;
 }

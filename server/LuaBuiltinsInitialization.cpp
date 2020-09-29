@@ -22,8 +22,10 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
 std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
     std::vector<byte> ids;
     ids.resize(replies.size(), 0);
-    std::transform(replies.cbegin(), replies.cend(), ids.begin(),
-                   [](const auto r) { return r.first; });
+
+    std::transform(replies.cbegin(), replies.cend(), ids.begin(), [](const auto r) {
+        return r.first;
+    });
 
     return ids;
 }
@@ -78,9 +80,7 @@ byte InstructionsProvider::votePlayer(Gameplay& interface, const byte target) {
     const std::vector<byte> ids { interface.players() };
 
     OptionsList options;
-    std::transform(ids.cbegin(), ids.cend(), std::inserter(options, options.begin()),
-                   [&interface](const byte id) -> OptionsList::value_type
-    {
+    std::transform(ids.cbegin(), ids.cend(), std::inserter(options, options.begin()), [&interface](const byte id) -> OptionsList::value_type {
         return { id, interface.player(id).name() };
     });
 
@@ -91,25 +91,13 @@ byte InstructionsProvider::votePlayer(Gameplay& interface, const byte target) {
 void InstructionsProvider::initBuiltins() {
     using namespace AsContainer;
 
-    ctx_.new_usertype<std::vector<std::string>>(
-                "StringVector", sol::constructors<std::vector<std::string>()>(),
-                "iterable", luaVector<std::string>);
-    ctx_.new_usertype<std::vector<byte>>(
-                "ByteVector", sol::constructors<std::vector<byte>()>(),
-                "iterable", luaVector<byte>);
+    ctx_.new_usertype<std::vector<std::string>>("StringVector", sol::constructors<std::vector<std::string>()>(), "iterable", luaVector<std::string>);
+    ctx_.new_usertype<std::vector<byte>>("ByteVector", sol::constructors<std::vector<byte>()>(), "iterable", luaVector<byte>);
 
-    ctx_.new_usertype<std::map<byte, std::string>>(
-                "ByteWithString", sol::constructors<std::map<byte, std::string>()>(),
-                "iterable", luaContainer<std::map<byte, std::string>>);
-    ctx_.new_usertype<std::unordered_map<std::string, std::string>>(
-                "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(),
-                "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
-    ctx_.new_usertype<Effects>(
-                "Effects", sol::constructors<Effects()>(),
-                "iterable", luaContainer<Effects>);
-    ctx_.new_usertype<EnemiesGroup>(
-                "Group", sol::constructors<EnemiesGroup()>(),
-                "iterable", luaContainer<EnemiesGroup>);
+    ctx_.new_usertype<std::map<byte, std::string>>( "ByteWithString", sol::constructors<std::map<byte, std::string>()>(), "iterable", luaContainer<std::map<byte, std::string>>);
+    ctx_.new_usertype<std::unordered_map<std::string, std::string>>( "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
+    ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
+    ctx_.new_usertype<EnemiesGroup>("Group", sol::constructors<EnemiesGroup()>(), "iterable", luaContainer<EnemiesGroup>);
 
     sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
@@ -177,9 +165,7 @@ void InstructionsProvider::initBuiltins() {
     game_type["enemy"] = &Game::enemy;
     game_type["group"] = &Game::group;
 
-    sol::usertype<PlayerCheckingResult> check_result_type {
-        ctx_.new_usertype<PlayerCheckingResult>("CheckingResult")
-    };
+    sol::usertype<PlayerCheckingResult> check_result_type { ctx_.new_usertype<PlayerCheckingResult>("CheckingResult") };
     check_result_type["alive"] = sol::readonly(&PlayerCheckingResult::alive);
     check_result_type["leaderSwitch"] = sol::readonly(&PlayerCheckingResult::leaderSwitch);
     check_result_type["sessionEnd"] = sol::readonly(&PlayerCheckingResult::sessionEnd);
@@ -196,12 +182,8 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;
     gameplay_type["voteForLeader"] = &Gameplay::voteForLeader;
     gameplay_type["askReply"] = sol::overload(
-        [](Gameplay& ctx, const byte target, const byte min, const byte max) {
-            return ctx.askReply(target, min, max);
-        },
-        [](Gameplay& ctx, const byte target, const std::vector<byte>& possibilities) {
-            return ctx.askReply(target, possibilities);
-        },
+        [](Gameplay& ctx, const byte target, const byte min, const byte max) { return ctx.askReply(target, min, max); },
+        [](Gameplay& ctx, const byte target, const std::vector<byte>& possibilities) { return ctx.askReply(target, possibilities); },
         sol::resolve<Replies(const byte, const byte, const byte, const bool)>(&Gameplay::askReply),
         sol::resolve<Replies(const byte, const std::vector<byte>&, const bool)>(&Gameplay::askReply)
     );
@@ -242,7 +224,8 @@ void InstructionsProvider::initBuiltins() {
     ctx_["applyToGlobal"] = applyToGlobal;
     ctx_["dices"] = dices;
     ctx_["votePlayer"] = sol::overload(
-                [](Gameplay& interface) { return votePlayer(interface); }, votePlayer
+        [](Gameplay& interface) { return votePlayer(interface); },
+        votePlayer
     );
     ctx_["ALL_PLAYERS"] = 0;
     ctx_["setmetatable"] = sol::nil;

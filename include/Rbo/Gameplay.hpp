@@ -42,8 +42,7 @@ public:
     // print - Throw : NoPlayerRemaining
     void print(const std::string&, const byte = ALL_PLAYERS);
     void printOptions(const OptionsList&, const byte = ALL_PLAYERS);
-    void printOptions(const std::vector<std::string>&, const byte = ALL_PLAYERS,
-                      const byte = 1);
+    void printOptions(const std::vector<std::string>&, const byte = ALL_PLAYERS, const byte = 1);
     void printYesNo(const byte = ALL_PLAYERS);
 
     // send et end - Throw : NoPlayerRemaining

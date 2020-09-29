@@ -28,8 +28,9 @@ void EventEffect::apply(Player& target) const {
 
     std::vector<ItemEntry> ordered_items_changes { itemsChanges.size() };
     std::copy(itemsChanges.cbegin(), itemsChanges.cend(), ordered_items_changes.begin());
-    std::partition(ordered_items_changes.begin(), ordered_items_changes.end(),
-                   [](const auto& c) -> bool { return c.second < 0; });
+    std::partition(ordered_items_changes.begin(), ordered_items_changes.end(), [](const auto& c) -> bool {
+        return c.second < 0;
+    });
 
     for (const auto& [item, qty] : ordered_items_changes) {
         const auto& [inventory, name] { splitItemEntry(item) };
@@ -62,9 +63,7 @@ EventEffect::ItemsChanges EventEffect::simulateItemsChanges(const Player& target
         supposed_sizes.at(inv) += qty;
     }
 
-    const bool full = std::any_of(supposed_sizes.cbegin(), supposed_sizes.cend(),
-                                  [&target](const auto& size) -> bool
-    {
+    const bool full = std::any_of(supposed_sizes.cbegin(), supposed_sizes.cend(), [&target](const auto& size) {
         return size.second > target.inventory(size.first).maxSize();
     });
 
@@ -92,8 +91,7 @@ const EnemyDescriptor& Game::enemy(const std::string& name) const {
 
 const GroupDescriptor& Game::group(const std::string& name) const {
     if (groups.count(name) == 0)
-        throw std::out_of_range { "Descipteur de groupe d'ennemis \""
-                                  + name + "\" inconnu" };
+        throw std::out_of_range { "Descipteur de groupe d'ennemis \"" + name + "\" inconnu" };
 
     return groups.at(name);
 }
@@ -101,15 +99,11 @@ const GroupDescriptor& Game::group(const std::string& name) const {
 std::vector<Game::Error> Game::validity() const {
     std::vector<Error> errors;
 
-    const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(),
-                                             [](const auto& i)
-    {
+    const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(), [](const auto& i) {
         const InventoryDescriptor& inv { i.second };
 
         uint init_size { 0 };
-        return std::all_of(inv.initialStuff.cbegin(), inv.initialStuff.cend(),
-                           [&init_size, &inv](const auto& item)
-        {
+        return std::all_of(inv.initialStuff.cbegin(), inv.initialStuff.cend(), [&init_size, &inv](const auto& item) {
             if (inv.limit && (init_size += item.second) > inv.limit->min())
                 return false;
 
@@ -123,28 +117,26 @@ std::vector<Game::Error> Game::validity() const {
     if (!valid_init_invs)
         errors.push_back(Error::InitialInventories);
 
-    const bool valid_bonuses = std::all_of(
-                bonuses.cbegin(), bonuses.cend(),
-                [this](const auto& b) { return hasItem(b.first) && hasStat(b.second.stat); });
+    const bool valid_bonuses = std::all_of(bonuses.cbegin(), bonuses.cend(), [this](const auto& b) {
+        return hasItem(b.first) && hasStat(b.second.stat);
+    });
 
     if (!valid_bonuses)
         errors.push_back(Error::Bonuses);
 
-    const bool valid_effects = std::all_of(eventEffects.cbegin(), eventEffects.cend(),
-                                           [this](const auto& e)
-    {
+    const bool valid_effects = std::all_of(eventEffects.cbegin(), eventEffects.cend(), [this](const auto& e) {
         const EventEffect& effect { e.second };
 
-        const bool valid_stats = std::all_of(
-                    effect.statsChanges.cbegin(), effect.statsChanges.cend(),
-                    [this](const auto& s) { return hasStat(s.first) || hasGlobal(s.first); });
+        const bool valid_stats = std::all_of(effect.statsChanges.cbegin(), effect.statsChanges.cend(), [this](const auto& s) {
+            return hasStat(s.first) || hasGlobal(s.first);
+        });
 
         if (!valid_stats)
             return false;
 
-        const bool valid_items = std::all_of(
-                    effect.itemsChanges.cbegin(), effect.itemsChanges.cend(),
-                    [this](const auto& i) { return hasItem(i.first); });
+        const bool valid_items = std::all_of(effect.itemsChanges.cbegin(), effect.itemsChanges.cend(), [this](const auto& i) {
+            return hasItem(i.first);
+        });
 
         if (!valid_items)
             return false;
@@ -155,9 +147,7 @@ std::vector<Game::Error> Game::validity() const {
     if (!valid_effects)
         errors.push_back(Error::Effects);
 
-    const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(),
-                                          [this](const auto& g)
-    {
+    const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(), [this](const auto& g) {
         return std::all_of(g.second.cbegin(), g.second.cend(), [this](const auto& e) {
             return enemies.count(e.second) == 1;
         });
@@ -166,30 +156,30 @@ std::vector<Game::Error> Game::validity() const {
     if (!valid_groups)
         errors.push_back(Error::Groups);
 
-    const bool valid_rest_givables = std::all_of(
-                rest.givables.cbegin(), rest.givables.cend(),
-                [this](const auto& i) { return hasItem(i); });
+    const bool valid_rest_givables = std::all_of(rest.givables.cbegin(), rest.givables.cend(), [this](const auto& i) {
+        return hasItem(i);
+    });
 
     if (!valid_rest_givables)
         errors.push_back(Error::RestGivables);
 
-    const bool valid_rest_availables = std::all_of(
-                rest.availables.cbegin(), rest.availables.cend(),
-                [this](const auto& a) { return hasItem(a.first) && hasEffect(a.second); });
+    const bool valid_rest_availables = std::all_of(rest.availables.cbegin(), rest.availables.cend(), [this](const auto& a) {
+        return hasItem(a.first) && hasEffect(a.second);
+    });
 
     if (!valid_rest_availables)
         errors.push_back(Error::RestAvailables);
 
-    const bool valid_death_conditions = std::all_of(
-                deathConditions.cbegin(), deathConditions.cend(), [this]
-                (const auto& c) { return Condition::operators.count(c.op) == 1 && hasStat(c.stat); });
+    const bool valid_death_conditions = std::all_of(deathConditions.cbegin(), deathConditions.cend(), [this](const auto& c) {
+        return Condition::operators.count(c.op) == 1 && hasStat(c.stat);
+    });
 
     if (!valid_death_conditions)
         errors.push_back(Error::DeathConditions);
 
-    const bool valid_end_conditions = std::all_of(
-                gameEndConditions.cbegin(), gameEndConditions.cend(), [this]
-                (const auto& c) { return Condition::operators.count(c.op) == 1 && hasGlobal(c.stat); });
+    const bool valid_end_conditions = std::all_of(gameEndConditions.cbegin(), gameEndConditions.cend(), [this](const auto& c) {
+        return Condition::operators.count(c.op) == 1 && hasGlobal(c.stat);
+    });
 
     if (!valid_end_conditions)
         errors.push_back(Error::GameEndConditions);
@@ -233,8 +223,9 @@ std::string Game::getMessage(const Error Error) {
 
 std::vector<std::string> Game::getNames(const StatsDescriptors& stats) {
     std::vector<std::string> names { stats.size() };
-    std::transform(stats.cbegin(), stats.cend(), names.begin(),
-                   [](const auto& stat) -> std::string { return stat.first; });
+    std::transform(stats.cbegin(), stats.cend(), names.begin(), [](const auto& stat) -> std::string {
+        return stat.first;
+    });
 
     return names;
 }
@@ -244,10 +235,7 @@ std::vector<std::string> Game::player() const { return getNames(playerStats); }
 
 ItemsList Game::itemsList() const {
     ItemsList items;
-    std::transform(playerInventories.cbegin(), playerInventories.cend(),
-                   std::inserter(items, items.begin()),
-                   [](const auto& inv) -> ItemsList::value_type
-    {
+    std::transform(playerInventories.cbegin(), playerInventories.cend(), std::inserter(items, items.begin()), [](const auto& inv) -> ItemsList::value_type {
         return { inv.first, inv.second.items };
     });
 

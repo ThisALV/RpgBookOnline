@@ -26,8 +26,7 @@ private:
     void initMetatable();
 
 public:
-    TablesLock(sol::state& ctx)
-        : ctx_ { ctx }, index_ { ctx.create_table() }, metatable_ { ctx.create_table() } {}
+    TablesLock(sol::state& ctx) : ctx_ { ctx }, index_ { ctx.create_table() }, metatable_ { ctx.create_table() } {}
 
     TablesLock(const TablesLock&) = delete;
     TablesLock& operator=(const TablesLock&) = delete;

@@ -16,23 +16,19 @@ struct ScriptLoadingError : std::runtime_error {
 };
 
 struct GameLoadingError : std::runtime_error {
-    GameLoadingError(const std::string& msg)
-        : std::runtime_error { "Impossible de charger le jeu : " + msg } {}
+    GameLoadingError(const std::string& msg) : std::runtime_error { "Impossible de charger le jeu : " + msg } {}
 };
 
 struct GameSavingError : std::runtime_error {
-    GameSavingError(const std::string& msg)
-        : std::runtime_error { "Impossible de sauvegarder le jeu : " + msg } {}
+    GameSavingError(const std::string& msg) : std::runtime_error { "Impossible de sauvegarder le jeu : " + msg } {}
 };
 
 struct SceneLoadingError : std::runtime_error {
-    SceneLoadingError(const word id, const std::string& msg)
-        : std::runtime_error { "Impossible de charger la scène " + std::to_string(id) + " : " + msg } {}
+    SceneLoadingError(const word id, const std::string& msg) : std::runtime_error { "Impossible de charger la scène " + std::to_string(id) + " : " + msg } {}
 };
 
 struct CheckpointAlreadyExists : std::logic_error {
-    CheckpointAlreadyExists(const std::string& name)
-        : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}
+    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}
 };
 
 class LocalGameBuilder : public GameBuilder {

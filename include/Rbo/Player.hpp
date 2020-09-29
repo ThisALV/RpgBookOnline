@@ -60,15 +60,13 @@ private:
     void refreshBonuses(const BonusAction, const std::string&, const std::string&, const uint);
 
 public:
-    friend void testRefreshBonuses(Player&, const int, const std::string&, const std::string&,
-                                   const uint);
+    friend void testRefreshBonuses(Player&, const int, const std::string&, const std::string&, const uint);
 
     inline static const int STAT_MIN { StatsLimits::min() };
     inline static const int STAT_MAX { StatsLimits::max() };
     inline static const StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
 
-    Player(const byte, const std::string&, const std::vector<std::string>&, const ItemsList&,
-           const ItemsBonuses&);
+    Player(const byte, const std::string&, const std::vector<std::string>&, const ItemsList&, const ItemsBonuses&);
 
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
@@ -98,8 +96,7 @@ public:
 } // namespace Rbo
 
 template<typename Output> Output& operator<<(Output& out, const Rbo::Player& player) {
-    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name()
-        << "\"; stats=" << player.stats().values() << " inventories=[";
+    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name() << "\"; stats=" << player.stats().values() << " inventories=[";
     for (const auto& [name, inventory] : player.inventories())
         out << " \"" << name << "\"=" << inventory << ';';
 
@@ -109,9 +106,7 @@ template<typename Output> Output& operator<<(Output& out, const Rbo::Player& pla
 
 template<typename Output>
 Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
-    out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" }
-                                                 : std::to_string(*inventory.maxSize()))
-        << "; size=" << inventory.size() << " ]";
+    out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" } : std::to_string(*inventory.maxSize())) << "; size=" << inventory.size() << " ]";
 
     return out;
 }

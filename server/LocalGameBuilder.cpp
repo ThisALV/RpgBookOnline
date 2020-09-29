@@ -9,8 +9,7 @@ namespace Rbo::Server {
 
 RandomEngine LocalGameBuilder::chkpt_id_rd_ { now() };
 
-LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
-                                   const fs::path& scenes, const fs::path& scripts_dir)
+LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts, const fs::path& scenes, const fs::path& scripts_dir)
     : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
       logger_ { rboLogger("GameBuilder") }, exec_ctx_ {}, provider_ { exec_ctx_, logger_ }
 {
@@ -24,9 +23,7 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
     if (!fs::is_directory(scripts_dir))
         throw std::invalid_argument { "Script dirs n'est pas un dossier" };
 
-    const fs::directory_iterator scripts {
-        scripts_dir, fs::directory_options::skip_permission_denied
-    };
+    const fs::directory_iterator scripts { scripts_dir, fs::directory_options::skip_permission_denied };
 
     for (const fs::directory_entry& entry : scripts) {
         if (!fs::is_regular_file(entry) || entry.path().extension() != ".lua") {
@@ -107,8 +104,7 @@ GameState LocalGameBuilder::load(const std::string& name) const {
 }
 
 std::string LocalGameBuilder::save(const std::string& name, const GameState& state) const {
-    const std::string final_name { name + '_' +
-                std::to_string(std::uniform_int_distribution { 0, 5000 } (chkpt_id_rd_)) };
+    const std::string final_name { name + '_' + std::to_string(std::uniform_int_distribution { 0, 5000 } (chkpt_id_rd_)) };
 
     logger_.trace("Chargement des checkpoints dans {}.", chkpts_);
     json data;
@@ -157,8 +153,7 @@ Scene LocalGameBuilder::buildScene(const word id) const {
 
     for (const auto instruction_entry : scene_obj.as<sol::table>()) {
         if (instruction_entry.second.get_type() != sol::type::table)
-            throw SceneLoadingError { id,
-                    "Entrée n'étant pas une table parmis les instructions" };
+            throw SceneLoadingError { id, "Entrée n'étant pas une table parmis les instructions" };
 
         const sol::table instruction { instruction_entry.second.as<sol::table>() };
         const sol::object name { instruction[1].get<sol::object>() };

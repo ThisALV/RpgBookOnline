@@ -19,8 +19,7 @@ struct NoPlayerRemaining : std::runtime_error {
 };
 
 struct UnknownPlayer : std::logic_error {
-    UnknownPlayer(const byte id)
-        : std::logic_error { "Joueur " + std::to_string(id) + " inconnu" } {}
+    UnknownPlayer(const byte id) : std::logic_error { "Joueur " + std::to_string(id) + " inconnu" } {}
 };
 
 struct CancelledRequest : std::exception {
@@ -43,8 +42,7 @@ struct InvalidIDs : std::logic_error {
 };
 
 struct IntroductionCheckpoint : std::logic_error {
-    IntroductionCheckpoint()
-        : std::logic_error { "Sauvegarde durant la scène d'introduction " + std::to_string(INTRO) } {}
+    IntroductionCheckpoint() : std::logic_error { "Sauvegarde durant la scène d'introduction " + std::to_string(INTRO) } {}
 };
 
 struct Particpant {

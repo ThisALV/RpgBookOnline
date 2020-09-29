@@ -11,10 +11,7 @@
 
 namespace Rbo {
 
-InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids,
-                       const ParticipantsValidity type)
-    : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type }
-{
+InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids, const ParticipantsValidity type) : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type } {
     assert(type != ParticipantsValidity::Ok);
 
     msg = "Expected IDs :";
@@ -26,9 +23,7 @@ const char* CancelledRequest::what() const noexcept {
     return "CancelledRequest";
 }
 
-void Session::logPlayerError(spdlog::logger& logger, const byte player,
-                             const std::string& err)
-{
+void Session::logPlayerError(spdlog::logger& logger, const byte player, const std::string& err) {
     logger.error("Player {} : {}", player, err);
 }
 
@@ -37,8 +32,7 @@ std::string Session::initStatMsg(const DiceFormula& init, const std::string& nam
     if (init.dices == 0)
         msg += std::to_string(init.bonus);
     else
-        msg += std::to_string(init.dices) + " dé(s) 6 + " + std::to_string(init.bonus) +
-                " = " + std::to_string(value);
+        msg += std::to_string(init.dices) + " dé(s) 6 + " + std::to_string(init.bonus) + " = " + std::to_string(value);
 
     return msg;
 }
@@ -106,18 +100,14 @@ void Session::end(Participants& participants) {
     stop();
 };
 
-void Session::start(std::map<byte, Particpant>& participants, const std::string& checkpoint,
-                    const bool missing_participants)
-{
+void Session::start(std::map<byte, Particpant>& participants, const std::string& checkpoint, const bool missing_participants) {
     assert(participants.size() <= std::numeric_limits<byte>::max());
     running_ = true;
 
     for (auto& [id, participant] : participants) {
         logger_.trace("Déplacement du socket du participant {}.", id);
 
-        Player player {
-            id, participant.name, game().player(), game().itemsList(), game().bonuses
-        };
+        Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
 
         players_.insert({ id, std::move(player) });
         connections_.insert({ id, std::move(participant.socket) });
@@ -217,8 +207,9 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             std::vector<byte> expected_players;
             expected_players.resize(state.players.size(), 0);
 
-            std::transform(state.players.cbegin(), state.players.cend(), expected_players.begin(),
-                           [](const auto& ps) -> byte { return ps.first; });
+            std::transform(state.players.cbegin(), state.players.cend(), expected_players.begin(), [](const auto& ps) -> byte {
+                return ps.first;
+            });
 
             throw InvalidIDs { expected_players, participants_validity };
         }
@@ -310,8 +301,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
 
             size_msg += formula.dices == 0
                     ? std::to_string(*size)
-                    : std::to_string(formula.dices) + " dé(s) 6 + " +
-                      std::to_string(formula.bonus) + " = " + std::to_string(*size);
+                    : std::to_string(formula.dices) + " dé(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
         } else {
             size = {};
             size_msg += "infinie";
@@ -326,10 +316,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
 #ifndef NDEBUG
         const InventorySize capacity { target.inventory(name).maxSize() };
 #endif
-        assert(!capacity ||
-               std::accumulate(initial.cbegin(), initial.cend(), 0,
-                               [](const std::size_t s, const auto& i) { return s + i.second; })
-               <= capacity);
+        assert(!capacity || std::accumulate(initial.cbegin(), initial.cend(), 0, [](const std::size_t s, const auto& i) { return s + i.second; }) <= capacity);
 
         std::string initial_msg { name + " - contenu initial :" };
         for (const auto& [item, qty] : initial) {
@@ -392,9 +379,7 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
         throw IntroductionCheckpoint {};
 
     PlayersStates states;
-    std::transform(players_.cbegin(), players_.cend(), std::inserter(states, states.begin()),
-                   [](const auto& state) -> PlayersStates::value_type
-    {
+    std::transform(players_.cbegin(), players_.cend(), std::inserter(states, states.begin()), [](const auto& state) -> PlayersStates::value_type {
         const auto& [id, player] { state };
 
         const Stats& stats { player.stats().raw() };
@@ -413,8 +398,9 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
 
 Players Session::players() {
     std::map<byte, Player*> ptrs;
-    std::transform(players_.begin(), players_.end(), std::inserter(ptrs, ptrs.end()),
-                   [](auto& p) -> std::pair<byte, Player*> { return { p.first, &p.second }; });
+    std::transform(players_.begin(), players_.end(), std::inserter(ptrs, ptrs.end()), [](auto& p) -> std::pair<byte, Player*> {
+        return { p.first, &p.second };
+    });
 
     return ptrs;
 }
@@ -422,9 +408,7 @@ Players Session::players() {
 template<typename T> std::map<byte, const T*> constPtrMap(const std::map<byte, T>& map) {
     std::map<byte, const T*> const_ptrs;
 
-    std::transform(map.cbegin(), map.cend(), std::inserter(const_ptrs, const_ptrs.end()),
-                   [](const auto& v) -> std::pair<byte, const T*>
-    {
+    std::transform(map.cbegin(), map.cend(), std::inserter(const_ptrs, const_ptrs.end()), [](const auto& v) -> std::pair<byte, const T*> {
         return { v.first, &v.second };
     });
 
@@ -480,9 +464,7 @@ PlayerStateChanges Session::getChanges(const byte id) {
     return changes;
 }
 
-Replies Session::request(const byte target, const Data& data, ReplyController controller,
-                         const bool wait)
-{
+Replies Session::request(const byte target, const Data& data, ReplyController controller, const bool wait) {
     RequestCtx ctx;
 
     if (target == ALL_PLAYERS) {
@@ -497,17 +479,13 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
     const ulong to_handle { ctx.players.size() };
 
     std::map<byte, ReplyHandler> handlers;
-    std::transform(ctx.players.cbegin(), ctx.players.cend(), std::inserter(handlers, handlers.end()),
-                   [&ctx, &controller, this](const auto p) -> std::pair<byte, ReplyHandler>
-    {
+    std::transform(ctx.players.cbegin(), ctx.players.cend(), std::inserter(handlers, handlers.end()), [&ctx, &controller, this](const auto p) -> std::pair<byte, ReplyHandler> {
         return { p.first, ReplyHandler { executor_, logger_, ctx, controller, p.first } };
     });
 
     const io::const_buffer buffer { trunc(data) };
     for (auto [id, player] : ctx.players) {
-        player->async_send(buffer, io::bind_executor(executor_,
-                                             std::bind(&ReplyHandler::handle, &handlers.at(id),
-                                             std::placeholders::_1, std::placeholders::_2)));
+        player->async_send(buffer, io::bind_executor(executor_, std::bind(&ReplyHandler::handle, &handlers.at(id), std::placeholders::_1, std::placeholders::_2)));
     }
 
     logger_.trace("En attente de {} réponses...", ctx.limit);

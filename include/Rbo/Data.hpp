@@ -11,8 +11,7 @@ const std::size_t LENGTH_SIZE { sizeof(word) };
 using DataBuffer = std::array<byte, MAX_LENGTH>;
 
 struct BufferOverflow : std::logic_error {
-    BufferOverflow() : std::logic_error {
-                           "Buffer dépassant " + std::to_string(MAX_LENGTH) + " octets" } {}
+    BufferOverflow() : std::logic_error { "Buffer dépassant " + std::to_string(MAX_LENGTH) + " octets" } {}
 };
 
 class Data {

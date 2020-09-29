@@ -30,8 +30,7 @@ public:
         NetworkError(const std::string&, const ErrCode&);
     };
 
-    ReplyHandler(io::io_context::strand&, spdlog::logger&, RequestCtx&, const ReplyController,
-                 const byte);
+    ReplyHandler(io::io_context::strand&, spdlog::logger&, RequestCtx&, const ReplyController, const byte);
 
     ReplyHandler(const ReplyHandler&) = delete;
     ReplyHandler& operator=(const ReplyHandler&) = delete;

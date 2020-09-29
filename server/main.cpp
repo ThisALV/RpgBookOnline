@@ -66,9 +66,7 @@ int main(const int argc, const char* argv[]) {
             std::cout << "\b\b";
 
             if (err) {
-                throw std::runtime_error {
-                    "Arrêt impossible " + std::to_string(sig) + " : " + err.message()
-                };
+                throw std::runtime_error { "Arrêt impossible " + std::to_string(sig) + " : " + err.message() };
             }
 
             logger.debug("Signal d'arrêt {}", sig);

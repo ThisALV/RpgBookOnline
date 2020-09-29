@@ -10,15 +10,13 @@ namespace Rbo::Server {
 struct UnknownInstruction : std::logic_error {
     std::string instruction;
 
-    UnknownInstruction(const std::string& name)
-        : std::logic_error { "Instruction \"" + name + "\" inconnue" }, instruction { name } {}
+    UnknownInstruction(const std::string& name) : std::logic_error { "Instruction \"" + name + "\" inconnue" }, instruction { name } {}
 };
 
 struct InstructionFailed : std::runtime_error {
     std::string instruction;
 
-    InstructionFailed(const std::string& name, const std::string& msg)
-        : std::runtime_error { name + " : " + msg }, instruction { name } {}
+    InstructionFailed(const std::string& name, const std::string& msg) : std::runtime_error { name + " : " + msg }, instruction { name } {}
 };
 
 struct IllegalLuaModifications : std::runtime_error {

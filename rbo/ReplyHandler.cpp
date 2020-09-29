@@ -5,8 +5,7 @@
 
 namespace Rbo {
 
-ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger,
-                           RequestCtx& ctx, const ReplyController controller, const byte p_id)
+ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger, RequestCtx& ctx, const ReplyController controller, const byte p_id)
     : executor_ { &exectuor },
       logger_ { &logger },
       ctx_ { &ctx },
@@ -71,9 +70,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
         SessionDataFactory validity_data;
         validity_data.makeValidation(reply_validity);
 
-        const ErrCode validation_err {
-            trySend(*ctx_->players.at(playerID_), trunc(validity_data.dataWithLength()))
-        };
+        const ErrCode validation_err { trySend(*ctx_->players.at(playerID_), trunc(validity_data.dataWithLength())) };
 
         if (validation_err)
             throw NetworkError { "send_validation", validation_err };
@@ -86,9 +83,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
                 SessionDataFactory reply_data;
                 reply_data.makeReply(id, reply);
 
-                const ErrCode err {
-                    trySend(*ctx_->players.at(playerID_), trunc(reply_data.dataWithLength()))
-                };
+                const ErrCode err { trySend(*ctx_->players.at(playerID_), trunc(reply_data.dataWithLength())) };
 
                 if (err)
                     throw NetworkError { "receive_answers" + std::to_string(id), err };
@@ -104,10 +99,8 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 
 void ReplyHandler::listenReply() {
     logger_->trace("Écoute de la réponse de {}...", playerID_);
-    ctx_->players.at(playerID_)->async_receive(io::buffer(replyBuffer_),
-                                               io::bind_executor(*executor_, std::bind(
-                                                   &ReplyHandler::handleReply, this,
-                                                   std::placeholders::_1, std::placeholders::_2)));
+    ctx_->players.at(playerID_)->async_receive(
+                io::buffer(replyBuffer_), io::bind_executor(*executor_, std::bind(&ReplyHandler::handleReply, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {

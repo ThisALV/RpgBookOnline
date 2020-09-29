@@ -11,9 +11,7 @@ void Lobby::logMemberError(spdlog::logger& logger, const byte id, const ErrCode&
     logger.error("Membre {} : {}", id, err.message());
 }
 
-void Lobby::logRegisteringError(spdlog::logger& logger, const tcp::endpoint client,
-                                const ErrCode& err)
-{
+void Lobby::logRegisteringError(spdlog::logger& logger, const tcp::endpoint client, const ErrCode& err) {
     logger.error("Inscription de {} : {}", client, err.message());
 }
 
@@ -24,11 +22,10 @@ std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) c
     std::ostringstream str;
     str << client;
 
-    return std::hash<std::string>{}(str.str());
+    return std::hash<std::string> {} (str.str());
 }
 
-Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
-             const GameBuilder& game_builder, const ulong prepare_delay_ms)
+Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt, const GameBuilder& game_builder, const ulong prepare_delay_ms)
     : logger_ { rboLogger("Lobby") },
       lobby_io_ { lobby_io },
       member_handling_ { lobby_io },
@@ -40,8 +37,7 @@ Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt,
       session_ { lobby_io, game_builder } {}
 
 void Lobby::disconnect(const byte id, const bool crash) {
-    logger_.info("Déconnexion du membre {} ({}). Crash = {}", id,
-                 connections_.at(id).remote_endpoint(), crash);
+    logger_.info("Déconnexion du membre {} ({}). Crash = {}", id, connections_.at(id).remote_endpoint(), crash);
 
     if (!crash)
         connections_.at(id).shutdown(tcp::socket::shutdown_both);
@@ -90,8 +86,9 @@ std::vector<byte> Lobby::ids() const {
     std::vector<byte> ids;
     ids.resize(names().size());
 
-    std::transform(names().cbegin(), names().cend(), ids.begin(),
-                   [](const auto& member) -> byte { return member.first; });
+    std::transform(names().cbegin(), names().cend(), ids.begin(), [](const auto& member) -> byte {
+        return member.first;
+    });
 
     return ids;
 }
@@ -101,8 +98,7 @@ void Lobby::preparation() {
 
     state_ = Starting;
     prepare_timer_.expires_after(prepare_delay_);
-    prepare_timer_.async_wait([this](const ErrCode err)
-    {
+    prepare_timer_.async_wait([this](const ErrCode err) {
         if (err) {
             if (!(err == io::error::basic_errors::operation_aborted && isOpen())) {
                 cancelPreparation(true);
@@ -168,9 +164,8 @@ void Lobby::close(const bool crash) {
 
 void Lobby::acceptMember() {
     logger_.trace("En attente d'une connexion sur le port {}...", port());
-    new_players_acceptor_.async_accept(io::bind_executor(member_handling_,
-                std::bind(&Lobby::registerMember, this,
-                          std::placeholders::_1, std::placeholders::_2)));
+    new_players_acceptor_.async_accept(
+                io::bind_executor(member_handling_, std::bind(&Lobby::registerMember, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 void Lobby::listenMember(const byte id) {
@@ -180,9 +175,7 @@ void Lobby::listenMember(const byte id) {
 
     logger_.trace("Écoute des requêtes de {}...", id);
     connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)),
-                                      io::bind_executor(member_handling_, std::bind(
-                                              &Lobby::handleMemberRequest, this, id,
-                                              std::placeholders::_1, std::placeholders::_2)));
+                                      io::bind_executor(member_handling_, std::bind(&Lobby::handleMemberRequest, this, id, std::placeholders::_1, std::placeholders::_2)));
 }
 
 void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
@@ -208,11 +201,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
     registering_buffers_.insert({ client_endpt, ReceiveBuffer {} });
     registering_buffers_.at(client_endpt).fill(0);
 
-    registering_.at(client_endpt).async_receive(
-                io::buffer(registering_buffers_.at(client_endpt)),
-                io::bind_executor(member_handling_, [this, client_endpt]
-                                  (const ErrCode name_err, const std::size_t) mutable
-    {
+    registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) mutable {
         if (name_err) {
             logRegisteringError(logger_, client_endpt, name_err);
             return;
@@ -238,9 +227,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
         LobbyDataFactory registration_data;
         registration_data.makeRegistration(registration);
 
-        const ErrCode send_register_err {
-            trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength()))
-        };
+        const ErrCode send_register_err { trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength())) };
 
         if (send_register_err) {
             logRegisteringError(logger_, client_endpt, send_register_err);
@@ -248,8 +235,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
         }
 
         if (registration != RegistrationResult::Ok) {
-            logger_.warn("Inscription de {} impossible : {}", client_endpt,
-                         static_cast<int>(registration));
+            logger_.warn("Inscription de {} impossible : {}", client_endpt, static_cast<int>(registration));
             registering_.at(client_endpt).shutdown(tcp::socket::shutdown_both);
             registering_.erase(client_endpt);
 
@@ -275,9 +261,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
             LobbyDataFactory ready_data;
             ready_data.makeReady(player);
 
-            const ErrCode send_err {
-                trySend(connections_.at(id), trunc(ready_data.dataWithLength()))
-            };
+            const ErrCode send_err { trySend(connections_.at(id), trunc(ready_data.dataWithLength())) };
 
             if (send_err) {
                 disconnect(id, true);
@@ -369,13 +353,10 @@ ReceiveBuffer Lobby::receiveFromMaster() {
     std::atomic_bool received { false };
     bool receive_err { false };
 
-    connections_.at(master_).async_receive(io::buffer(buffer), [this, &received, &receive_err]
-                                           (const ErrCode err, const std::size_t)
-    {
+    connections_.at(master_).async_receive(io::buffer(buffer), [this, &received, &receive_err](const ErrCode err, const std::size_t) {
         received = true;
         if (err && (err != io::error::basic_errors::operation_aborted || !isClosed()))
             receive_err = true;
-
     });
 
     while (!received && !isClosed())
@@ -469,9 +450,7 @@ void Lobby::launchPreparation() {
         open();
 }
 
-void Lobby::makeSession(std::optional<std::string> chkpt_name,
-                        std::optional<bool> missing_participants)
-{
+void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<bool> missing_participants) {
     assert(!(missing_participants && chkpt_name->empty()));
     if (!chkpt_name)
         chkpt_name = askCheckpoint();

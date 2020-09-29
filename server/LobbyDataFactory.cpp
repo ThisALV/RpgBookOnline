@@ -56,9 +56,7 @@ void LobbyDataFactory::makeYesNo(const YesNoQuestion request) {
     data_.add(request);
 }
 
-void LobbyDataFactory::makeInvalidIDs(const SessionResult result,
-                                      const std::vector<byte>& expected)
-{
+void LobbyDataFactory::makeInvalidIDs(const SessionResult result, const std::vector<byte>& expected) {
     assert(isInvalidIDs(result));
 
     makeResult(result);

@@ -21,11 +21,7 @@ ulong now() {
 
 namespace Sinks {
 
-auto sink_file {
-    std::make_shared<spdlog::sinks::basic_file_sink_mt>(
-                "logs/" + std::to_string(now()) + ".log", true)
-};
-
+auto sink_file { std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/" + std::to_string(now()) + ".log", true) };
 auto sink_console { std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
 
 const std::string log_format { "[%T.%e] %^%-8l%$ - %-11n (#%t) : %v" };
@@ -38,9 +34,7 @@ void loggerErrorHandler(const std::string& err) {
 
 spdlog::logger& rboLogger(const std::string& name) {
     assert(name.length() <= 11);
-    auto logger {
-        std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { Sinks::sink_file, Sinks::sink_console })
-    };
+    auto logger { std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { Sinks::sink_file, Sinks::sink_console }) };
 
     spdlog::register_logger(logger);
 
@@ -87,17 +81,13 @@ byte vote(const Replies& replies) {
     if (winners.size() == 1)
         return winners.at(0);
 
-    const std::size_t winner {
-        std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (Vote::rd)
-    };
+    const std::size_t winner { std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (Vote::rd) };
 
     return winners.at(winner);
 }
 
 
-InvalidReply::InvalidReply(const ReplyValidity err_type)
-    : std::logic_error { "Invalid reply" }, type { err_type }
-{
+InvalidReply::InvalidReply(const ReplyValidity err_type) : std::logic_error { "Invalid reply" }, type { err_type } {
     assert(isInvalid(type));
 }
 

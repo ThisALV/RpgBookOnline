@@ -25,11 +25,8 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
     return next ? *next : Next {};
 }
 
-InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logger)
-    : ctx_ { ctx }, logger_ { logger }, resources_lock_ { ctx }
-{
-    ctx_.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string,
-                        sol::lib::math, sol::lib::table);
+InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logger) : ctx_ { ctx }, logger_ { logger }, resources_lock_ { ctx } {
+    ctx_.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string, sol::lib::math, sol::lib::table);
 
     sol::table global { ctx_.globals() };
     for (const auto [key, value] : global) {
