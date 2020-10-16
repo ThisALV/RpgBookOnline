@@ -70,15 +70,14 @@ void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& chan
     data_.put(changes_data.dump());
 }
 
-void SessionDataFactory::makeGlobalStat(const std::string stat, const int min, const int max,
-                                        const int value, const bool hidden)
-{
+void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& stat) {
     makeData(DataType::GlobalStat);
-    data_.put(stat);
-    data_.putNumeric(min);
-    data_.putNumeric(max);
-    data_.putNumeric(value);
-    data_.add(hidden ? 1 : 0);
+    data_.put(name);
+    data_.putNumeric(stat.limits.min);
+    data_.putNumeric(stat.limits.max);
+    data_.putNumeric(stat.value);
+    data_.add(stat.hidden ? 1 : 0);
+    data_.add(stat.main ? 1 : 0);
 }
 
 void SessionDataFactory::makeDie(const byte id) {

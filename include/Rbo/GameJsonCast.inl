@@ -31,6 +31,7 @@ inline void from_json(const json& data, StatDescriptor& stat) {
     limits.at("max").get_to(stat.limits.max);
     data.at("capped").get_to(stat.capped);
     data.at("hidden").get_to(stat.hidden);
+    data.at("main").get_to(stat.main);
 }
 
 inline void from_json(const json& data, InventoryDescriptor& inv) {
@@ -66,11 +67,12 @@ inline void from_json(const json& data, Condition& condition) {
 }
 
 inline void to_json(json& data, const Stat& stat) {
-    const auto [value, limits, hidden] { stat };
+    const auto [value, limits, hidden, main] { stat };
 
     data["value"] = value;
     data["limits"] = json::object({ { "min", limits.min }, { "max", limits.max } });
     data["hidden"] = hidden;
+    data["main"] = main;
 }
 
 inline void from_json(const json& data, Stat& stat) {
@@ -80,6 +82,7 @@ inline void from_json(const json& data, Stat& stat) {
     limits.at("min").get_to(stat.limits.min);
     limits.at("max").get_to(stat.limits.max);
     data.at("hidden").get_to(stat.hidden);
+    data.at("main").get_to(stat.main);
 }
 
 inline void to_json(json& data, const PlayerState& player) {

@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE(Infos) {
         } },
         { "inventoriesMaxCapacity", { { "inv1", nullptr }, { "inv2", 55 } } },
         { "stats", {
-              { "a", { { "hidden", false }, { "limits", default_limits }, { "value", 1 } } },
-              { "b", { { "hidden", false }, { "limits", default_limits }, { "value", 2 } } }
+              { "a", { { "hidden", false }, { "main", false }, { "limits", default_limits }, { "value", 1 } } },
+              { "b", { { "hidden", false }, { "main", true }, { "limits", default_limits }, { "value", 2 } } }
         } }
     });
 
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(Infos) {
 
     const byte player_id { 4 };
     const PlayerStateChanges changes {
-        { { "a", Stat { 1, StatLimits {}, false } }, { "b", Stat { 2, StatLimits {}, false } } },
+        { { "a", Stat { 1, StatLimits {}, false, false } }, { "b", Stat { 2, StatLimits {}, false, true } } },
         {
             { "inv1", { { "A", 5 }, { "B", -4 } } },
             { "inv2", { { "A", -1 } } }
@@ -107,12 +107,12 @@ BOOST_AUTO_TEST_CASE(BattleInit) {
 BOOST_AUTO_TEST_CASE(GlobalStat) {
     const Data expected {
         std::vector<byte> {
-            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0, 0, 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 1
+            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 0, 0, 0, 0, 0, 1
         }
     };
 
     SessionDataFactory factory;
-    factory.makeGlobalStat("test", 0, 468, 2020, true);
+    factory.makeGlobalStat("test", Stat { 0, { 468, 2020 }, false, true });
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

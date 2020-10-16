@@ -38,6 +38,9 @@ public:
     void setHidden(const std::string&, const bool);
     bool hidden(const std::string&) const;
 
+    void setMain(const std::string&, const bool);
+    bool main(const std::string&) const;
+
     bool has(const std::string& stat) const { return stats_.count(stat) == 1; }
 
     StatsValues values() const;

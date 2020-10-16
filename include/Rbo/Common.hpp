@@ -117,6 +117,7 @@ struct Stat {
     int value { 0 };
     StatLimits limits;
     bool hidden { false };
+    bool main { false };
 
     bool operator==(const Stat&) const;
     bool operator!=(const Stat& rhs) const { return !(*this == rhs); }
@@ -139,6 +140,7 @@ struct StatDescriptor {
     StatLimits limits;
     bool capped;
     bool hidden;
+    bool main;
 };
 
 struct InventoryDescriptor {

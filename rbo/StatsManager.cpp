@@ -71,6 +71,16 @@ bool StatsManager::hidden(const std::string& stat) const {
     return stats_.at(stat).hidden;
 }
 
+void StatsManager::setMain(const std::string& stat, const bool main) {
+    checkExists(stat);
+    stats_.at(stat).main = main;
+}
+
+bool StatsManager::main(const std::string& stat) const {
+    checkExists(stat);
+    return stats_.at(stat).main;
+}
+
 StatsValues StatsManager::values() const {
     StatsValues values;
     std::transform(stats_.cbegin(), stats_.cend(), std::inserter(values, values.begin()), [](const auto& s) { return StatsValues::value_type { s.first, s.second.value }; });

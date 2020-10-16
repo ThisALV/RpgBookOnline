@@ -139,7 +139,7 @@ bool StatLimits::operator==(const StatLimits& rhs) const {
 }
 
 bool Stat::operator==(const Stat& rhs) const {
-    return value == rhs.value && limits == rhs.limits && hidden == rhs.hidden;
+    return value == rhs.value && limits == rhs.limits && hidden == rhs.hidden && main == rhs.main;
 }
 
 } // namespace Rbo

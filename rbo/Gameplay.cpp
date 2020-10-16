@@ -193,10 +193,8 @@ void Gameplay::printYesNo(const byte target) {
 }
 
 void Gameplay::sendGlobalStat(const std::string& stat) {
-    const auto [min, max] { global().limits(stat) };
-
     SessionDataFactory data_factory;
-    data_factory.makeGlobalStat(stat, min, max, global().get(stat), global().hidden(stat));
+    data_factory.makeGlobalStat(stat, global().raw().at(stat));
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }

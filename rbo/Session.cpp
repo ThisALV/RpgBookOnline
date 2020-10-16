@@ -130,7 +130,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             interface.print("Statistiques globales :");
 
         for (const auto& [name, stat] : game().globalStats) {
-            const auto [init, limits, capped, hidden] { stat };
+            const auto [init, limits, capped, hidden, main] { stat };
             const int value { init() };
 
             assert((static_cast<int>(init.dices) + init.bonus) >= limits.min);
@@ -138,6 +138,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
             stats_.setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
             stats_.set(name, value);
             stats_.setHidden(name, hidden);
+            stats_.setMain(name, main);
 
             const std::string stat_msg { initStatMsg(init, name, value) };
             if (!hidden) {
@@ -169,12 +170,14 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
         }
 
         for (const auto& [name, stat] : state.global) {
-            const auto [min, max] { stat.limits };
-            const int value { stat.value };
+            const auto [value, limits, hidden, main] { stat };
+            const auto [min, max] { limits };
             assert(!(value < min || value > max));
 
             stats().setLimits(name, min, max);
             stats().set(name, value);
+            stats().setHidden(name, hidden);
+            stats().setMain(name, main);
 
             SessionDataFactory global_stat;
             interface.sendGlobalStat(name);
@@ -276,13 +279,13 @@ void Session::initPlayers(Gameplay& interface) {
 void Session::initPlayer(Gameplay& interface, Player& target) {
     interface.print("Stats de " + target.name());
     for (const auto& [name, stat] : game().playerStats) {
-        const auto [init, limits, capped, hidden] { stat };
+        const auto [init, limits, capped, hidden, main] { stat };
         const int value { init() };
 
-        target.stats().setLimits(name, limits.min, capped ?
-                                     std::min(value, limits.max) : limits.max);
+        target.stats().setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
         target.stats().set(name, value);
         target.stats().setHidden(name, hidden);
+        target.stats().setMain(name, main);
 
         const std::string stat_msg { initStatMsg(init, name, value) };
         logger_.info("[Player {} stats] {}", target.id(), stat_msg);
@@ -333,12 +336,14 @@ void Session::restaurePlayer(const byte id, const PlayerState& state) {
     Player& target { player(id) };
 
     for (const auto& [name, stat] : state.stats) {
-        const StatDescriptor& stat_infos { game().playerStats.at(name) };
-        const auto [min, max] { stat_infos.limits };
+        const auto [value, limits, hidden, main] { stat };
+        const auto [min, max] { limits };
         assert(!(stat.value < min || stat.value > max));
 
         target.stats().setLimits(name, min, max);
         target.stats().set(name, stat.value);
+        target.stats().setHidden(name, hidden);
+        target.stats().setMain(name, main);
     }
 
     for (const auto& [inv, content] : state.inventories) {

@@ -115,6 +115,8 @@ void InstructionsProvider::initBuiltins() {
     stats_type["limits"] = &StatsManager::limits;
     stats_type["setHidden"] = &StatsManager::setHidden;
     stats_type["hidden"] = &StatsManager::hidden;
+    stats_type["setMain"] = &StatsManager::setMain;
+    stats_type["main"] = &StatsManager::main;
     stats_type["has"] = &StatsManager::has;
 
     sol::usertype<Inventory> inv_type { ctx_.new_usertype<Inventory>("Inventory") };
