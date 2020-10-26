@@ -30,14 +30,14 @@ private:
 
     static RandomEngine dices_rd_;
 
-    static std::vector<byte> getIDs(const Replies&);
-    static std::tuple<byte, byte> reply(const Replies&);
-    static void assertArgs(const bool);
-    static bool toBoolean(const std::string&);
-    static void applyToGlobal(Gameplay&, const EventEffect&);
-    static bool isInstruction(const sol::object&, const sol::object&);
-    static uint dices(const uint, const uint);
-    static byte votePlayer(Gameplay&, const byte = ALL_PLAYERS);
+    static std::vector<byte> getIDs(const Replies& replies);
+    static std::tuple<byte, byte> reply(const Replies& replies);
+    static void assertArgs(const bool assertion);
+    static bool toBoolean(const std::string& str);
+    static void applyToGlobal(Gameplay& ctx, const EventEffect& effect);
+    static bool isInstruction(const sol::object& key, const sol::object& value);
+    static uint dices(const uint count, const uint type);
+    static byte votePlayer(Gameplay& interface, const std::string& msg, const byte target = ALL_PLAYERS);
 
     struct LuaInstruction {
         LuaFunc func;
@@ -54,7 +54,7 @@ private:
     void initBuiltins();
 
 public:
-    InstructionsProvider(sol::state&, spdlog::logger&);
+    InstructionsProvider(sol::state& lua, spdlog::logger& logger);
 
     InstructionsProvider(const InstructionsProvider&) = delete;
     InstructionsProvider& operator=(const InstructionsProvider&) = delete;
@@ -62,7 +62,7 @@ public:
     bool operator==(const InstructionsProvider&) const = delete;
 
     void load();
-    Instruction get(const std::string&, const sol::table) const;
+    Instruction get(const std::string& name, const sol::table args) const;
     bool has(const std::string& name) const { return instructions_.count(name) == 1; }
 };
 

@@ -9,5 +9,4 @@ find_package(Lua REQUIRED)
 find_package(sol2 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-target_include_directories(server PRIVATE "${RBO_INCLUDE_DIR}")
 target_link_libraries(server PRIVATE rbo nlohmann_json::nlohmann_json ${LUA_LIBRARIES} sol2::sol2)

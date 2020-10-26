@@ -20,38 +20,27 @@ void SessionDataFactory::makeRequest(const Request type) {
     data_.add(type);
 }
 
-void SessionDataFactory::makeRange(const byte min, const byte max) {
+void SessionDataFactory::makeRange(const std::string& msg, const byte min, const byte max) {
     makeRequest(Request::Range);
+    data_.put(msg);
     data_.add(min);
     data_.add(max);
 }
 
-void SessionDataFactory::makePossibilities(const std::vector<byte>& range) {
+void SessionDataFactory::makePossibilities(const std::string& msg, const OptionsList& options) {
     makeRequest(Request::Possibilities);
-    data_.add(range.size());
-
-    for (const byte possibility : range)
-        data_.add(possibility);
+    data_.put(msg);
+    data_.putList(options);
 }
 
-void SessionDataFactory::makeText(const Text type) {
+void SessionDataFactory::makeYesNoQuestion(const std::string& question) {
+    makeRequest(Request::YesNo);
+    data_.put(question);
+}
+
+void SessionDataFactory::makeText(const std::string& txt) {
     makeData(DataType::Text);
-    data_.add(type);
-}
-
-void SessionDataFactory::makePlain(const std::string& txt) {
-    makeText(Text::Plain);
     data_.put(txt);
-}
-
-void SessionDataFactory::makeOptions(const OptionsList& options) {
-    makeText(Text::List);
-    data_.add(static_cast<byte>(options.size())); // static_cast éviter d'utiliser le template add
-
-    for (const auto& [option, txt] : options) {
-        data_.add(option);
-        data_.put(txt);
-    }
 }
 
 void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& changes) {

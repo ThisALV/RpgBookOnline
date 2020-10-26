@@ -7,6 +7,7 @@ namespace Rbo {
 
 const std::size_t MAX_LENGTH { 1300 };
 const std::size_t LENGTH_SIZE { sizeof(word) };
+const std::size_t STR_LENGTH_SIZE { 2 };
 
 using DataBuffer = std::array<byte, MAX_LENGTH>;
 
@@ -39,13 +40,14 @@ public:
     std::size_t count() const { return bytes_; }
     const DataBuffer& buffer() const { return buffer_; };
 
-    bool operator==(const Data&) const;
+    bool operator==(const Data& rhs) const;
 
-    void add(const byte);
+    void add(const byte b);
     template<typename Enum> void add(const Enum e) { add(static_cast<byte>(e)); }
 
-    void put(const std::string&);
+    void put(const std::string& str);
     template<typename NumType> void putNumeric(const NumType value) { putNumeric(value, count()); }
+    void putList(const OptionsList& options);
 
     void refreshLength() { putNumeric<word>(static_cast<word>(count()), 0, false); }
 };

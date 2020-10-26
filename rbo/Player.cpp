@@ -15,8 +15,9 @@ void Player::refreshBonuses(const BonusAction action, const std::string& inv, co
 }
 
 Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonuses& bonuses) : id_ { id }, name_ { name }, stats_ { stats }, bonuses_ { bonuses } {
-    for (const auto& [name, items] : inventories)
-        inventories_.insert({ name, Inventory { items } });
+    std::transform(inventories.cbegin(), inventories.cend(), std::inserter(inventories_, inventories_.begin()), [](const auto& inv) {
+        return PlayerInventories::value_type { inv.first, Inventory { inv.second } };
+    });
 }
 
 bool Player::add(const std::string& inv, const std::string& item, const uint qty) {
@@ -92,7 +93,7 @@ std::size_t accumulate(const std::size_t total, const InventoryContent::value_ty
 }
 
 uint Inventory::size() const {
-    return std::accumulate(content().cbegin(), content().cend(), 0, accumulate);
+    return std::accumulate(content().cbegin(), content().cend(), std::size_t { 0 }, accumulate);
 }
 
 bool Inventory::setMaxSize(const InventorySize capacity) {

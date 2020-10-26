@@ -67,6 +67,17 @@ std::vector<byte> Gameplay::players() const {
     return ids;
 }
 
+OptionsList Gameplay::names() const {
+    const Players players { ctx_.players() };
+
+    OptionsList names;
+    std::transform(players.cbegin(), players.cend(), std::inserter(names, names.begin()), [](const auto p) {
+        return OptionsList::value_type { p.first, p.second->name() };
+    });
+
+    return names;
+}
+
 std::size_t Gameplay::count() const {
     return ctx_.count();
 }
@@ -80,30 +91,28 @@ void Gameplay::switchLeader(const byte id) {
 }
 
 void Gameplay::voteForLeader() {
-    const Players players { ctx_.players() };
-
-    std::vector<byte> ids;
-    ids.resize(players.size(), 0);
-
-    std::transform(players.cbegin(), players.cend(), ids.begin(), [](const auto p) -> byte {
-        return p.first;
-    });
-
-    switchLeader(vote(askReply(ALL_PLAYERS, ids, true)));
+    switchLeader(vote(askReply(ALL_PLAYERS, "Qui doit devenir leader ?", names(), true)));
 }
 
-Replies Gameplay::askReply(const byte target, const byte min, const byte max, const bool wait) {
+Replies Gameplay::askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool wait) {
     SessionDataFactory data_factory;
-    data_factory.makeRange(min, max);
+    data_factory.makeRange(msg, min, max);
 
     return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { min, max }, wait);
 }
 
-Replies Gameplay::askReply(const byte target, const std::vector<byte>& range, const bool wait) {
+Replies Gameplay::askReply(const byte target, const std::string& msg, const OptionsList& options, const bool wait) {
     SessionDataFactory data_factory;
-    data_factory.makePossibilities(range);
+    data_factory.makePossibilities(msg, options);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { range }, wait);
+    std::vector<byte> ids;
+    ids.resize(options.size());
+
+    std::transform(options.cbegin(), options.cend(), ids.begin(), [](const auto& o) -> byte {
+        return o.first;
+    });
+
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { ids }, wait);
 }
 
 Replies Gameplay::askConfirm(const byte target, const bool wait) {
@@ -113,9 +122,9 @@ Replies Gameplay::askConfirm(const byte target, const bool wait) {
     return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, wait);
 }
 
-Replies Gameplay::askYesNo(const byte target, const bool wait) {
+Replies Gameplay::askYesNo(const byte target, const std::string& question, const bool wait) {
     SessionDataFactory data_factory;
-    data_factory.makeRequest(Request::YesNo);
+    data_factory.makeYesNoQuestion(question);
 
     return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, wait);
 }
@@ -162,34 +171,9 @@ bool Gameplay::checkGame() {
 
 void Gameplay::print(const std::string& txt, const byte target) {
     SessionDataFactory data_factory;
-    data_factory.makePlain(txt);
+    data_factory.makeText(txt);
 
     ctx_.sendTo(target, data_factory.dataWithLength());
-}
-
-void Gameplay::printOptions(const OptionsList& options, const byte target) {
-    SessionDataFactory data_factory;
-    data_factory.makeOptions(options);
-
-    ctx_.sendTo(target, data_factory.dataWithLength());
-}
-
-void Gameplay::printOptions(const std::vector<std::string>& options, const byte target, const byte begin) {
-    OptionsList list;
-    std::size_t i { begin };
-    for (const std::string& option : options)
-        list.insert({ i++, option });
-
-    SessionDataFactory data_factory;
-    data_factory.makeOptions(list);
-
-    ctx_.sendTo(target, data_factory.dataWithLength());
-}
-
-const std::vector<std::string> yes_no { "Oui", "Non" };
-
-void Gameplay::printYesNo(const byte target) {
-    printOptions(yes_no, target);
 }
 
 void Gameplay::sendGlobalStat(const std::string& stat) {
@@ -220,7 +204,7 @@ void Gameplay::sendBattleAtk(const byte p_id, const std::string& enemy, const in
     ctx_.sendToAll(data_factory.dataWithLength());
 }
 
-void Gameplay::endBattle() {
+void Gameplay::sendBattleEnd() {
     SessionDataFactory data_factory;
     data_factory.makeBattleInfos(BattleInfo::End);
 

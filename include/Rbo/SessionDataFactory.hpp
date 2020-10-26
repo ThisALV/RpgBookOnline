@@ -14,15 +14,11 @@ enum struct Request : byte {
     Range, Possibilities, Confirm, YesNo, End
 };
 
-enum struct Text : byte {
-    Plain, List
-};
-
 enum struct ReplyValidity : byte {
     Ok, TooLate, OutOfRangeError, InavlidLengthError, NotConfirmError
 };
 
-bool isInvalid(const ReplyValidity);
+bool isInvalid(const ReplyValidity validity);
 
 enum struct BattleInfo : byte {
     Init, Atk, End
@@ -31,24 +27,23 @@ enum struct BattleInfo : byte {
 class Data;
 
 struct SessionDataFactory : DataFactory {
-    void makeData(const DataType);
-    void makeRequest(const Request);
-    void makeRange(const byte, const byte);
-    void makePossibilities(const std::vector<byte>&);
-    void makeText(const Text);
-    void makePlain(const std::string&);
-    void makeOptions(const OptionsList&);
-    void makeInfos(const byte, const PlayerStateChanges&);
-    void makeGlobalStat(const std::string&, const Stat&);
-    void makeDie(const byte);
-    void makeSwitch(const word);
-    void makeReply(const byte, const byte);
-    void makeValidation(const ReplyValidity);
-    void makeBattleInfos(const BattleInfo);
-    void makeBattleInit(const GroupDescriptor&, const std::unordered_map<std::string, EnemyDescriptor>&);
-    void makeAtk(const byte, const std::string&, const int);
-    void makeCrash(const byte);
-    void makeLeaderSwitch(const byte);
+    void makeData(const DataType type);
+    void makeRequest(const Request type);
+    void makeRange(const std::string& msg, const byte min, const byte max);
+    void makePossibilities(const std::string& msg, const OptionsList& options);
+    void makeYesNoQuestion(const std::string& question);
+    void makeText(const std::string& txt);
+    void makeInfos(const byte id, const PlayerStateChanges& changes);
+    void makeGlobalStat(const std::string& name, const Stat& stat);
+    void makeDie(const byte id);
+    void makeSwitch(const word scene);
+    void makeReply(const byte id, const byte reply);
+    void makeValidation(const ReplyValidity validity);
+    void makeBattleInfos(const BattleInfo infos);
+    void makeBattleInit(const GroupDescriptor& group, const std::unordered_map<std::string, EnemyDescriptor>& enemies_db);
+    void makeAtk(const byte player, const std::string& enemy, const int dmg);
+    void makeCrash(const byte id);
+    void makeLeaderSwitch(const byte leader);
 };
 
 } // namespace Rbo

@@ -57,10 +57,8 @@ EventEffect::ItemsChanges EventEffect::simulateItemsChanges(const Player& target
         if (qty < 0 && static_cast<int>(target_inv.count(name)) < std::abs(qty))
             return ItemsChanges::ItemEmpty;
 
-        if (!target_inv.limited())
-            continue;
-
-        supposed_sizes.at(inv) += qty;
+        if (target_inv.limited())
+            supposed_sizes.at(inv) += qty;
     }
 
     const bool full = std::any_of(supposed_sizes.cbegin(), supposed_sizes.cend(), [&target](const auto& size) {

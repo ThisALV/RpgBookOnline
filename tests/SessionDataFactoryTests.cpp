@@ -24,27 +24,30 @@ std::ostream& operator<<(std::ostream& out, const Data& data) {
 
 BOOST_AUTO_TEST_SUITE(Make)
 
-BOOST_AUTO_TEST_CASE(Possibilities) {
-    const Data expected { std::vector<byte> { 0, 1, 5, 0, 3, 1, 5, 144 } };
-    const std::vector<byte> arg { 0, 3, 1, 5, 144 };
+BOOST_AUTO_TEST_CASE(Range) {
+    const Data expected {
+        std::vector<byte> {
+            0, 0, 0, 12, 'H', 'o', 'w', ' ', 'a', 'r', 'e', ' ', 'y', 'o', 'u', '?', 5, 15
+        }
+    };
+    const std::string msg { "How are you?" };
 
     SessionDataFactory factory;
-    factory.makePossibilities(arg);
+    factory.makeRange(msg, 5, 15);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
-BOOST_AUTO_TEST_CASE(Options) {
+BOOST_AUTO_TEST_CASE(Possibilities) {
     const Data expected {
         std::vector<byte> {
-            1, 1, 4, 0, 0, 4, 'Z', 'e', 'r', 'o', 1, 0, 3, 'O', 'n', 'e', 2, 0, 3, 'T', 'w', 'o',
-            4, 0, 4, 'F', 'o', 'u', 'r'
+            0, 1, 4, 0, 0, 4, 'Z', 'e', 'r', 'o', 1, 0, 3, 'O', 'n', 'e', 2, 0, 3, 'T', 'w', 'o', 4, 0, 4, 'F', 'o', 'u', 'r'
         }
     };
     const OptionsList arg { { 0, "Zero" }, { 1, "One" }, { 2, "Two" }, { 4, "Four" } };
 
     SessionDataFactory factory;
-    factory.makeOptions(arg);
+    factory.makePossibilities(arg);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

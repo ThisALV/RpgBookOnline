@@ -76,16 +76,8 @@ uint InstructionsProvider::dices(const uint dices, const uint max) {
     return result;
 }
 
-byte InstructionsProvider::votePlayer(Gameplay& interface, const byte target) {
-    const std::vector<byte> ids { interface.players() };
-
-    OptionsList options;
-    std::transform(ids.cbegin(), ids.cend(), std::inserter(options, options.begin()), [&interface](const byte id) -> OptionsList::value_type {
-        return { id, interface.player(id).name() };
-    });
-
-    interface.printOptions(options, target);
-    return vote(interface.askReply(target, ids));
+byte InstructionsProvider::votePlayer(Gameplay& interface, const std::string& msg, const byte target) {
+    return vote(interface.askReply(target, msg, interface.names()));
 }
 
 void InstructionsProvider::initBuiltins() {
@@ -179,22 +171,29 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["checkpoint"] = &Gameplay::checkpoint;
     gameplay_type["player"] = &Gameplay::player;
     gameplay_type["players"] = &Gameplay::players;
+    gameplay_type["names"] = &Gameplay::names;
     gameplay_type["count"] = &Gameplay::count;
     gameplay_type["leader"] = &Gameplay::leader;
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;
     gameplay_type["voteForLeader"] = &Gameplay::voteForLeader;
     gameplay_type["askReply"] = sol::overload(
-        [](Gameplay& ctx, const byte target, const byte min, const byte max) { return ctx.askReply(target, min, max); },
-        [](Gameplay& ctx, const byte target, const std::vector<byte>& possibilities) { return ctx.askReply(target, possibilities); },
-        sol::resolve<Replies(const byte, const byte, const byte, const bool)>(&Gameplay::askReply),
-        sol::resolve<Replies(const byte, const std::vector<byte>&, const bool)>(&Gameplay::askReply)
+        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max) {
+            return ctx.askReply(target, msg, min, max);
+        },
+        [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options) {
+            return ctx.askReply(target, msg, options);
+        },
+        sol::resolve<Replies(const byte, const std::string&, const byte, const byte, const bool)>(&Gameplay::askReply),
+        sol::resolve<Replies(const byte, const std::string&, const OptionsList&, const bool)>(&Gameplay::askReply)
     );
     gameplay_type["askConfirm"] = sol::overload(
         [](Gameplay& ctx, const byte target) { return ctx.askConfirm(target); },
         &Gameplay::askConfirm
     );
     gameplay_type["askYesNo"] = sol::overload(
-        [](Gameplay& ctx, const byte target) { return ctx.askYesNo(target); },
+        [](Gameplay& ctx, const byte target, const std::string& question) {
+            return ctx.askYesNo(target, question);
+        },
         &Gameplay::askYesNo
     );
     gameplay_type["checkPlayer"] = &Gameplay::checkPlayer;
@@ -202,20 +201,11 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["print"] = sol::overload(
         [](Gameplay& ctx, const std::string& text) { ctx.print(text); }, &Gameplay::print
     );
-    gameplay_type["printOptions"] = sol::overload(
-        [](Gameplay& ctx, const OptionsList& list) { ctx.printOptions(list); },
-        [](Gameplay& ctx, const std::vector<std::string>& list) { ctx.printOptions(list); },
-        sol::resolve<void(const OptionsList&, const byte)>(&Gameplay::printOptions),
-        sol::resolve<void(const std::vector<std::string>&, const byte, const byte)>(&Gameplay::printOptions)
-    );
-    gameplay_type["printYesNo"] = sol::overload(
-        [](Gameplay& ctx) { ctx.printYesNo(); }, &Gameplay::printYesNo
-    );
     gameplay_type["sendGlobalStat"] = &Gameplay::sendGlobalStat;
     gameplay_type["sendInfos"] = &Gameplay::sendInfos;
     gameplay_type["sendBattleInfos"] = &Gameplay::sendBattleInfos;
     gameplay_type["sendBattleAtk"] = &Gameplay::sendBattleAtk;
-    gameplay_type["sendBattleEnd"] = &Gameplay::endBattle;
+    gameplay_type["sendBattleEnd"] = &Gameplay::sendBattleEnd;
 
     ctx_["getIDs"] = getIDs;
     ctx_["reply"] = reply;
@@ -226,7 +216,7 @@ void InstructionsProvider::initBuiltins() {
     ctx_["applyToGlobal"] = applyToGlobal;
     ctx_["dices"] = dices;
     ctx_["votePlayer"] = sol::overload(
-        [](Gameplay& interface) { return votePlayer(interface); },
+        [](Gameplay& interface, const std::string& msg) { return votePlayer(interface, msg); },
         votePlayer
     );
     ctx_["ALL_PLAYERS"] = 0;

@@ -42,6 +42,28 @@ void Data::put(const std::string& str) {
         buffer_[bytes_] = str[bytes_ - init];
 }
 
+void Data::putList(const OptionsList& options) {
+    const std::size_t size { options.size() };
+
+    if (size > std::numeric_limits<byte>::max())
+        throw BufferOverflow {};
+
+    const std::size_t total {
+        std::accumulate(options.cbegin(), options.cend(), std::size_t { 1 }, [](const std::size_t size, const auto& o) {
+            return size + 1 + STR_LENGTH_SIZE + o.second.length();
+        })
+    };
+
+    if (total > MAX_LENGTH)
+        throw BufferOverflow {};
+
+    add(static_cast<byte>(size));
+    for (const auto& [option, txt] : options) {
+        add(option);
+        put(txt);
+    }
+}
+
 const Data& DataFactory::dataWithLength() {
     data_.refreshLength();
 

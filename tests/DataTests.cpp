@@ -1,8 +1,8 @@
 #define BOOST_TEST_MODULE Data
 
-#include "boost/test/unit_test.hpp"
-#include "boost/test/data/test_case.hpp"
-#include "Rbo/Data.hpp"
+#include <boost/test/unit_test.hpp>
+#include <boost/test/data/test_case.hpp>
+#include <Rbo/Data.hpp>
 
 using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
 
@@ -125,12 +125,46 @@ BOOST_AUTO_TEST_CASE(UInt32) {
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
-BOOST_AUTO_TEST_CASE(NumericOverflow, *boost::unit_test::depends_on { "Add/Byte" }) {
+BOOST_AUTO_TEST_CASE(NumericOverflow) {
     Data data;
     for (std::size_t i { 0 }; i < MAX_LENGTH - 3; i++)
         data.add(0);
 
     BOOST_CHECK_THROW(data.putNumeric<int>(9999999), BufferOverflow);
+}
+
+BOOST_AUTO_TEST_CASE(List) {
+    const DataBuffer expected_buffer {
+        0, 0, 3, 1, 0, 6, 'L', 0xc3, 0xa9, 'l', 'i', 'o', 3, 0, 1, '#', 4, 0, 4, 'T', 'e', 's', 't'
+    };
+    const OptionsList options {
+        { 1, "Lélio" }, { 4, "Test" }, { 3, "#" }
+    };
+
+    Data data;
+    data.putList(options);
+
+    BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
+}
+
+BOOST_AUTO_TEST_CASE(ListOptionsCountOverflow) {
+    OptionsList options;
+    for (int i { 0 }; i < std::numeric_limits<byte>::max() + 1; i++)
+        options.insert({ i, "" });
+
+    Data data;
+    BOOST_CHECK_THROW(data.putList(options), BufferOverflow);
+}
+
+BOOST_AUTO_TEST_CASE(ListDataSizeOverflow) {
+    const std::string txt(100, ' '); // Syntaxe C++14 pour éviter l'initializer_list constructor
+
+    OptionsList options;
+    for (int i { 0 }; i < std::numeric_limits<byte>::max(); i++)
+        options.insert({ i, txt });
+
+    Data data;
+    BOOST_CHECK_THROW(data.putList(options), BufferOverflow);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

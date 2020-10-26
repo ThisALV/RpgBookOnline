@@ -12,7 +12,7 @@ foreach(TEST ${RBO_TESTS})
     list(GET INFOS 1 NAME)
 
     add_executable(${EXEC} ${NAME}.cpp Common.cpp ${RBO_INCLUDE_DIR}/Rbo/Tests/Common.hpp)
-    target_include_directories(${EXEC} PRIVATE ${Boost_INCLUDE_DIR} ${RBO_INCLUDE_DIR})
+    target_include_directories(${EXEC} PRIVATE ${Boost_INCLUDE_DIR})
     target_link_libraries(${EXEC} PRIVATE rbo Boost::unit_test_framework spdlog::spdlog)
 endforeach()
 

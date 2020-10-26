@@ -21,21 +21,19 @@ function Rbo.Goto(interface, args)
 end
 
 function Rbo.PathChoice(interface, args)
-    assertArgs(type(args.wait) == "boolean" and type(args.paths) == "table")
-
-    local list = StringVector:new():iterable()
-    local options = {}
-    for scene, text in pairs(args.paths) do
-        assertArgs(isNum(scene) and isStr(text))
-
-        table.insert(options, scene)
-        list:add(text.." -> "..scene)
+    assertArgs(type(args.msg) == "string" and type(args.paths) == "table")
+    
+    if type(args.wait) ~= "boolean" then
+        args.wait = true
     end
 
-    interface:printOptions(list)
-    local selected = vote(interface:askReply(ALL_PLAYERS, 1, #list, args.wait))
+    local options = ByteWithString:new():iterable()
+    for scene, text in pairs(args.paths) do
+        assertArgs(isNum(scene) and isStr(text))
+        options:set(scene, text)
+    end
 
-    return options[selected]
+    return vote(interface:askReply(ALL_PLAYERS, args.msg, options, args.wait))
 end
 
 function Rbo.Checkpoint(interface, args)
@@ -80,8 +78,7 @@ end
 function Rbo.ActionVote(interface, args)
     assertArgs(isStr(args.text) and isStr(args.effect))
 
-    interface:print(args.text)
-    local selected = vote(interface:askReply(ALL_PLAYERS, interface:players()))
+    local selected = vote(interface:askReply(ALL_PLAYERS, args.text, interface:names()))
     local effect = interface:game():effect(args.effect)
 
     effect:apply(interface:player(selected))
@@ -124,7 +121,7 @@ function Rbo.IfHas(interface, args)
     elseif leader then
         targets:add(interface:leader())
     elseif vote then
-        targets:add(votePlayer(interface))
+        targets:add(votePlayer(interface, "Qui aurait un(e) "..args.item.." ?"))
     else
         targets:add(args.target)
     end
@@ -140,7 +137,11 @@ function Rbo.IfHas(interface, args)
 
     local has = count >= args.qty
     if has and args.consumed then
-        interface:player(targets:get(1)):consume(args.inv, args.item, args.qty)
+        local target = targets:get(1)
+
+        interface:player(target):consume(args.inv, args.item, args.qty)
+        interface:sendInfos(target)
+        interface:checkPlayer(target)
     end
     
     return has and args.yes or args.no
