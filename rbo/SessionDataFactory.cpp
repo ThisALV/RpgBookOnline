@@ -65,8 +65,8 @@ void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& sta
     data_.putNumeric(stat.limits.min);
     data_.putNumeric(stat.limits.max);
     data_.putNumeric(stat.value);
-    data_.add(stat.hidden ? 1 : 0);
-    data_.add(stat.main ? 1 : 0);
+    data_.add(stat.hidden);
+    data_.add(stat.main);
 }
 
 void SessionDataFactory::makeDie(const byte id) {

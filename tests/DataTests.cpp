@@ -54,6 +54,28 @@ BOOST_DATA_TEST_CASE(Byte, dataset::xrange(25))
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
+BOOST_AUTO_TEST_CASE(BoolTrue) {
+    const bool value { true };
+    const DataBuffer expected_buffer { 0, 0, 1 };
+
+    Data data;
+    data.add(value);
+
+    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + 1);
+    BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
+}
+
+BOOST_AUTO_TEST_CASE(BoolFalse) {
+    const bool value { false };
+    const DataBuffer expected_buffer { 0, 0, 0 };
+
+    Data data;
+    data.add(value);
+
+    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + 1);
+    BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
+}
+
 BOOST_AUTO_TEST_CASE(Overflow) {
     Data data;
 

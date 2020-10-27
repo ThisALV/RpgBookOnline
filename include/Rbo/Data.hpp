@@ -43,6 +43,7 @@ public:
     bool operator==(const Data& rhs) const;
 
     void add(const byte b);
+    void add(const bool b);
     template<typename Enum> void add(const Enum e) { add(static_cast<byte>(e)); }
 
     void put(const std::string& str);

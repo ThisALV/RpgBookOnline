@@ -33,6 +33,10 @@ void Data::add(const byte b) {
     buffer_[bytes_++] = b;
 }
 
+void Data::add(const bool b) {
+    add(static_cast<byte>(b ? 1 : 0));
+}
+
 void Data::put(const std::string& str) {
     if (count() + str.length() + sizeof(word) > MAX_LENGTH)
         throw BufferOverflow {};
