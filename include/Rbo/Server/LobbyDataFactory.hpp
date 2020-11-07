@@ -1,3 +1,5 @@
+#include <Rbo/Server/ServerCommon.hpp>
+
 #include <Rbo/Data.hpp>
 
 namespace Rbo::Server {
@@ -19,20 +21,21 @@ enum struct SessionResult : byte {
     Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer
 };
 
-bool isParametersError(const SessionResult);
-bool isInvalidIDs(const SessionResult);
+bool isParametersError(const SessionResult result);
+bool isInvalidIDs(const SessionResult result);
 
 struct LobbyDataFactory : DataFactory {
-    void makeRegistration(const RegistrationResult);
-    void makeState(const State);
-    void makeNewMember(const byte, const std::string&);
-    void makeReady(const byte);
-    void makeDisconnect(const byte);
-    void makePrepare(const byte);
-    void makeCrash(const byte);
-    void makeYesNo(const YesNoQuestion);
-    void makeResult(const SessionResult);
-    void makeInvalidIDs(const SessionResult, const std::vector<byte>&);
+    void makeRegistration(const RegistrationResult result);
+    void makeState(const State state);
+    void makeNewMember(const byte id, const std::string& name);
+    void makeReady(const byte id);
+    void makeDisconnect(const byte id);
+    void makePrepare(const byte master);
+    void makeCrash(const byte id);
+    void makeYesNo(const YesNoQuestion question);
+    void makeResult(const SessionResult result);
+    void makeRegistered(const MembersStates& members);
+    void makeInvalidIDs(const SessionResult result, const std::vector<byte>& expected);
 };
 
 } // namespace Rbo::Server

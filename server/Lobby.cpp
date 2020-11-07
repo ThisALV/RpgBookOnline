@@ -42,16 +42,12 @@ void Lobby::disconnect(const byte id, const bool crash) {
     if (!crash)
         connections_.at(id).shutdown(tcp::socket::shutdown_both);
 
-    const auto ready_member { std::find(ready_members_.cbegin(), ready_members_.cend(), id) };
-    if (ready_member != ready_members_.cend())
-        ready_members_.erase(ready_member);
-
-    players_.erase(id);
+    members_.erase(id);
     connections_.erase(id);
 
-    if (names().empty() && isStarting())
+    if (members().empty() && isStarting())
         cancelPreparation();
-    else if (!names().empty() && isOpen() && allMembersReady())
+    else if (!members().empty() && isOpen() && allMembersReady())
         preparation();
 
     LobbyDataFactory disconnect_data;
@@ -76,21 +72,26 @@ void Lobby::sendToAll(const Data& data) {
 }
 
 bool Lobby::registered(const std::string& name) const {
-    const auto b { names().cbegin() };
-    const auto e { names().cend() };
-
-    return std::find_if(b, e, [&name](const auto& p) -> bool { return p.second == name; }) != e;
+    return std::any_of(members().cbegin(), members().cend(), [&name](const auto& m) { return m.second.name == name; });
 }
 
 std::vector<byte> Lobby::ids() const {
     std::vector<byte> ids;
-    ids.resize(names().size());
+    ids.resize(members().size());
 
-    std::transform(names().cbegin(), names().cend(), ids.begin(), [](const auto& member) -> byte {
+    std::transform(members().cbegin(), members().cend(), ids.begin(), [](const auto& member) -> byte {
         return member.first;
     });
 
     return ids;
+}
+
+const std::string& Lobby::name(const byte id) const {
+    return members().at(id).name;
+}
+
+bool Lobby::ready(const byte id) const {
+    return members().at(id).ready;
 }
 
 void Lobby::preparation() {
@@ -225,7 +226,10 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
             registration = RegistrationResult::UnavailableName;
 
         LobbyDataFactory registration_data;
-        registration_data.makeRegistration(registration);
+        if (registration == RegistrationResult::Ok)
+            registration_data.makeRegistered(members());
+        else
+            registration_data.makeRegistration(registration);
 
         const ErrCode send_register_err { trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength())) };
 
@@ -248,7 +252,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
 
         sendToAll(new_player_data.dataWithLength());
 
-        players_.insert({ id, name });
+        members_.insert({ id, Member { name, false } });
         connections_.insert({ id, std::move(registering_.at(client_endpt)) });
 
         request_buffers_.insert({ id, ReceiveBuffer {} });
@@ -256,19 +260,6 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
 
         registering_.erase(client_endpt);
         registering_buffers_.erase(client_endpt);
-
-        for (const byte player : readyMembers()) {
-            LobbyDataFactory ready_data;
-            ready_data.makeReady(player);
-
-            const ErrCode send_err { trySend(connections_.at(id), trunc(ready_data.dataWithLength())) };
-
-            if (send_err) {
-                disconnect(id, true);
-                logMemberError(logger_, id, send_err);
-                return;
-            }
-        }
 
         listenMember(id);
     }));
@@ -303,26 +294,28 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 
     switch (static_cast<MemberRequest>(request_buffer[0])) {
     case MemberRequest::Ready: {
-        const auto b { ready_members_.cbegin() };
-        const auto e { ready_members_.cend() };
-
-        const auto member { std::find(b, e, id) };
-        if (member != e) {
-            logger_.info("Membre \"{}\" [{}] n'est plus prêt.", names().at(id), id);
-            ready_members_.erase(member);
+        if (ready(id)) {
+            logger_.info("Membre \"{}\" [{}] n'est plus prêt.", name(id), id);
+            members_.at(id).ready = false;
         } else {
-            logger_.info("Membre \"{}\" [{}] est prêt.", names().at(id), id);
-            ready_members_.push_back(id);
+            logger_.info("Membre \"{}\" [{}] est prêt.", name(id), id);
+            members_.at(id).ready = true;
         }
 
-        logger_.debug("Membres prêts : {}", readyMembers());
+        std::vector<byte> ready_members;
+        for (const auto& [id, member] : members()) {
+            if (member.ready)
+                ready_members.push_back(id);
+        }
+
+        logger_.debug("Membres prêts : {}", ready_members);
 
         LobbyDataFactory ready_data;
         ready_data.makeReady(id);
 
         sendToAll(ready_data.dataWithLength());
 
-        if (!isStarting() && allMembersReady() && !names().empty())
+        if (!isStarting() && allMembersReady() && !members().empty())
             preparation();
         else if (isStarting() && !allMembersReady())
             cancelPreparation();
@@ -338,11 +331,11 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 }
 
 void Lobby::sendToAllMasterHandling(const Data& data) {
-    const bool was_here { names().count(master_) == 1 };
+    const bool was_here { registered(master_) };
 
     sendToAll(data);
 
-    if (was_here && names().count(master_) == 0)
+    if (was_here && !registered(master_))
         throw MasterDisconnected { master_ };
 }
 
@@ -423,7 +416,7 @@ void Lobby::launchPreparation() {
     cancelling_lock.unlock();
 
     try {
-        master_ = names().cbegin()->first;
+        master_ = members().cbegin()->first;
 
         LobbyDataFactory prepare_data;
         prepare_data.makePrepare(master_);
@@ -440,8 +433,6 @@ void Lobby::launchPreparation() {
         master_dc_data.makeState(State::MasterDisconnected);
 
         sendToAll(master_dc_data.dataWithLength());
-
-        ready_members_.clear();
     } catch (const NoPlayerRemaining& err) {
         logger_.error(err.what());
     }
@@ -459,15 +450,14 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
 
     Run run { runSession(*chkpt_name, *missing_participants) };
     session_.reset();
-    players_.clear();
+    members_.clear();
     connections_.clear();
-    ready_members_.clear();
 
     if (run.result != SessionResult::Crashed) {
         logger_.trace("Envoi du résultat de la session aux participants.");
 
         for (auto& [id, participant] : run.participants) {
-            players_.insert({ id, participant.name });
+            members_.insert({ id, Member { participant.name, false } });
             connections_.insert({ id, std::move(participant.socket) });
         }
 
@@ -503,7 +493,7 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
                     disconnect(id);
             }
 
-            if (names().count(master_) == 0)
+            if (!registered(master_))
                 throw MasterDisconnected { master_ };
 
             makeSession(new_ckpt);
@@ -520,8 +510,8 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_particip
     sendToAllMasterHandling(start_data.dataWithLength());
 
     Participants participants;
-    for (const auto& [id, name] : names())
-        participants.insert({ id, Particpant { name, std::move(connections_.at(id)) } });
+    for (const auto& [id, member] : members())
+        participants.insert({ id, Particpant { member.name, std::move(connections_.at(id)) } });
 
     try {
         if (isClosed())

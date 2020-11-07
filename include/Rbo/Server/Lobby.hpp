@@ -1,6 +1,8 @@
 #ifndef LOBBY_HPP
 #define LOBBY_HPP
 
+#include <Rbo/Server/ServerCommon.hpp>
+
 #include <Rbo/Session.hpp>
 
 namespace Rbo::Server {
@@ -8,7 +10,6 @@ namespace Rbo::Server {
 enum struct YesNoQuestion : byte;
 enum struct SessionResult : byte;
 
-using MembersName = std::map<byte, std::string>;
 using MembersConnection = std::map<byte, tcp::socket>;
 
 struct MasterDisconnected : std::runtime_error {
@@ -50,11 +51,10 @@ private:
     tcp::acceptor new_players_acceptor_;
     tcp::endpoint acceptor_endpt_;
 
-    MembersName players_;
+    MembersStates members_;
     MembersConnection connections_;
     RemoteEndptHashmap<tcp::socket> registering_;
     RemoteEndptHashmap<ReceiveBuffer> registering_buffers_;
-    std::vector<byte> ready_members_;
     std::map<byte, ReceiveBuffer> request_buffers_;
 
     std::chrono::milliseconds prepare_delay_;
@@ -96,14 +96,17 @@ public:
     void close(const bool = false);
 
     ushort port() const { return acceptor_endpt_.port(); }
-    bool registered(const byte id) const { return names().count(id) == 1; }
-    bool registered(const std::string&) const;
-    bool allMembersReady() const { return readyMembers().size() == names().size(); }
+    bool registered(const byte id) const { return members().count(id) == 1; }
+    bool registered(const std::string& name) const;
+    bool allMembersReady() const {
+        return std::all_of(members().cbegin(), members().cend(), [](const auto& m) { return m.second.ready; });
+    }
 
     std::vector<byte> ids() const;
-    const MembersName& names() const { return players_; }
+    const MembersStates& members() const { return members_; }
     const MembersConnection& connections() const { return connections_; }
-    const std::vector<byte>& readyMembers() const { return ready_members_; }
+    const std::string& name(const byte id) const;
+    bool ready(const byte id) const;
 
     bool isOpen() const { return state_ == Open; }
     bool isStarting() const { return state_ == Starting; }
