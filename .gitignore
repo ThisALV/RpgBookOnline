@@ -1,13 +1,8 @@
-/rbo_logins.ini
-Doxyfile
-/**/Doc/
-/**/Debug/
-/**/Release/
-/notes/
+Debug/
+Release/
 CMakeLists.txt.user
 /server/game/
 /server/instructions/Custom.lua
-**/.vscode/
 *.log
-__pycache__/
-client/
+.vscode/
+
