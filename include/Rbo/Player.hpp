@@ -93,9 +93,8 @@ public:
     const ItemsBonuses& statsBonus() const { return bonuses_; }
 };
 
-} // namespace Rbo
-
-template<typename Output> Output& operator<<(Output& out, const Rbo::Player& player) {
+template<typename Output>
+Output& operator<<(Output& out, const Rbo::Player& player) {
     out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name() << "\"; stats=" << player.stats().values() << " inventories=[";
     for (const auto& [name, inventory] : player.inventories())
         out << " \"" << name << "\"=" << inventory << ';';
@@ -110,5 +109,7 @@ Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
 
     return out;
 }
+
+} // namespace Rbo
 
 #endif // PLAYER_HPP

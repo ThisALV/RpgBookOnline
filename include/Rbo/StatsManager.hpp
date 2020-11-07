@@ -55,12 +55,17 @@ public:
 
 } // namespace Rbo
 
+namespace std {
+
 template<typename Output> Output& operator<<(Output& out, const Rbo::StatsValues& stats) {
     out << '[';
     for (const auto& [name, value] : stats)
         out << " \"" << name << "\"=" << value << ';';
 
-    return out << " ]";
+    out << " ]";
+    return out;
+}
+
 }
 
 #endif // STATSMANAGER_HPP

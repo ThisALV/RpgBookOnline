@@ -157,7 +157,8 @@ byte vote(const Replies&);
 
 spdlog::logger& rboLogger(const std::string&);
 
-template<typename NumType> std::vector<byte> decompose(const NumType value) {
+template<typename NumType>
+std::vector<byte> decompose(const NumType value) {
     const NumType byte_mask { 0xff };
     const std::size_t length { sizeof(NumType) };
 
@@ -175,13 +176,18 @@ const word INTRO { 0 };
 
 } // namespace Rbo
 
-template<typename Output> Output& operator<<(Output& out, const std::vector<Rbo::byte>& ids) {
+namespace std {
+
+template<typename Output>
+Output& operator<<(Output& out, const std::vector<Rbo::byte>& ids) {
     out << '[';
     for (const Rbo::byte id : ids)
         out << ' ' << std::to_string(id) << ';';
 
     out << " ]";
     return out; // (ostringstream& << string) ne retourne pas une ostringstream&
+}
+
 }
 
 #endif // COMMON_HPP

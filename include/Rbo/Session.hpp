@@ -132,12 +132,18 @@ public:
 
 } // namespace Rbo
 
-template<typename Output> Output& operator<<(Output& out, const Rbo::Replies& replies) {
+namespace std {
+
+template<typename Output>
+Output& operator<<(Output& out, const Rbo::Replies& replies) {
     out << '[';
     for (const auto [id, reply] : replies)
         out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
 
-    return out << " ]";
+    out << " ]";
+    return out;
+}
+
 }
 
 #endif // SESSION_HPP

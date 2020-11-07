@@ -7,7 +7,6 @@ using namespace Rbo;
 
 namespace Rbo {
 
-std::ostream& operator<<(std::ostream&, const StatsValues&);
 std::ostream& operator<<(std::ostream&, const PlayerInventories&);
 
 template<typename Outputable> struct OutputWrapper {

@@ -5,14 +5,6 @@
 
 namespace Rbo {
 
-std::ostream& operator<<(std::ostream& out, const StatsValues& stats) {
-    out << "StatsValues :";
-    for (const auto& [stat, value] : stats)
-        out << " \"" << stat << "\"=" << std::to_string(value);
-
-    return out;
-}
-
 std::ostream& operator<<(std::ostream& out, const PlayerInventories& inventories) {
     out << "PlayerInventories :";
 
