@@ -1,6 +1,6 @@
 ﻿#define BOOST_TEST_MODULE Game
 
-#include <Rbo/Tests/Common.hpp>
+#include <Rbo/Tests/TestsCommon.hpp>
 
 #include "boost/test/unit_test.hpp"
 #include "Rbo/Game.hpp"

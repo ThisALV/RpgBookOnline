@@ -1,4 +1,4 @@
-#include <Rbo/Tests/Common.hpp>
+#include <Rbo/Tests/TestsCommon.hpp>
 
 #include <iostream>
 #include "Rbo/Player.hpp"
