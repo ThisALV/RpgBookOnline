@@ -1,6 +1,7 @@
 #include <Rbo/Data.hpp>
 
 #include <cassert>
+#include <numeric>
 
 namespace Rbo {
 
