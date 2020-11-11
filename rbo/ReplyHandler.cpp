@@ -35,7 +35,7 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
     }
 
     if (ctx_->replies.size() >= ctx_->limit) {
-        logger_->trace("Réponse de {} ignorée.", playerID_);
+        logger_->info("Reply of [{}] ignored (too late).", playerID_);
         return ReplyValidity::TooLate;
     }
 
@@ -53,14 +53,14 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
             throw NetworkError { "send_answer" + std::to_string(remote_id), err };
     }
 
-    logger_->debug("reply:{}={}", playerID_, reply);
+    logger_->info("Reply of [{}] : {}", playerID_, reply);
     ctx_->replies.insert({ playerID_, reply });
 
     return ReplyValidity::Ok;
 }
 
 void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
-    logger_->trace("Traitement de la réponse de {}.", playerID_);
+    logger_->debug("Handling reply for [{}].", playerID_);
     try {
         if (r_err)
             throw NetworkError { "receive_reply", r_err };
@@ -76,7 +76,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
             throw NetworkError { "send_validation", validation_err };
 
         if (isInvalid(reply_validity)) {
-            logger_->trace("Réponse de {} invalide : {}.", playerID_, reply_validity);
+            logger_->error("Invalid reply for [{}] : error code #{}.", playerID_, reply_validity);
             listenReply();
         } else {
             for (const auto [id, reply] : ctx_->replies) {
@@ -89,7 +89,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
                     throw NetworkError { "receive_answers" + std::to_string(id), err };
             }
 
-            logger_->trace("Réponse de {} valide.", playerID_);
+            logger_->info("Reply of {} is valid.", playerID_);
             ctx_->counter++;
         }
     } catch (const NetworkError& err) {
@@ -98,7 +98,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 }
 
 void ReplyHandler::listenReply() {
-    logger_->trace("Écoute de la réponse de {}...", playerID_);
+    logger_->debug("Listening reply for [{}]...", playerID_);
     ctx_->players.at(playerID_)->async_receive(
                 io::buffer(replyBuffer_), io::bind_executor(*executor_, std::bind(&ReplyHandler::handleReply, this, std::placeholders::_1, std::placeholders::_2)));
 }
@@ -109,7 +109,7 @@ void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {
         return;
     }
 
-    logger_->trace("Requête envoyée à {}.", playerID_);
+    logger_->debug("Request sent to {}.", playerID_);
     replyBuffer_.fill(0);
     listenReply();
 }

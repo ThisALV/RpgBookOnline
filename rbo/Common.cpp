@@ -27,7 +27,7 @@ auto sink_console { std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
 const std::string log_format { "[%T.%e] %^%-8l%$ - %-11n (#%t) : %v" };
 
 void loggerErrorHandler(const std::string& err) {
-    std::cerr << "Erreur de logging : " << err << std::endl;
+    std::cerr << "Logger error : " << err << std::endl;
 }
 
 } // namespace Sinks

@@ -19,8 +19,8 @@ InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids, const Participants
         msg += ' ' + std::to_string(expected) + ';';
 }
 
-const char* CancelledRequest::what() const noexcept {
-    return "CancelledRequest";
+const char* CanceledRequest::what() const noexcept {
+    return "CanceledRequest";
 }
 
 void Session::logPlayerError(spdlog::logger& logger, const byte player, const std::string& err) {
@@ -28,11 +28,11 @@ void Session::logPlayerError(spdlog::logger& logger, const byte player, const st
 }
 
 std::string Session::initStatMsg(const DiceFormula& init, const std::string& name, const int value) {
-    std::string msg { name + " vaut " };
+    std::string msg { name + " = " };
     if (init.dices == 0)
         msg += std::to_string(init.bonus);
     else
-        msg += std::to_string(init.dices) + " dé(s) 6 + " + std::to_string(init.bonus) + " = " + std::to_string(value);
+        msg += std::to_string(init.dices) + " dice(s) 6 + " + std::to_string(init.bonus) + " = " + std::to_string(value);
 
     return msg;
 }
@@ -85,7 +85,7 @@ void Session::end(Participants& participants) {
     std::vector<byte> error_ids;
     for (auto& [id, participant] : participants) {
         if (connections_.count(id) == 1) {
-            logger_.trace("Déplacement du socket du participant {}.", id);
+            logger_.trace("Moving socket of parcticipant {}...", id);
             participant.socket = std::move(connection(id));
         } else {
             error_ids.push_back(id);
@@ -93,7 +93,7 @@ void Session::end(Participants& participants) {
     }
 
     for (const byte id : error_ids) {
-        logger_.trace("Suppression du participant {}.", id);
+        logger_.debug("Removing participant {}...", id);
         participants.erase(id);
     }
 
@@ -103,9 +103,10 @@ void Session::end(Participants& participants) {
 void Session::start(std::map<byte, Particpant>& participants, const std::string& checkpoint, const bool missing_participants) {
     assert(participants.size() <= std::numeric_limits<byte>::max());
     running_ = true;
+    logger_.info("Session started.");
 
     for (auto& [id, participant] : participants) {
-        logger_.trace("Déplacement du socket du participant {}.", id);
+        logger_.trace("Moving socket of participant {}...", id);
 
         Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
 
@@ -123,11 +124,11 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
     Gameplay interface { *this };
     word beginning;
     if (checkpoint.empty()) {
-        logger_.info("Nouvelle partie sur \"{}\".", game().name);
+        logger_.info("New game on \"{}\".", game().name);
         playScene(interface, INTRO);
 
         if (!game().globalStats.empty())
-            interface.print("Statistiques globales :");
+            interface.print("Global stats :");
 
         for (const auto& [name, stat] : game().globalStats) {
             const auto [init, limits, capped, hidden, main] { stat };
@@ -229,9 +230,9 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
         }
     }
 
-    logger_.debug("global={}", stats().values());
+    logger_.debug("Global : {}", stats().values());
     for (const auto& [id, player] : players_) {
-        logger_.debug("player:{}={}", id, player);
+        logger_.debug("Player {} : {}", id, player);
         interface.sendInfos(id);
     }
     first_state_ = false;
@@ -242,7 +243,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
 }
 
 Next Session::playScene(Gameplay& interface, const word id) {
-    logger_.info("Passage à la scène {}.", id);
+    logger_.info("Go to scene {}.", id);
     current_scene_ = id;
     const Scene scene { gameBuilder().buildScene(id) };
 
@@ -260,13 +261,13 @@ Next Session::playScene(Gameplay& interface, const word id) {
 
             if (result)
                 return result;
-        } catch (const CancelledRequest&) {
+        } catch (const CanceledRequest&) {
             break;
         }
     }
 
     if (id != INTRO)
-        logger_.info("Fin du jeu.");
+        logger_.info("Game end.");
 
     return {};
 }
@@ -277,7 +278,7 @@ void Session::initPlayers(Gameplay& interface) {
 }
 
 void Session::initPlayer(Gameplay& interface, Player& target) {
-    interface.print("Stats de " + target.name());
+    interface.print("Stats of " + target.name());
     for (const auto& [name, stat] : game().playerStats) {
         const auto [init, limits, capped, hidden, main] { stat };
         const int value { init() };
@@ -292,11 +293,11 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
         interface.print(stat_msg);
     }
 
-    interface.print("Inventaires de " + target.name());
+    interface.print("Inventories of " + target.name());
     for (const auto& [name, inv] : game().playerInventories) {
         const auto& [limit, items, initial] { inv };
 
-        std::string size_msg { name + " - taille : " };
+        std::string size_msg { name + " - size : " };
         InventorySize size;
         if (limit) {
             const DiceFormula& formula { *limit };
@@ -304,10 +305,10 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
 
             size_msg += formula.dices == 0
                     ? std::to_string(*size)
-                    : std::to_string(formula.dices) + " dé(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
+                    : std::to_string(formula.dices) + " dices(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
         } else {
             size = {};
-            size_msg += "infinie";
+            size_msg += "Inf";
         }
 
         interface.print(size_msg);
@@ -321,7 +322,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
 #endif
         assert(!capacity || std::accumulate(initial.cbegin(), initial.cend(), std::size_t { 0 }, [](const std::size_t s, const auto& i) { return s + i.second; }) <= capacity);
 
-        std::string initial_msg { name + " - contenu initial :" };
+        std::string initial_msg { name + " - initial content :" };
         for (const auto& [item, qty] : initial) {
             target.add(name, item, qty);
             initial_msg += ' ' + item + '*' + std::to_string(qty);
@@ -493,10 +494,10 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         player->async_send(buffer, io::bind_executor(executor_, std::bind(&ReplyHandler::handle, &handlers.at(id), std::placeholders::_1, std::placeholders::_2)));
     }
 
-    logger_.trace("En attente de {} réponses...", ctx.limit);
+    logger_.info("Waiting for {} replies in total...", ctx.limit);
     while (ctx.counter < to_handle && running())
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
-    logger_.trace("Réponses reçues.");
+    logger_.info("Replies received.");
 
     SessionDataFactory end;
     end.makeRequest(Request::End);
@@ -534,11 +535,12 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         sendToAll(crash_data.dataWithLength());
     }
 
-    logger_.debug("replies={}", ctx.replies);
-    logger_.debug("errorIDs={}", ctx.errorIDs);
+    logger_.info("Replies : {}", ctx.replies);
+    if (!ctx.errorIDs.empty())
+        logger_.warn("Crashed players : {}", ctx.errorIDs);
 
     if (!running())
-        throw CancelledRequest {};
+        throw CanceledRequest {};
 
     return ctx.replies;
 }

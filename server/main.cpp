@@ -17,7 +17,7 @@
 #endif
 
 int main(const int argc, const char* argv[]) {
-    const std::string usage { "Utilisation : <ip> <port> <threads> <prepare_delay (ms)>" };
+    const std::string usage { "Usage : <ip> <port> <threads> <prepare_delay (ms)>" };
 
     if (argc != 5) {
         std::cerr << usage << std::endl;
@@ -31,7 +31,7 @@ int main(const int argc, const char* argv[]) {
 
     try {
         if (ip != "ipv4" && ip != "ipv6")
-            throw std::logic_error { "Protocole IP inconnu" };
+            throw std::logic_error { "Unknown IP protocol" };
 
         port = std::stoi(std::string { argv[2] });
         threads = std::stoul(std::string { argv[3] });
@@ -45,7 +45,7 @@ int main(const int argc, const char* argv[]) {
 
     bool done;
     try {
-        logger.info("Lancement du serveur...");
+        logger.info("Starting server...");
 
         const Rbo::Server::LocalGameBuilder game_builder {
             "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
@@ -66,10 +66,10 @@ int main(const int argc, const char* argv[]) {
             std::cout << "\b\b";
 
             if (err) {
-                throw std::runtime_error { "Arrêt impossible " + std::to_string(sig) + " : " + err.message() };
+                throw std::runtime_error { "Impossible shutdown " + std::to_string(sig) + " : " + err.message() };
             }
 
-            logger.debug("Signal d'arrêt {}", sig);
+            logger.debug("Shutdown signal : {}", sig);
             executor.stop();
         });
 
@@ -85,6 +85,6 @@ int main(const int argc, const char* argv[]) {
     if (!done)
         return 3;
 
-    logger.info("Arrêt du serveur.");
+    logger.info("Server stopped.");
     return 0;
 }

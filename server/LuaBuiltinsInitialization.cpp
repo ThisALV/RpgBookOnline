@@ -32,7 +32,7 @@ std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
 
 std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
     if (replies.size() != 1)
-        throw std::invalid_argument { "Pour récupérer une réponse unique, il faut 1 réponse" };
+        throw std::invalid_argument { "To retrieve an unique reply, there must be one" };
 
     const auto reply { replies.cbegin() };
     return std::make_tuple(reply->first, reply->second);
@@ -40,7 +40,7 @@ std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
 
 void InstructionsProvider::assertArgs(const bool assertion) {
     if (!assertion)
-        throw std::invalid_argument { "Arguments invalides" };
+        throw std::invalid_argument { "Invalid arguments" };
 }
 
 bool InstructionsProvider::toBoolean(const std::string& str) {
@@ -49,12 +49,12 @@ bool InstructionsProvider::toBoolean(const std::string& str) {
     else if (str == "false")
         return false;
 
-    throw std::invalid_argument { "Convertion de \"" + str + "\" en booléen impossible" };
+    throw std::invalid_argument { "Unable to convert \"" + str + "\" into boolean" };
 }
 
 void InstructionsProvider::applyToGlobal(Gameplay& ctx, const EventEffect& effect) {
     if (!effect.itemsChanges.empty())
-        throw std::logic_error { "La session ne possède pas d'inventaires ni d'objets" };
+        throw std::logic_error { "Session doesn't have any items neither inventories" };
 
     for (const auto& [stat, change] : effect.statsChanges) {
         ctx.global().change(stat, change);

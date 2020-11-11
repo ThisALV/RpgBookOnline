@@ -25,7 +25,7 @@ bool LobbyExecutor::start() {
     for (std::thread& thread : threads_)
         thread = std::thread { std::bind(&LobbyExecutor::runExecutor, this) };
 
-    logger_.trace("{} threads lancés pour l'exécution du serveur.", threads_.size());
+    logger_.info("{} given threads for server execution.", threads_.size());
 
     for (std::thread& thread : threads_)
         thread.join();

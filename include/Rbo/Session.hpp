@@ -22,7 +22,7 @@ struct UnknownPlayer : std::logic_error {
     UnknownPlayer(const byte id) : std::logic_error { "Joueur " + std::to_string(id) + " inconnu" } {}
 };
 
-struct CancelledRequest : std::exception {
+struct CanceledRequest : std::exception {
     const char* what() const noexcept override;
 };
 

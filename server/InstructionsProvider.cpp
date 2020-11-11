@@ -15,7 +15,7 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
 
     if (!result.valid()) {
         const sol::error err { result.get<sol::error>() };
-        if (std::string { err.what() } == "CancelledRequest")
+        if (std::string { err.what() } == "CanceledRequest")
             return {};
 
         throw err;
@@ -51,11 +51,11 @@ void InstructionsProvider::load() {
             continue;
 
         const std::string name { key.as<std::string>() };
-        logger_.debug("Ajout de {}.", name);
+        logger_.debug("Loading \"{}\"...", name);
 
         sol::function instruction { value.as<sol::function>() };
         error_handlers[name] = [name](const std::string& err) -> std::string {
-            return err == "CancelledRequest" ? err : name + " : " + err;
+            return err == "CanceledRequest" ? err : name + " : " + err;
         };
         instruction.error_handler = error_handlers[name];
 
