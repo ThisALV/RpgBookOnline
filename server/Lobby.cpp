@@ -36,7 +36,12 @@ Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt, cons
       session_ { lobby_io, game_builder } {}
 
 void Lobby::disconnect(const byte id, const bool crash) {
-    logger_.info("Member {} disconnected ({}). Crash = {}", id, connections_.at(id).remote_endpoint(), crash);
+    tcp::socket& client { connections_.at(id) };
+    try {
+        logger_.info("Member {} disconnected ({}). Crash = {}", id, client.remote_endpoint(), crash);
+    } catch (const boost::system::system_error& err) {
+        logger_.info("Member {} disconnected (Unable to get address) : Crash = {}", id, crash);
+    }
 
     if (!crash)
         connections_.at(id).shutdown(tcp::socket::shutdown_both);

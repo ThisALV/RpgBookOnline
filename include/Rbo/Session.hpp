@@ -15,7 +15,7 @@ class Gameplay;
 enum struct ReplyValidity : byte;
 
 struct NoPlayerRemaining : std::runtime_error {
-    NoPlayerRemaining() : std::runtime_error { "Tous les joueurs se sont déconnectés" } {}
+    NoPlayerRemaining() : std::runtime_error { "All players disconnected" } {}
 };
 
 struct UnknownPlayer : std::logic_error {
