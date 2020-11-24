@@ -117,7 +117,7 @@ void Lobby::preparation() {
     });
 
     LobbyDataFactory preparation_data;
-    preparation_data.makeState(State::Preparing);
+    preparation_data.makePreparing(prepare_delay_.count());
 
     sendToAll(preparation_data.dataWithLength());
 }
@@ -130,7 +130,7 @@ void Lobby::cancelPreparation(const bool crash) {
     logger_.info("Preparation cancelled !");
 
     LobbyDataFactory preparation_data;
-    preparation_data.makeState(State::Preparing);
+    preparation_data.makeState(State::CancelPreparing);
 
     sendToAll(preparation_data.dataWithLength());
 }

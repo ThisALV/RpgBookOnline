@@ -20,6 +20,11 @@ void LobbyDataFactory::makeState(const State state) {
     data_.add(state);
 }
 
+void LobbyDataFactory::makePreparing(const ulong delay) {
+    makeState(State::Preparing);
+    data_.putNumeric(delay);
+}
+
 void LobbyDataFactory::makeNewMember(const byte id, const std::string& name) {
     makeState(State::MemberRegistered);
     data_.add(id);

@@ -10,7 +10,7 @@ enum struct RegistrationResult : byte {
 
 enum struct State : byte {
     MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
-    AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open
+    AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing
 };
 
 enum struct YesNoQuestion : byte {
@@ -27,6 +27,7 @@ bool isInvalidIDs(const SessionResult result);
 struct LobbyDataFactory : DataFactory {
     void makeRegistration(const RegistrationResult result);
     void makeState(const State state);
+    void makePreparing(const ulong delay);
     void makeNewMember(const byte id, const std::string& name);
     void makeReady(const byte id);
     void makeDisconnect(const byte id);
