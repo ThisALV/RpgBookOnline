@@ -449,10 +449,23 @@ void Lobby::launchPreparation() {
 
 void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<bool> missing_participants) {
     assert(!(missing_participants && chkpt_name->empty()));
-    if (!chkpt_name)
+    if (!chkpt_name) {
+        LobbyDataFactory select_chkpt_data;
+        select_chkpt_data.makeState(State::SelectingCheckpoint);
+
+        sendToAllMasterHandling(select_chkpt_data.dataWithLength());
+
         chkpt_name = askCheckpoint();
-    if (!missing_participants)
+    }
+
+    if (!missing_participants) {
+        LobbyDataFactory checking_players_data;
+        checking_players_data.makeState(State::CheckingPlayers);
+
+        sendToAllMasterHandling(checking_players_data.dataWithLength());
+
         missing_participants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingParticipants);
+    }
 
     Run run { runSession(*chkpt_name, *missing_participants) };
     session_.reset();

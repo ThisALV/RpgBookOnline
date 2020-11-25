@@ -10,7 +10,8 @@ enum struct RegistrationResult : byte {
 
 enum struct State : byte {
     MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
-    AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing
+    AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing,
+    SelectingCheckpoint, CheckingPlayers
 };
 
 enum struct YesNoQuestion : byte {
