@@ -74,6 +74,9 @@ int main(const int argc, const char* argv[]) {
         });
 
         done = executor.start();
+    } catch (const boost::system::system_error& err) {
+        logger.critical(err.what());
+        return 3;
     } catch (const Rbo::Server::ScriptLoadingError& err) {
         logger.critical(err.what());
         return 2;
