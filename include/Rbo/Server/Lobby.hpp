@@ -13,11 +13,11 @@ enum struct SessionResult : byte;
 using MembersConnection = std::map<byte, tcp::socket>;
 
 struct MasterDisconnected : std::runtime_error {
-    MasterDisconnected(const byte id) : std::runtime_error { "Membre maître ID=" + std::to_string(id) + " déconnecté" } {}
+    MasterDisconnected(const byte id) : std::runtime_error { "Master [" + std::to_string(id) + "] disconnected" } {}
 };
 
 struct PreparationError : std::runtime_error {
-    PreparationError(const ErrCode& err) : std::runtime_error { "Préparation impossible : " + err.message() } {}
+    PreparationError(const ErrCode& err) : std::runtime_error { "Unable to prepare session : " + err.message() } {}
 };
 
 struct Run {
