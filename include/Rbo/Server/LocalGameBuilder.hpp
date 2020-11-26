@@ -12,23 +12,23 @@ namespace fs = std::filesystem;
 
 struct ScriptLoadingError : std::runtime_error {
     ScriptLoadingError(const fs::path& script, const std::string& msg)
-        : std::runtime_error { "Impossible de charger les instructions dans \"" + script.string() + "\" : " + msg } {}
+        : std::runtime_error { "Unable to load instructions \"" + script.string() + "\" : " + msg } {}
 };
 
 struct GameLoadingError : std::runtime_error {
-    GameLoadingError(const std::string& msg) : std::runtime_error { "Impossible de charger le jeu : " + msg } {}
+    GameLoadingError(const std::string& msg) : std::runtime_error { "Unable to load game : " + msg } {}
 };
 
 struct GameSavingError : std::runtime_error {
-    GameSavingError(const std::string& msg) : std::runtime_error { "Impossible de sauvegarder le jeu : " + msg } {}
+    GameSavingError(const std::string& msg) : std::runtime_error { "Unable to save game : " + msg } {}
 };
 
 struct SceneLoadingError : std::runtime_error {
-    SceneLoadingError(const word id, const std::string& msg) : std::runtime_error { "Impossible de charger la scène " + std::to_string(id) + " : " + msg } {}
+    SceneLoadingError(const word id, const std::string& msg) : std::runtime_error { "Unable to load scene " + std::to_string(id) + " : " + msg } {}
 };
 
 struct CheckpointAlreadyExists : std::logic_error {
-    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Le checkpoint \"" + name + "\" existe déjà" } {}
+    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Checkpoint \"" + name + "\" already" } {}
 };
 
 class LocalGameBuilder : public GameBuilder {

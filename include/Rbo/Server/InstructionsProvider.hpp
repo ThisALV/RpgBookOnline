@@ -10,7 +10,7 @@ namespace Rbo::Server {
 struct UnknownInstruction : std::logic_error {
     std::string instruction;
 
-    UnknownInstruction(const std::string& name) : std::logic_error { "Instruction \"" + name + "\" inconnue" }, instruction { name } {}
+    UnknownInstruction(const std::string& name) : std::logic_error { "Unknown instruction \"" + name + '"' }, instruction { name } {}
 };
 
 struct InstructionFailed : std::runtime_error {
@@ -20,7 +20,7 @@ struct InstructionFailed : std::runtime_error {
 };
 
 struct IllegalLuaModifications : std::runtime_error {
-    IllegalLuaModifications() : std::runtime_error { "Ressources Lua illégalement modifiées" } {}
+    IllegalLuaModifications() : std::runtime_error { "Builtins Lua objects illegally changed" } {}
 };
 
 class InstructionsProvider {

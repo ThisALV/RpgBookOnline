@@ -6,15 +6,15 @@
 namespace Rbo::Server {
 
 struct IllegalChange : std::logic_error {
-    IllegalChange() : std::logic_error { "Modification d'une table constante" } {}
+    IllegalChange() : std::logic_error { "Modifying const table" } {}
 };
 
 struct UnknownConstTable : std::logic_error {
-    UnknownConstTable() : std::logic_error { "Accès sur une table constante inconnue" } {}
+    UnknownConstTable() : std::logic_error { "This const table is unknown" } {}
 };
 
 struct AlreadyConstTable : std::logic_error {
-    AlreadyConstTable() : std::logic_error { "Vérouillage sur une table déjà constante" } {}
+    AlreadyConstTable() : std::logic_error { "Locking already locked table" } {}
 };
 
 class TablesLock {

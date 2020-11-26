@@ -7,12 +7,12 @@ namespace Rbo {
 
 struct UnknownInventory : std::logic_error {
     UnknownInventory(const std::string& name)
-        : std::logic_error { "Inventoraire \"" + name + "\" inconnu" } {}
+        : std::logic_error { "Unknown inventory \"" + name + '"' } {}
 };
 
 struct UnknownItem : std::logic_error {
     UnknownItem(const std::string& item)
-        : std::logic_error { "Item \"" + item + "\" inconnu" } {}
+        : std::logic_error { "Unknown item \"" + item + '"' } {}
 };
 
 class Inventory {
