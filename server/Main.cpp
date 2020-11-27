@@ -60,7 +60,7 @@ int main(const int argc, const char* argv[]) {
         return 1;
     }
 
-    spdlog::logger& logger { Rbo::rboLogger("main") };
+    spdlog::logger& logger { Rbo::rboLogger("Main") };
 
     bool done;
     try {
