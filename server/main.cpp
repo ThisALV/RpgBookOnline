@@ -4,17 +4,36 @@
 #include <Rbo/Server/LobbyExecutor.hpp>
 #include <Rbo/Server/LocalGameBuilder.hpp>
 
-#ifdef NDEBUG // En Debug, GDB interprête SIGINT
-#define BASIC_STOP_SIGS SIGINT, SIGTERM
+#if defined(WIN32) || defined(_WIN32)
+
+#include <Windows.h>
+
+std::function<void(const Rbo::ErrCode, const int)> lobby_stop_handler;
+
+BOOL WINAPI StopHandler(DWORD event) {
+    switch (event) {
+    case CTRL_C_EVENT:
+    case CTRL_BREAK_EVENT:
+        lobby_stop_handler(Rbo::ErrCode {}, 15);
+        return TRUE;
+    case CTRL_CLOSE_EVENT:
+        lobby_stop_handler(Rbo::ErrCode {}, 1);
+        return TRUE;
+    default:
+        return FALSE;
+    }
+}
+
 #else
-#define BASIC_STOP_SIGS SIGTERM
+
+#ifdef NDEBUG // En Debug, GDB interprète SIGINT pour mettre en pause le programme
+#define STOP_SIGS SIGHUP, SIGINT, SIGTERM
+#else
+#define STOP_SIGS SIGHUP, SIGTERM
 #endif
 
-#ifdef SIGHUP // Windows ne fournit pas SIGHUP
-#define STOP_SIGS BASIC_STOP_SIGS, SIGHUP
-#else
-#define STOP_SIGS BASIC_STOP_SIGS
 #endif
+
 
 int main(const int argc, const char* argv[]) {
     const std::string usage { "Usage : <ip> <port> <threads> <prepare_delay (ms)>" };
@@ -61,8 +80,7 @@ int main(const int argc, const char* argv[]) {
 
         Rbo::Server::LobbyExecutor executor { threads, server, lobby, logger };
 
-        Rbo::io::signal_set stop_handler { server, STOP_SIGS };
-        stop_handler.async_wait([&executor, &logger](const Rbo::ErrCode err, const int sig) {
+        const auto stop_handler = [&executor, &logger](const Rbo::ErrCode err, const int sig) {
             std::cout << "\b\b";
 
             if (err) {
@@ -71,7 +89,17 @@ int main(const int argc, const char* argv[]) {
 
             logger.debug("Shutdown signal : {}", sig);
             executor.stop();
-        });
+        };
+
+#if defined(WIN32) || defined(_WIN32)
+        lobby_stop_handler = stop_handler;
+
+        if (!SetConsoleCtrlHandler(StopHandler, TRUE))
+            logger.warn("Stop handler initialization failed");
+#else
+        Rbo::io::signal_set stop_sigs_handler { server, STOP_SIGS };
+        stop_sigs_handler.async_wait(stop_handler);
+#endif
 
         done = executor.start();
     } catch (const boost::system::system_error& err) {
