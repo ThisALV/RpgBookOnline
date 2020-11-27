@@ -143,10 +143,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
 
             const std::string stat_msg { initStatMsg(init, name, value) };
             if (!hidden) {
-                SessionDataFactory global_stat;
                 interface.sendGlobalStat(name);
-
-                sendToAll(global_stat.dataWithLength());
                 interface.print(stat_msg);
             }
 
