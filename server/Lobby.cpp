@@ -472,22 +472,20 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
     members_.clear();
     connections_.clear();
 
-    if (run.result != SessionResult::Crashed) {
-        logger_.trace("Sending session's result to participants...");
+    logger_.trace("Sending session's result to participants...");
 
-        for (auto& [id, participant] : run.participants) {
-            members_.insert({ id, Member { participant.name, false } });
-            connections_.insert({ id, std::move(participant.socket) });
-        }
-
-        LobbyDataFactory run_data;
-        if (isInvalidIDs(run.result))
-            run_data.makeInvalidIDs(run.result, run.expectedIDs);
-        else
-            run_data.makeResult(run.result);
-
-        sendToAllMasterHandling(run_data.dataWithLength());
+    for (auto& [id, participant] : run.participants) {
+        members_.insert({ id, Member { participant.name, false } });
+        connections_.insert({ id, std::move(participant.socket) });
     }
+
+    LobbyDataFactory run_data;
+    if (isInvalidIDs(run.result))
+        run_data.makeInvalidIDs(run.result, run.expectedIDs);
+    else
+        run_data.makeResult(run.result);
+
+    sendToAllMasterHandling(run_data.dataWithLength());
 
     if (!isParametersError(run.result))
         return;

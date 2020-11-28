@@ -234,7 +234,12 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
     }
     first_state_ = false;
 
-    for (Next next { beginning }; next && running(); next = playScene(interface, *next));
+    try {
+        for (Next next { beginning }; next && running(); next = playScene(interface, *next));
+    } catch (const std::exception& err) {
+        end(participants);
+        throw err;
+    }
 
     end(participants);
 }
