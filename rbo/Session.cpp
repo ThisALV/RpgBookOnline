@@ -85,7 +85,7 @@ void Session::end(Participants& participants) {
     std::vector<byte> error_ids;
     for (auto& [id, participant] : participants) {
         if (connections_.count(id) == 1) {
-            logger_.trace("Moving socket of parcticipant {}...", id);
+            logger_.trace("Moving socket of participant {}...", id);
             participant.socket = std::move(connection(id));
         } else {
             error_ids.push_back(id);
