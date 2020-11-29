@@ -439,6 +439,9 @@ void Lobby::launchPreparation() {
         master_dc_data.makeState(State::MasterDisconnected);
 
         sendToAll(master_dc_data.dataWithLength());
+
+        for (auto& member : members_)
+            member.second.ready = false;
     } catch (const NoPlayerRemaining& err) {
         logger_.error(err.what());
     }
