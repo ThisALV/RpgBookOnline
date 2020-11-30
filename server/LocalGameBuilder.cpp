@@ -10,8 +10,12 @@ namespace Rbo::Server {
 RandomEngine LocalGameBuilder::chkpt_id_rd_ { now() };
 
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts, const fs::path& scenes, const fs::path& scripts_dir)
-    : game_ { game }, chkpts_ { chkpts }, scenes_ { scenes },
-      logger_ { rboLogger("GameBuilder") }, exec_ctx_ {}, provider_ { exec_ctx_, logger_ }
+    : game_ { game },
+      chkpts_ { chkpts },
+      scenes_ { scenes },
+      logger_ { rboLogger("GameBuilder") },
+      exec_ctx_ {},
+      provider_ { exec_ctx_, logger_ }
 {
     logger_.info("Loading scenes...");
     try {
