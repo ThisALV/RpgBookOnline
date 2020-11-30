@@ -121,6 +121,7 @@ public:
     Player& player(const byte);
     const Player& player(const byte) const;
 
+    std::vector<byte> ids() const;
     Players players();
     ConstPlayers players() const;
     std::size_t count() const { return players_.size(); }

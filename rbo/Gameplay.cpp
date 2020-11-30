@@ -56,15 +56,7 @@ Player& Gameplay::player(const byte id) {
 }
 
 std::vector<byte> Gameplay::players() const {
-    const Players players { ctx_.players() };
-    std::vector<byte> ids;
-    ids.resize(ctx_.count(), 0);
-
-    std::transform(players.cbegin(), players.cend(), ids.begin(), [](const auto p) {
-        return p.first;
-    });
-
-    return ids;
+    return ctx_.ids();
 }
 
 OptionsList Gameplay::names() const {

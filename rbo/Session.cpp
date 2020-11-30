@@ -404,6 +404,17 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
     return gameBuilder().save(chkpt_name, { id, stats().raw(), leader(), states });
 }
 
+std::vector<byte> Session::ids() const {
+    std::vector<byte> ids;
+    ids.resize(count(), 0);
+
+    std::transform(players_.cbegin(), players_.cend(), ids.begin(), [](const auto& p) -> byte {
+        return p.first;
+    });
+
+    return ids;
+}
+
 Players Session::players() {
     std::map<byte, Player*> ptrs;
     std::transform(players_.begin(), players_.end(), std::inserter(ptrs, ptrs.end()), [](auto& p) -> std::pair<byte, Player*> {
@@ -564,8 +575,8 @@ void Session::sendTo(const byte target_id, const Data& data) {
 void Session::sendToAll(const Data& data) {
     const io::const_buffer buffer { trunc(data) };
 
-    for (auto& [id, connection] : connections_) {
-        const ErrCode err { trySend(connection, buffer) };
+    for (const byte id : ids()) {
+        const ErrCode err { trySend(connections_.at(id), buffer) };
 
         if (err) {
             logPlayerError(logger_, id, err.message());

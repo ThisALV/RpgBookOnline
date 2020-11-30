@@ -65,8 +65,8 @@ void Lobby::disconnect(const byte id, const bool crash) {
 
 void Lobby::sendToAll(const Data& data) {
     const io::const_buffer buffer { trunc(data) };
-    for (auto& [id, connection] : connections_) {
-        const ErrCode send_err { trySend(connection, buffer) };
+    for (const byte id : ids()) {
+        const ErrCode send_err { trySend(connections_.at(id), buffer) };
 
         if (send_err) {
             logger_.error("Sending failed for {} : {}", id, send_err.message());
