@@ -33,28 +33,28 @@ EnemyPtr Enemy::create(const EnemyDescriptor& enemy) {
 
 void Enemy::hit(const int dmg) {
     if (dmg < 0)
-        throw std::invalid_argument { "Les dégâts ne peuvent pas être négatifs" };
+        throw std::invalid_argument { "Damages must be positive (else, it's damage)" };
 
     stats_.change("hp", -dmg);
 }
 
 void Enemy::heal(const int hp) {
     if (hp < 0)
-        throw std::invalid_argument { "Les soins ne peuvent pas être négatifs" };
+        throw std::invalid_argument { "Heals HP must be positive (else, it's healing)" };
 
     stats_.change("hp", hp);
 }
 
 void Enemy::buff(const int bonus) {
     if (bonus < 0)
-        throw std::invalid_argument { "Les bonus de dégâts ne peuvent pas être négatifs" };
+        throw std::invalid_argument { "Damages buff must be positive (else, it's unbuff)" };
 
     stats_.change("skill", bonus);
 }
 
 void Enemy::unbuff(const int malus) {
     if (malus < 0)
-        throw std::invalid_argument { "Les malus de dégâts ne peuvent pas être négatifs" };
+        throw std::invalid_argument { "Damages unbuff must be positive (else, it's buff)" };
 
     stats_.change("skill", -malus);
 }

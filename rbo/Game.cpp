@@ -199,24 +199,24 @@ bool Game::hasItem(const std::string& entry) const {
 std::string Game::getMessage(const Error Error) {
     switch (Error) {
     case Error::InitialInventories:
-        return "Inventaires initiaux invalides : manque de place ou par objets inconnus";
+        return "Invalid initial inventories : No more space or unknown items";
     case Error::Bonuses:
-        return "Bonus invalides : statistiques ou objets inconnus";
+        return "Invalid buff : unknown stats or items";
     case Error::Effects:
-        return "Effets invalides : statistiques inconnues";
+        return "Invalid effects : unknown stats";
     case Error::Groups:
-        return "Groupes d'ennemis invalides : ennemis inconnus";
+        return "Invalid enemies group : unknown enemies";
     case Error::RestGivables:
-        return "Objets à donner pendant repos invalides : objets inconnus";
+        return "Invalid rest properties : unknown giveable items";
     case Error::RestAvailables:
-        return "Objets à utiliser pendant repos invalides : objets ou effets inconnus";
+        return "Invalid rest properties : unknown consumable items or effects";
     case Error::DeathConditions:
-        return "Conditions de morts invalides : statistiques ou opérateurs inconnus";
+        return "Invalid death conditions : unknown stats or condition operators";
     case Error::GameEndConditions:
-        return "Conditions de fin invalides : statistiques ou opérateurs inconnus";
+        return "Invalid game end conditions : unknown stats or condition operators";
     }
 
-    return "Cela ne doit pas arriver";
+    throw std::invalid_argument { "This isn't an error" };
 }
 
 std::vector<std::string> Game::getNames(const StatsDescriptors& stats) {
