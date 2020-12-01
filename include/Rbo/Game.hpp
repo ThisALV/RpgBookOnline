@@ -13,10 +13,10 @@ struct EventEffect {
     std::unordered_map<std::string, int> statsChanges;
     std::unordered_map<std::string, int> itemsChanges;
 
-    bool operator==(const EventEffect&) const;
+    bool operator==(const EventEffect& rhs) const;
 
-    void apply(Player&) const;
-    ItemsChanges simulateItemsChanges(const Player&) const;
+    void apply(Player& target) const;
+    ItemsChanges simulateItemsChanges(const Player& possibleTarget) const;
 };
 
 using Effects = std::unordered_map<std::string, EventEffect>;
@@ -27,7 +27,7 @@ struct RestProperties {
 };
 
 struct Condition {
-    using Operator = std::function<bool(const int, const int)>;
+    using Operator = std::function<bool(const int statValue, const int conditionThreshold)>;
 
     static const std::unordered_map<std::string, Operator> operators;
 
@@ -35,7 +35,7 @@ struct Condition {
     std::string op;
     int value;
 
-    bool test(const StatsManager&) const;
+    bool test(const StatsManager& stats) const;
 };
 
 struct Game {
@@ -44,7 +44,7 @@ struct Game {
         RestAvailables, DeathConditions, GameEndConditions
     };
 
-    static std::string getMessage(const Error);
+    static std::string getMessage(const Error errType);
 
     std::string name;
     StatsDescriptors globalStats;
@@ -61,9 +61,9 @@ struct Game {
     bool voteOnLeaderDeath;
     bool voteLeader;
 
-    const EventEffect& effect(const std::string&) const;
-    const EnemyDescriptor& enemy(const std::string&) const;
-    const GroupDescriptor& group(const std::string&) const;
+    const EventEffect& effect(const std::string& name) const;
+    const EnemyDescriptor& enemy(const std::string& name) const;
+    const GroupDescriptor& group(const std::string& name) const;
 
     std::vector<std::string> player() const;
     std::vector<std::string> global() const;
@@ -74,10 +74,10 @@ struct Game {
     bool hasGlobal(const std::string& stat) const { return globalStats.count(stat) == 1; }
     bool hasStat(const std::string& stat) const { return playerStats.count(stat) == 1; }
     bool hasEffect(const std::string& name) const { return eventEffects.count(name) == 1; }
-    bool hasItem(const std::string&) const;
+    bool hasItem(const std::string& itemEntry) const;
 
 private:
-    static std::vector<std::string> getNames(const StatsDescriptors&);
+    static std::vector<std::string> getNames(const StatsDescriptors& stats);
 };
 
 } // namespace Rbo

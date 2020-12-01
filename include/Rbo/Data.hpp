@@ -12,7 +12,7 @@ const std::size_t STR_LENGTH_SIZE { 2 };
 using DataBuffer = std::array<byte, MAX_LENGTH>;
 
 struct BufferOverflow : std::logic_error {
-    BufferOverflow() : std::logic_error { "Overflow of " + std::to_string(MAX_LENGTH) + " bytes" } {}
+    BufferOverflow() : std::logic_error { "Overflow : bigger than " + std::to_string(MAX_LENGTH) + " bytes" } {}
 };
 
 class Data {
@@ -35,7 +35,7 @@ private:
 
 public:
     Data();
-    Data(const std::vector<byte>&);
+    Data(const std::vector<byte>& initialData);
 
     std::size_t count() const { return bytes_; }
     const DataBuffer& buffer() const { return buffer_; };

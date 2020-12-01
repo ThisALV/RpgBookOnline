@@ -31,11 +31,11 @@ struct Run {
 
 class Lobby {
 private:
-    static void logMemberError(spdlog::logger&, const byte, const ErrCode&);
-    static void logRegisteringError(spdlog::logger&, const tcp::endpoint, const ErrCode&);
+    static void logMemberError(spdlog::logger& lobby_logger, const byte member_id, const ErrCode& err);
+    static void logRegisteringError(spdlog::logger& lobby_logger, const tcp::endpoint client, const ErrCode& err);
 
     struct RemoteEndpointHash {
-        std::size_t operator()(const tcp::endpoint&) const;
+        std::size_t operator()(const tcp::endpoint& client) const;
     };
 
     template<typename ValueT>
@@ -65,27 +65,27 @@ private:
     Session session_;
     byte master_;
 
-    void disconnect(const byte, const bool = false);
-    void sendToAll(const Data&);
-    void sendToAllMasterHandling(const Data&);
+    void disconnect(const byte member_id, const bool is_crash = false);
+    void sendToAll(const Data& data);
+    void sendToAllMasterHandling(const Data& data);
     ReceiveBuffer receiveFromMaster();
-    void sendToMaster(const Data&);
+    void sendToMaster(const Data& data);
 
     void acceptMember();
-    void listenMember(const byte);
-    void registerMember(const boost::system::error_code, tcp::socket);
-    void handleMemberRequest(const byte, const boost::system::error_code, const std::size_t);
+    void listenMember(const byte id);
+    void registerMember(const boost::system::error_code err, tcp::socket connection);
+    void handleMemberRequest(const byte member_id, const boost::system::error_code err, const std::size_t);
     void launchPreparation();
-    void makeSession(std::optional<std::string> = {}, std::optional<bool> = {});
-    Run runSession(const std::string&, const bool = false);
+    void makeSession(std::optional<std::string> checkpt_final_name = {}, std::optional<bool> missing_participants = {});
+    Run runSession(const std::string& checkpt_final_name, const bool missing_participants = false);
 
     void preparation();
-    void cancelPreparation(const bool = false);
+    void cancelPreparation(const bool is_crash = false);
     std::string askCheckpoint();
-    bool askYesNo(const YesNoQuestion);
+    bool askYesNo(const YesNoQuestion question);
 
 public:
-    Lobby(io::io_context&, const tcp::endpoint&, const GameBuilder&, const ulong = 5);
+    Lobby(io::io_context& execution_ctx, const tcp::endpoint& server, const GameBuilder& game_builder, const ulong prepare_delay_ms = 5000);
 
     Lobby(const Lobby&) = delete;
     Lobby& operator=(const Lobby&) = delete;
@@ -93,7 +93,7 @@ public:
     bool operator==(const Lobby&) const = delete;
 
     void open();
-    void close(const bool = false);
+    void close(const bool is_crash = false);
 
     ushort port() const { return acceptor_endpt_.port(); }
     bool registered(const byte id) const { return members().count(id) == 1; }

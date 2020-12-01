@@ -36,7 +36,7 @@ struct InvalidIDs : std::logic_error {
 
     std::string msg;
 
-    InvalidIDs(const std::vector<byte>&, const ParticipantsValidity);
+    InvalidIDs(const std::vector<byte>& expectedIDs, const ParticipantsValidity errType);
 
     virtual const char* what() const noexcept override { return msg.data(); }
 };
@@ -55,8 +55,8 @@ using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
 private:
-    static void logPlayerError(spdlog::logger&, const byte, const std::string&);
-    static std::string initStatMsg(const DiceFormula&, const std::string&, const int);
+    static void logPlayerError(spdlog::logger& sessionlogger, const byte playerID, const std::string& msg);
+    static std::string initStatMsg(const DiceFormula& initFormula, const std::string& statName, const int statValue);
 
     io::io_context::strand executor_;
     spdlog::logger& logger_;
@@ -72,35 +72,35 @@ private:
 
     const GameBuilder& game_builer_;
 
-    void initPlayers(Gameplay&);
-    void initPlayer(Gameplay&, Player&);
-    void restaurePlayer(const byte, const PlayerState&);
+    void initPlayers(Gameplay& interface);
+    void initPlayer(Gameplay& interface, Player& target);
+    void restaurePlayer(const byte targetID, const PlayerState& previousState);
 
-    Next playScene(Gameplay&, const word);
-    void end(Participants&);
+    Next playScene(Gameplay& interface, const word sceneID);
+    void end(Participants& initialParticipantsData);
 
-    void removePlayer(const byte);
+    void removePlayer(const byte targetID);
 
-    tcp::socket& connection(const byte);
+    tcp::socket& connection(const byte playerID);
 
 public:
     friend void confirmController(const io::mutable_buffer&);
     friend struct RangeController;
 
-    Session(io::io_context&, const GameBuilder&);
+    Session(io::io_context& executionCtx, const GameBuilder& gameBuilder);
 
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
 
     bool operator==(const Session&) const = delete;
 
-    void start(Participants&, const std::string& = "", const bool = false);
+    void start(Participants& initialParticipantsData, const std::string& checkpt = "", const bool missing_participants = false);
 
     void stop() { running_ = false; }
     bool running() const { return running_; }
     void reset();
 
-    std::string checkpoint(const std::string&, const word) const;
+    std::string checkpoint(const std::string& generic_name, const word sceneID) const;
 
     const Game& game() const { return game_; }
 
@@ -109,17 +109,17 @@ public:
 
     const GameBuilder& gameBuilder() const { return game_builer_; }
 
-    Replies request(const byte, const Data&, ReplyController, const bool);
-    void sendTo(const byte, const Data&);
-    void sendToAll(const Data&);
+    Replies request(const byte targetsID, const Data& request_data, ReplyController controller, const bool wait_all_players);
+    void sendTo(const byte target, const Data& data);
+    void sendToAll(const Data& data);
 
-    void disconnect(const byte, const bool = false);
+    void disconnect(const byte target, const bool is_crash = false);
 
     byte leader() const { return leader_; }
-    void switchLeader(const byte);
+    void switchLeader(const byte new_leader);
 
-    Player& player(const byte);
-    const Player& player(const byte) const;
+    Player& player(const byte id);
+    const Player& player(const byte id) const;
 
     std::vector<byte> ids() const;
     Players players();
@@ -128,7 +128,7 @@ public:
     bool playersRemaining() const { return !players_.empty(); }
 
     const std::map<byte, PlayerState>& lastStates() const { return last_states_; }
-    PlayerStateChanges getChanges(const byte);
+    PlayerStateChanges getChanges(const byte playerID);
 };
 
 } // namespace Rbo

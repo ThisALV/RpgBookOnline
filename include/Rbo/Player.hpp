@@ -6,13 +6,11 @@
 namespace Rbo {
 
 struct UnknownInventory : std::logic_error {
-    UnknownInventory(const std::string& name)
-        : std::logic_error { "Unknown inventory \"" + name + '"' } {}
+    UnknownInventory(const std::string& name) : std::logic_error { "Unknown inventory \"" + name + '"' } {}
 };
 
 struct UnknownItem : std::logic_error {
-    UnknownItem(const std::string& item)
-        : std::logic_error { "Unknown item \"" + item + '"' } {}
+    UnknownItem(const std::string& item) : std::logic_error { "Unknown item \"" + item + '"' } {}
 };
 
 class Inventory {
@@ -20,18 +18,18 @@ public:
     explicit Inventory(const std::vector<std::string>&, const InventorySize& = {});
     Inventory() : Inventory { {}, {} } {}
 
-    bool operator==(const Inventory&) const;
+    bool operator==(const Inventory& rhs) const;
 
-    bool add(const std::string&, const uint);
-    bool consume(const std::string&, const uint);
+    bool add(const std::string& item, const uint qty);
+    bool consume(const std::string& item, const uint qty);
 
     uint size() const;
-    uint count(const std::string&) const;
+    uint count(const std::string& item) const;
     bool has(const std::string& item) const { return count(item) != 0; }
 
     bool limited() const { return size_.has_value(); }
     InventorySize maxSize() const { return size_; }
-    bool setMaxSize(const InventorySize);
+    bool setMaxSize(const InventorySize newMaxSize);
 
     const InventoryContent& content() const { return content_; }
 
@@ -39,7 +37,7 @@ private:
     InventorySize size_;
     InventoryContent content_;
 
-    void checkExists(const std::string&) const;
+    void checkExists(const std::string& item) const;
 };
 
 class Player {
@@ -56,8 +54,8 @@ private:
         None = 0, Enable = 1, Disable = -1
     };
 
-    void readjustStat(const std::string&);
-    void refreshBonuses(const BonusAction, const std::string&, const std::string&, const uint);
+    void readjustStat(const std::string& statName);
+    void refreshBonuses(const BonusAction action, const std::string& inv, const std::string& name, const uint qtyModified);
 
 public:
     friend void testRefreshBonuses(Player&, const int, const std::string&, const std::string&, const uint);
@@ -66,25 +64,25 @@ public:
     inline static const int STAT_MAX { StatsLimits::max() };
     inline static const StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
 
-    Player(const byte, const std::string&, const std::vector<std::string>&, const ItemsList&, const ItemsBonuses&);
+    Player(const byte id, const std::string& name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonuses& bonuses);
 
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
 
-    Player(Player&&) = default;
-    Player& operator=(Player&&) = default;
+    Player(Player&& other) = default;
+    Player& operator=(Player&& rhs) = default;
 
     bool operator==(const Player&) const = delete;
 
-    bool same(const Player& p) const { return id() == p.id(); }
+    bool same(const Player& other) const { return id() == other.id(); }
     byte id() const { return id_; }
     const std::string& name() const { return name_; }
 
-    bool add(const std::string&, const std::string&, const uint);
-    bool consume(const std::string&, const std::string&, const uint);
+    bool add(const std::string& inventory, const std::string& item, const uint qty);
+    bool consume(const std::string& inventory, const std::string& item, const uint qty);
 
-    Inventory& inventory(const std::string&);
-    const Inventory& inventory(const std::string&) const;
+    Inventory& inventory(const std::string& name);
+    const Inventory& inventory(const std::string& name) const;
 
     StatsManager& stats() { return stats_; }
     const StatsManager& stats() const { return stats_; }

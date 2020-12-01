@@ -33,7 +33,7 @@ public:
 
     bool operator==(const TablesLock&) const = delete;
 
-    void operator()(sol::table);
+    void operator()(sol::table target_to_lock);
     sol::table get(const sol::table key) { return index_[key].get<sol::table>(); }
 };
 

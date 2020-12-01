@@ -14,9 +14,9 @@ class Enemy {
 private:
     StatsManager stats_;
 
-    Enemy(const EnemyDescriptor&);
+    Enemy(const EnemyDescriptor& descriptor);
 public:
-    static EnemyPtr create(const EnemyDescriptor&);
+    static EnemyPtr create(const EnemyDescriptor& descriptor);
 
     Enemy(const Enemy&) = delete;
     Enemy& operator=(const Enemy&) = delete;
@@ -27,10 +27,10 @@ public:
     uint hp() const { return stats_.get("hp"); }
     uint skill() const { return stats_.get("skill"); }
 
-    void hit(const int);
-    void heal(const int);
-    void buff(const int);
-    void unbuff(const int);
+    void hit(const int dmg);
+    void heal(const int hp);
+    void buff(const int bonus);
+    void unbuff(const int malus);
 };
 
 using EnemiesGroup = std::unordered_map<std::string, EnemyPtr>;

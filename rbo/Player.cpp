@@ -14,7 +14,12 @@ void Player::refreshBonuses(const BonusAction action, const std::string& inv, co
     }
 }
 
-Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonuses& bonuses) : id_ { id }, name_ { name }, stats_ { stats }, bonuses_ { bonuses } {
+Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonuses& bonuses) :
+    id_ { id },
+    name_ { name },
+    stats_ { stats },
+    bonuses_ { bonuses }
+{
     std::transform(inventories.cbegin(), inventories.cend(), std::inserter(inventories_, inventories_.begin()), [](const auto& inv) {
         return PlayerInventories::value_type { inv.first, Inventory { inv.second } };
     });

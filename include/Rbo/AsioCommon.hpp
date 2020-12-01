@@ -14,8 +14,8 @@ using ErrCode = boost::system::error_code;
 using tcp = io::ip::tcp;
 using ReceiveBuffer = std::array<byte, 100>;
 
-io::const_buffer trunc(const Data&);
-ErrCode trySend(tcp::socket&, const io::const_buffer&);
+io::const_buffer trunc(const Data& data);
+ErrCode trySend(tcp::socket& connection, const io::const_buffer& buffer);
 
 } // namespace Rbo
 

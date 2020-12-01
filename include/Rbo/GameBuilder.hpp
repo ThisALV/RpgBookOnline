@@ -24,9 +24,9 @@ struct GameBuilder {
     virtual ~GameBuilder() = default;
 
     virtual Game operator()() const = 0;
-    virtual GameState load(const std::string&) const = 0;
-    virtual std::string save(const std::string&, const GameState&) const = 0;
-    virtual Scene buildScene(const word) const = 0;
+    virtual GameState load(const std::string& checkpt_final_name) const = 0;
+    virtual std::string save(const std::string& checkpt_name, const GameState& state) const = 0;
+    virtual Scene buildScene(const word id) const = 0;
 };
 
 } // namespace Rbo

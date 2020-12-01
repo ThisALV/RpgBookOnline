@@ -28,7 +28,7 @@ struct SceneLoadingError : std::runtime_error {
 };
 
 struct CheckpointAlreadyExists : std::logic_error {
-    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Checkpoint \"" + name + "\" already" } {}
+    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Checkpoint \"" + name + "\" already exists" } {}
 };
 
 class LocalGameBuilder : public GameBuilder {
@@ -44,7 +44,7 @@ private:
     InstructionsProvider provider_;
 
 public:
-    LocalGameBuilder(const fs::path&, const fs::path&, const fs::path&, const fs::path&);
+    LocalGameBuilder(const fs::path& game_file, const fs::path& checkpts_file, const fs::path& scenes_file, const fs::path& instructions_dir);
     virtual ~LocalGameBuilder() = default;
 
     LocalGameBuilder(const LocalGameBuilder&) = delete;
@@ -53,9 +53,9 @@ public:
     bool operator==(const LocalGameBuilder&) const = delete;
 
     virtual Game operator()() const override;
-    virtual GameState load(const std::string&) const override;
-    virtual std::string save(const std::string&, const GameState&) const override;
-    virtual Scene buildScene(const word) const override;
+    virtual GameState load(const std::string& checkpt_final_name) const override;
+    virtual std::string save(const std::string& checkpt_generic_name, const GameState& state) const override;
+    virtual Scene buildScene(const word scene_id) const override;
 };
 
 } // namespace Rbo::Server

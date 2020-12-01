@@ -42,12 +42,12 @@ enum struct ReplyValidity : byte;
 
 using OptionsList = std::map<byte, std::string>;
 using Replies = std::map<byte, byte>;
-using ReplyController = std::function<void(const byte)>;
+using ReplyController = std::function<void(const byte reply)>;
 
 using Next = std::optional<word>;
-using Instruction = std::function<Next(Gameplay&)>;
+using Instruction = std::function<Next(Gameplay& interface)>;
 using Scene = std::vector<Instruction>;
-using SceneBuilder = std::function<Scene(const Game&, const word)>;
+using SceneBuilder = std::function<Scene(const Game& currentGame, const word scene)>;
 
 using Players = std::map<byte, Player*>;
 using ConstPlayers = std::map<byte, const Player*>;
@@ -86,7 +86,7 @@ struct ItemBonus {
     std::string stat;
     int bonus;
 
-    bool operator==(const ItemBonus&) const;
+    bool operator==(const ItemBonus& rhs) const;
 };
 
 struct EnemyDescriptor {
@@ -97,7 +97,7 @@ struct EnemyDescriptor {
 struct InvalidReply : std::logic_error {
     ReplyValidity type;
 
-    InvalidReply(const ReplyValidity);
+    InvalidReply(const ReplyValidity errorType);
 };
 
 struct PlayerCheckingResult {
@@ -119,7 +119,7 @@ struct Stat {
     bool hidden { false };
     bool main { false };
 
-    bool operator==(const Stat&) const;
+    bool operator==(const Stat& rhs) const;
     bool operator!=(const Stat& rhs) const { return !(*this == rhs); }
 };
 
@@ -150,12 +150,12 @@ struct InventoryDescriptor {
 };
 
 ulong now();
-std::string itemEntry(const std::string&, const std::string&);
-std::pair<std::string, std::string> splitItemEntry(const std::string&);
-bool contains(const std::vector<std::string>&, const std::string&);
-byte vote(const Replies&);
+std::string itemEntry(const std::string& inventory, const std::string& item);
+std::pair<std::string, std::string> splitItemEntry(const std::string& itemEntry);
+bool contains(const std::vector<std::string>& strs, const std::string& element);
+byte vote(const Replies& requestResults);
 
-spdlog::logger& rboLogger(const std::string&);
+spdlog::logger& rboLogger(const std::string& name);
 
 template<typename NumType>
 std::vector<byte> decompose(const NumType value) {

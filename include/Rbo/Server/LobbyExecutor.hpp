@@ -22,8 +22,12 @@ private:
 
 public:
     LobbyExecutor(const std::size_t threads, io::io_context& server, Lobby& lobby, spdlog::logger& logger)
-        : threads_ { threads }, server_ { server }, lobby_ { lobby }, logger_ { logger },
-          closed_ { false }, error_ { false }
+        : threads_ { threads },
+          server_ { server },
+          lobby_ { lobby },
+          logger_ { logger },
+          closed_ { false },
+          error_ { false }
     {
         assert(threads >= 2);
     }

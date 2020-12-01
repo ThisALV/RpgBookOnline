@@ -37,17 +37,17 @@ public:
     Replies askConfirm(const byte target, const bool wait = true);
     Replies askYesNo(const byte target, const std::string& question, const bool wait = true);
 
-    PlayerCheckingResult checkPlayer(const byte);
+    PlayerCheckingResult checkPlayer(const byte id);
     bool checkGame();
 
     // print - Throw : NoPlayerRemaining
-    void print(const std::string&, const byte = ALL_PLAYERS);
+    void print(const std::string& msg, const byte target = ALL_PLAYERS);
 
     // send et end - Throw : NoPlayerRemaining
-    void sendGlobalStat(const std::string&);
-    void sendInfos(const byte);
-    void sendBattleInfos(const GroupDescriptor&);
-    void sendBattleAtk(const byte, const std::string&, const int);
+    void sendGlobalStat(const std::string& statName);
+    void sendInfos(const byte playerInfosID);
+    void sendBattleInfos(const GroupDescriptor& enemiesGroupDescriptor);
+    void sendBattleAtk(const byte playerAtk, const std::string& enemiesName, const int dmgs);
     void sendBattleEnd();
 };
 

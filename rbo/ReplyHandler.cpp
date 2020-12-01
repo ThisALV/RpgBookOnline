@@ -12,9 +12,6 @@ ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& log
       controlValidity { controller },
       playerID_ { p_id } {}
 
-ReplyHandler::NetworkError::NetworkError(const std::string& op, const ErrCode& err)
-        : std::runtime_error { op + " : " + err.category().name() + (" - " + err.message()) } {}
-
 void ReplyHandler::handleError(const NetworkError& err) const {
     logger_->error("[ReplyHandler {}] {}", playerID_, err.what());
     ctx_->errorIDs.push_back(playerID_);
