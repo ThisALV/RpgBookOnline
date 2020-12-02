@@ -28,6 +28,7 @@ class Data;
 
 struct SessionDataFactory : DataFactory {
     void makeData(const DataType type);
+    void makeStart(const std::string& game_name);
     void makeRequest(const Request type);
     void makeRange(const std::string& msg, const byte min, const byte max);
     void makePossibilities(const std::string& msg, const OptionsList& options);

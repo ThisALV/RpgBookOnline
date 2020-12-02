@@ -15,6 +15,11 @@ void SessionDataFactory::makeData(const DataType type) {
     data_.add(type);
 }
 
+void SessionDataFactory::makeStart(const std::string& game_name) {
+    makeData(DataType::Start);
+    data_.put(game_name);
+}
+
 void SessionDataFactory::makeRequest(const Request type) {
     makeData(DataType::Request);
     data_.add(type);

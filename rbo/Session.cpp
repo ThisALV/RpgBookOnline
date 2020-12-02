@@ -117,7 +117,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
     stats_ = { game().global() };
 
     SessionDataFactory start_msg;
-    start_msg.makeData(DataType::Start);
+    start_msg.makeStart(game().name);
 
     sendToAll(start_msg.dataWithLength());
 
