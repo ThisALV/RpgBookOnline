@@ -280,7 +280,7 @@ void Session::initPlayers(Gameplay& interface) {
 }
 
 void Session::initPlayer(Gameplay& interface, Player& target) {
-    interface.print("Stats of " + target.name());
+    interface.print("Stats of " + target.name() + " :");
     for (const auto& [name, stat] : game().playerStats) {
         const auto [init, limits, capped, hidden, main] { stat };
         const int value { init() };
@@ -295,7 +295,7 @@ void Session::initPlayer(Gameplay& interface, Player& target) {
         interface.print(stat_msg);
     }
 
-    interface.print("Inventories of " + target.name());
+    interface.print("Inventories of " + target.name() + " :");
     for (const auto& [name, inv] : game().playerInventories) {
         const auto& [limit, items, initial] { inv };
 
