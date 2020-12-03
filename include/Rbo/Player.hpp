@@ -58,8 +58,6 @@ private:
     void refreshBonuses(const BonusAction action, const std::string& inv, const std::string& name, const uint qtyModified);
 
 public:
-    friend void testRefreshBonuses(Player&, const int, const std::string&, const std::string&, const uint);
-
     inline static const int STAT_MIN { StatsLimits::min() };
     inline static const int STAT_MAX { StatsLimits::max() };
     inline static const StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
