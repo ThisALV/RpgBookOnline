@@ -89,7 +89,6 @@ void InstructionsProvider::initBuiltins() {
     ctx_.new_usertype<std::map<byte, std::string>>( "ByteWithString", sol::constructors<std::map<byte, std::string>()>(), "iterable", luaContainer<std::map<byte, std::string>>);
     ctx_.new_usertype<std::unordered_map<std::string, std::string>>( "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
     ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
-    ctx_.new_usertype<EnemiesGroup>("Group", sol::constructors<EnemiesGroup()>(), "iterable", luaContainer<EnemiesGroup>);
 
     sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
@@ -141,7 +140,7 @@ void InstructionsProvider::initBuiltins() {
     effect_type["apply"] = &EventEffect::apply;
     effect_type["simulateItemsChanges"] = &EventEffect::simulateItemsChanges;
 
-    sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy", "create", &Enemy::create) };
+    sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy") };
     enemy_type["alive"] = &Enemy::alive;
     enemy_type["hp"] = &Enemy::hp;
     enemy_type["skill"] = &Enemy::skill;
@@ -149,6 +148,23 @@ void InstructionsProvider::initBuiltins() {
     enemy_type["heal"] = &Enemy::heal;
     enemy_type["buff"] = &Enemy::buff;
     enemy_type["unbuff"] = &Enemy::unbuff;
+
+    sol::usertype<EnemiesGroup> group { ctx_.new_usertype<EnemiesGroup>("EnemiesGroup") };
+    group["defeated"] = &EnemiesGroup::defeated;
+    group["lastPos"] = &EnemiesGroup::lastPos;
+    group["get"] = sol::overload(
+        sol::resolve<Enemy&(const std::string&)>(&EnemiesGroup::get),
+        sol::resolve<Enemy&(const byte)>(&EnemiesGroup::get)
+    );
+    group["current"] = sol::resolve<Enemy&()>(&EnemiesGroup::current);
+    group["currentPos"] = &EnemiesGroup::currentPos;
+    group["currentName"] = &EnemiesGroup::currentName;
+    group["goTo"] = &EnemiesGroup::goTo;
+    group["next"] = &EnemiesGroup::next;
+    group["nextAlive"] = sol::overload(
+        [](EnemiesGroup& self) -> Enemy& { return self.nextAlive(); },
+        &EnemiesGroup::nextAlive
+    );
 
     sol::usertype<Game> game_type { ctx_.new_usertype<Game>("Game") };
     game_type["name"] = sol::readonly(&Game::name);

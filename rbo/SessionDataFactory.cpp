@@ -100,12 +100,14 @@ void SessionDataFactory::makeBattleInfos(const BattleInfo type) {
     data_.add(type);
 }
 
-void SessionDataFactory::makeBattleInit(const GroupDescriptor& group, const std::unordered_map<std::string, EnemyDescriptor>& enemies) {
+void SessionDataFactory::makeBattleInit(const GroupDescriptor& group, const Game& ctx) {
     json infos;
-    for (const auto& [name, generic_name] : group) {
-        const EnemyDescriptor& enemy { enemies.at(generic_name) };
+    for (const auto& [priority, enemy_descriptor_binding] : group) {
+        const auto& [ctxName, genericName] { enemy_descriptor_binding };
+        const EnemyDescriptor& enemy { ctx.enemy(genericName) };
 
-        infos[name] = {
+        infos[std::to_string(priority)] = {
+            { "name", ctxName },
             { "hp", enemy.hp },
             { "skill", enemy.skill }
         };
@@ -115,7 +117,7 @@ void SessionDataFactory::makeBattleInit(const GroupDescriptor& group, const std:
     data_.put(infos.dump());
 }
 
-void SessionDataFactory::makeAtk(const byte player, const std::string& enemy, const int dmg) {
+void SessionDataFactory::makeBattleAtk(const byte player, const std::string& enemy, const int dmg) {
     makeBattleInfos(BattleInfo::Atk);
     data_.add(player);
     data_.put(enemy);

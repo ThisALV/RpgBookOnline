@@ -1,8 +1,9 @@
 #define BOOST_TEST_MODULE SessionDataFactory
 
-#include "boost/test/unit_test.hpp"
-#include "nlohmann/json.hpp"
-#include "Rbo/SessionDataFactory.hpp"
+#include <boost/test/unit_test.hpp>
+#include <nlohmann/json.hpp>
+#include <Rbo/Game.hpp>
+#include <Rbo/SessionDataFactory.hpp>
 
 using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
 
@@ -90,19 +91,25 @@ BOOST_AUTO_TEST_CASE(Infos) {
 
 BOOST_AUTO_TEST_CASE(BattleInit) {
     Data expected { std::vector<byte> { 8, 0 } };
-    expected.put(R"({"A":{"hp":45,"skill":16},"B":{"hp":46,"skill":17}})");
+    const json group_data {
+        { "1", { { "name", "B" }, { "hp", 46 }, { "skill", 17 } } },
+        { "3", { { "name", "A" }, { "hp", 45 }, { "skill", 16 } } }
+    };
+    expected.put(group_data.dump());
 
-    const std::unordered_map<std::string, EnemyDescriptor> enemies {
+    Game ctx;
+    ctx.enemies = {
         { "EnemyA", { 45, 16 } },
         { "EnemyB", { 46, 17 } }
     };
+
     const GroupDescriptor group {
-        { "A", "EnemyA" },
-        { "B", "EnemyB" }
+        { 3, { "A", "EnemyA" } },
+        { 1, { "B", "EnemyB" } }
     };
 
     SessionDataFactory factory;
-    factory.makeBattleInit(group, enemies);
+    factory.makeBattleInit(group, ctx);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

@@ -2,9 +2,9 @@
 
 #include <Rbo/Tests/TestsCommon.hpp>
 
-#include "boost/test/unit_test.hpp"
-#include "Rbo/Game.hpp"
-#include "Rbo/Player.hpp"
+#include <boost/test/unit_test.hpp>
+#include <Rbo/Game.hpp>
+#include <Rbo/Player.hpp>
 
 namespace Rbo {
 
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(GroupsUnknownEnemy) {
     Game game;
-    game.groups.insert({ "1", { { "1", "EnemyA" }, { "2", "EnemyB" } } });
+    game.groups.insert({ "1", { { 1, { "1", "EnemyA" } }, { 2, { "2", "EnemyB" } } } });
 
     const std::vector<Game::Error> validity { game.validity() };
     BOOST_CHECK_EQUAL(1, validity.size());
@@ -375,11 +375,11 @@ BOOST_AUTO_TEST_CASE(EffectUnknownStatAndBonusUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(Ok) {
     StatsDescriptors global {
-        { "1", { DiceFormula { 2, 0 }, StatLimits { -15, 15 }, false, false } },
+        { "1", { DiceFormula { 2, 0 }, StatLimits { -15, 15 }, false, false, true } },
         { "2", {} }
     };
     StatsDescriptors player {
-        { "a", { DiceFormula { 1, 0 }, StatLimits { -10, 10 }, true, true } },
+        { "a", { DiceFormula { 1, 0 }, StatLimits { -10, 10 }, true, true, false } },
         { "b", {} }
     };
     InventoriesDescriptors inventories {
@@ -400,8 +400,8 @@ BOOST_AUTO_TEST_CASE(Ok) {
         { "EnemyB", { 46, 46 } }
     };
     std::unordered_map<std::string, GroupDescriptor> groups {
-        { "GroupA", { { "1", "EnemyA" }, { "2", "EnemyA" } } },
-        { "GroupB", { { "1", "EnemyB" }, { "2", "EnemyB" } } }
+        { "GroupA", { { 1, { "1", "EnemyA" } }, { 2, { "2", "EnemyA" } } } },
+        { "GroupB", { { 2, { "1", "EnemyB" } }, { 2, { "2", "EnemyB" } } } }
     };
     RestProperties rest {
         { itemEntry("inv1", "A"), itemEntry("inv2", "A") },

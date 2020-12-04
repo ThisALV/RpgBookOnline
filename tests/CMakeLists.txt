@@ -2,7 +2,7 @@ find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 find_package(spdlog CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-set(RBO_TESTS "data-tests DataTests" "session-data-factory-tests SessionDataFactoryTests" "player-tests PlayerTests" "stats-manager-tests StatsManagerTests" "game-tests GameTests")
+set(RBO_TESTS "data-tests DataTests" "session-data-factory-tests SessionDataFactoryTests" "player-tests PlayerTests" "stats-manager-tests StatsManagerTests" "game-tests GameTests" "enemy-tests EnemyTests")
 
 foreach(TEST ${RBO_TESTS})
     message(STATUS "Entering test : ${TEST}")

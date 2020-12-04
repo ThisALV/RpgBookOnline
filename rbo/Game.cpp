@@ -74,17 +74,17 @@ bool Condition::test(const StatsManager& stats) const {
 }
 
 const EventEffect& Game::effect(const std::string& name) const {
-    if (eventEffects.count(name) == 0)
+    if (!hasEffect(name))
         throw std::out_of_range { "Effet \"" + name + "\" inconnu" };
 
     return eventEffects.at(name);
 }
 
-const EnemyDescriptor& Game::enemy(const std::string& name) const {
-    if (enemies.count(name) == 0)
+const EnemyDescriptor& Game::enemy(const std::string& generic_name) const {
+    if (!hasEnemy(generic_name))
         throw std::out_of_range { "Descipteur d'ennemi \"" + name + "\" inconnu" };
 
-    return enemies.at(name);
+    return enemies.at(generic_name);
 }
 
 const GroupDescriptor& Game::group(const std::string& name) const {
@@ -147,7 +147,7 @@ std::vector<Game::Error> Game::validity() const {
 
     const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(), [this](const auto& g) {
         return std::all_of(g.second.cbegin(), g.second.cend(), [this](const auto& e) {
-            return enemies.count(e.second) == 1;
+            return hasEnemy(e.second.genericName);
         });
     });
 

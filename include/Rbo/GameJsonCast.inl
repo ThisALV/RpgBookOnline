@@ -55,6 +55,11 @@ inline void from_json(const json& data, EnemyDescriptor& enemy) {
     data.at("skill").get_to(enemy.skill);
 }
 
+inline void from_json(const json& data, GroupDescriptor& group) {
+    for (const auto& [priority, enemy] : data.get<json::object_t>())
+        group.insert({ std::stoi(priority), EnemyDescriptorBinding { enemy["ctx"].get<std::string>(), enemy["generic"].get<std::string>() } });
+}
+
 inline void from_json(const json& data, RestProperties& rest) {
     data.at("givables").get_to(rest.givables);
     data.at("availables").get_to(rest.availables);

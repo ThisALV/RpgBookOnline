@@ -11,6 +11,7 @@
 #include <functional>
 #include <optional>
 #include <random>
+#include <limits>
 #include <spdlog/fwd.h>
 
 using ushort = std::uint16_t;
@@ -31,6 +32,7 @@ struct Stat;
 struct StatDescriptor;
 struct InventoryDescriptor;
 struct PlayerState;
+struct EnemyDescriptorBinding;
 
 using byte = std::uint8_t;
 using s_byte = std::int8_t;
@@ -67,7 +69,7 @@ using PlayersStates = std::map<byte, PlayerState>;
 using StatsDescriptors = std::unordered_map<std::string, StatDescriptor>;
 using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
 
-using GroupDescriptor = std::unordered_map<std::string, std::string>;
+using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<byte>>;
 
 struct DiceFormula {
     uint dices;
@@ -92,6 +94,11 @@ struct ItemBonus {
 struct EnemyDescriptor {
     int hp;
     int skill;
+};
+
+struct EnemyDescriptorBinding {
+    std::string ctxName;
+    std::string genericName;
 };
 
 struct InvalidReply : std::logic_error {

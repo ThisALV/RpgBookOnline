@@ -7,8 +7,6 @@ using namespace Rbo;
 
 namespace Rbo {
 
-std::ostream& operator<<(std::ostream&, const PlayerInventories&);
-
 template<typename Outputable> struct OutputWrapper {
     const Outputable& value;
 
@@ -17,11 +15,15 @@ template<typename Outputable> struct OutputWrapper {
 
 using StatsWrapper = OutputWrapper<StatsValues>;
 using InventoriesWrapper = OutputWrapper<PlayerInventories>;
+using StrVecWrapper = OutputWrapper<std::vector<std::string>>;
 
 template<typename Outputable>
 std::ostream& operator<<(std::ostream& out, OutputWrapper<Outputable> wrapper) {
     return out << wrapper.value;
 }
+
+std::ostream& operator<<(std::ostream& out, const PlayerInventories& inventories);
+std::ostream& operator<<(std::ostream& out, const std::vector<std::string>& strs);
 
 } // namespace Rbo
 

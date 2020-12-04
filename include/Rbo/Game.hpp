@@ -74,6 +74,7 @@ struct Game {
     bool hasGlobal(const std::string& stat) const { return globalStats.count(stat) == 1; }
     bool hasStat(const std::string& stat) const { return playerStats.count(stat) == 1; }
     bool hasEffect(const std::string& name) const { return eventEffects.count(name) == 1; }
+    bool hasEnemy(const std::string& generic_name) const { return enemies.count(generic_name) == 1; }
     bool hasItem(const std::string& itemEntry) const;
 
 private:

@@ -20,4 +20,13 @@ std::ostream& operator<<(std::ostream& out, const PlayerInventories& inventories
     return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const std::vector<std::string>& strs) {
+    out << "[Size : " << strs.size() << "]";
+
+    for (const std::string& str : strs)
+        out << " \"" << str << "\";";
+
+    return out;
+}
+
 } // namespace Rbo
