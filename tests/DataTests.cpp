@@ -4,7 +4,7 @@
 #include <boost/test/data/test_case.hpp>
 #include <Rbo/Data.hpp>
 
-using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
+using namespace Rbo;
 
 namespace dataset = boost::unit_test::data;
 

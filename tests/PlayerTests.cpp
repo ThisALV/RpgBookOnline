@@ -2,8 +2,9 @@
 
 #include <Rbo/Tests/TestsCommon.hpp>
 
-#include "boost/test/unit_test.hpp"
-#include "Rbo/Player.hpp"
+#include <boost/test/unit_test.hpp>
+
+using namespace Rbo;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(ItemsBonuses)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(Stats)

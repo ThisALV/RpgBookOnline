@@ -5,7 +5,7 @@
 #include <Rbo/Game.hpp>
 #include <Rbo/SessionDataFactory.hpp>
 
-using namespace Rbo; // Common.hpp nécessite d'include Player.hpp
+using namespace Rbo;
 
 using json = nlohmann::json;
 

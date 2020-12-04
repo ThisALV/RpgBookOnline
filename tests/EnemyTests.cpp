@@ -19,6 +19,8 @@ void testPosChecking(const EnemiesGroup& group, const byte pos) {
 
 } // namespace Rbo
 
+using namespace Rbo;
+
 BOOST_AUTO_TEST_SUITE(EnemyTests)
 
 BOOST_AUTO_TEST_SUITE(Ctor)

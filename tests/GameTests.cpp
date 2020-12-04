@@ -4,7 +4,8 @@
 
 #include <boost/test/unit_test.hpp>
 #include <Rbo/Game.hpp>
-#include <Rbo/Player.hpp>
+
+using namespace Rbo;
 
 namespace Rbo {
 
