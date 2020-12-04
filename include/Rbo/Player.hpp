@@ -90,7 +90,7 @@ public:
 };
 
 template<typename Output>
-Output& operator<<(Output& out, const Rbo::Player& player) {
+Output& operator<<(Output& out, const Player& player) {
     out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name() << "\"; stats=" << player.stats().values() << " inventories=[";
     for (const auto& [name, inventory] : player.inventories())
         out << " \"" << name << "\"=" << inventory << ';';
@@ -100,7 +100,7 @@ Output& operator<<(Output& out, const Rbo::Player& player) {
 }
 
 template<typename Output>
-Output& operator<<(Output& out, const Rbo::Inventory& inventory) {
+Output& operator<<(Output& out, const Inventory& inventory) {
     out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" } : std::to_string(*inventory.maxSize())) << "; size=" << inventory.size() << " ]";
 
     return out;
