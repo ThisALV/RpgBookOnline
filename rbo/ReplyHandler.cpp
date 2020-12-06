@@ -47,7 +47,7 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
         const ErrCode err { trySend(*remote_player, anwser_buffer) };
 
         if (err)
-            throw NetworkError { "send_answer" + std::to_string(remote_id), err };
+            throw NetworkError { "send_answer:" + std::to_string(remote_id), err };
     }
 
     logger_->info("Reply of [{}] : {}", playerID_, reply);
