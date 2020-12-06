@@ -23,10 +23,6 @@ const char* CanceledRequest::what() const noexcept {
     return "CanceledRequest";
 }
 
-void Session::logPlayerError(spdlog::logger& logger, const byte player, const std::string& err) {
-    logger.error("Player {} : {}", player, err);
-}
-
 std::string Session::initStatMsg(const DiceFormula& init, const std::string& name, const int value) {
     std::string msg { name + " = " };
     if (init.dices == 0)
@@ -41,6 +37,10 @@ tcp::socket& Session::connection(const byte id) {
     assert(connections_.count(id) == 1);
 
     return connections_.at(id);
+}
+
+void Session::logPlayerError(const byte player, const std::string& err) {
+    logger_.error("Player {} : {}", player, err);
 }
 
 void Session::disconnect(const byte id, const bool crash) {
@@ -524,7 +524,7 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
             const ErrCode end_err { trySend(*player, ending_buffer) };
 
             if (end_err) {
-                logPlayerError(logger_, id, end_err.message());
+                logPlayerError(id, end_err.message());
                 ctx.errorIDs.push_back(id);
             }
         }
@@ -567,7 +567,7 @@ void Session::sendTo(const byte target_id, const Data& data) {
     const ErrCode err { trySend(connection(target_id), trunc(data)) };
 
     if (err) {
-        logPlayerError(logger_, target_id, err.message());
+        logPlayerError(target_id, err.message());
         disconnect(target_id, true);
     }
 }
@@ -576,10 +576,10 @@ void Session::sendToAll(const Data& data) {
     const io::const_buffer buffer { trunc(data) };
 
     for (const byte id : ids()) {
-        const ErrCode err { trySend(connections_.at(id), buffer) };
+        const ErrCode err { trySend(connection(id), buffer) };
 
         if (err) {
-            logPlayerError(logger_, id, err.message());
+            logPlayerError(id, err.message());
             disconnect(id, true);
         }
     }

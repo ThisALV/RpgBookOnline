@@ -55,7 +55,6 @@ using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
 private:
-    static void logPlayerError(spdlog::logger& sessionlogger, const byte playerID, const std::string& msg);
     static std::string initStatMsg(const DiceFormula& initFormula, const std::string& statName, const int statValue);
 
     io::io_context::strand executor_;
@@ -82,6 +81,7 @@ private:
     void removePlayer(const byte targetID);
 
     tcp::socket& connection(const byte playerID);
+    void logPlayerError(const byte playerID, const std::string& msg);
 
 public:
     friend void confirmController(const io::mutable_buffer&);
