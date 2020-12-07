@@ -1,5 +1,6 @@
 #define BOOST_TEST_MODULE SessionDataFactory
 
+#include <iomanip>
 #include <boost/test/unit_test.hpp>
 #include <nlohmann/json.hpp>
 #include <Rbo/Game.hpp>
@@ -12,13 +13,13 @@ using json = nlohmann::json;
 namespace Rbo {
 
 std::ostream& operator<<(std::ostream& out, const Data& data) {
-    out << "Data (" << data.count() << " B) :";
+    out << "Data (" << data.count() << " B) :" << std::hex << std::setw(4) << std::showbase << std::internal << std::setfill('0');
 
     const auto begin { data.buffer().cbegin() };
     for (const byte b : std::vector<byte> { begin, begin + data.count() })
-        out << ' ' << std::to_string(b);
+        out << ' ' << int { b };
 
-    return out;
+    return out << std::dec << std::setw(0) << std::noshowbase << std::internal;
 }
 
 } // namespace Rbo
@@ -53,20 +54,20 @@ BOOST_AUTO_TEST_CASE(Possibilities) {
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
-BOOST_AUTO_TEST_CASE(Infos) {
+BOOST_AUTO_TEST_CASE(PlayerUpdates) {
     Data expected { std::vector<byte> { 2, 4 } };
 
     const json default_limits = json::object({
-        { "min", StatValueLimits::min() }, { "max", StatValueLimits::max() }
+        { "min", StatsValueLimits::min() }, { "max", StatsValueLimits::max() }
     });
     const json infos = json::object({
         { "inventories", {
               { "inv1", { { "A", 5 }, { "B", -4 } } },
               { "inv2", { { "A", -1 } } }
         } },
-        { "inventoriesMaxCapacity", { { "inv1", nullptr }, { "inv2", 55 } } },
+        { "capacities", { { "inv1", nullptr }, { "inv2", 55 } } },
         { "stats", {
-              { "a", { { "hidden", false }, { "main", false }, { "limits", default_limits }, { "value", 1 } } },
+              { "a", { { "hidden", true } } },
               { "b", { { "hidden", false }, { "main", true }, { "limits", default_limits }, { "value", 2 } } }
         } }
     });
@@ -74,8 +75,8 @@ BOOST_AUTO_TEST_CASE(Infos) {
     expected.put(infos.dump());
 
     const byte player_id { 4 };
-    const PlayerStateChanges changes {
-        { { "a", Stat { 1, StatLimits {}, false, false } }, { "b", Stat { 2, StatLimits {}, false, true } } },
+    const PlayerUpdate changes {
+        { { "a", Stat { 1, StatLimits {}, true, false } }, { "b", Stat { 2, StatLimits {}, false, true } } },
         {
             { "inv1", { { "A", 5 }, { "B", -4 } } },
             { "inv2", { { "A", -1 } } }
@@ -84,7 +85,7 @@ BOOST_AUTO_TEST_CASE(Infos) {
     };
 
     SessionDataFactory factory;
-    factory.makeInfos(player_id, changes);
+    factory.makePlayerUpdate(player_id, changes);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
@@ -114,10 +115,12 @@ BOOST_AUTO_TEST_CASE(BattleInit) {
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
-BOOST_AUTO_TEST_CASE(GlobalStat) {
+BOOST_AUTO_TEST_SUITE(GlobalStat)
+
+BOOST_AUTO_TEST_CASE(Visible) {
     const Data expected {
         std::vector<byte> {
-            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 0, 0, 0, 0, 0, 1
+            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 0, 0, 0, 0, 1
         }
     };
 
@@ -126,5 +129,20 @@ BOOST_AUTO_TEST_CASE(GlobalStat) {
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
+
+BOOST_AUTO_TEST_CASE(Hidden) {
+    const Data expected {
+        std::vector<byte> {
+            3, 0, 4, 't', 'e', 's', 't', 1
+        }
+    };
+
+    SessionDataFactory factory;
+    factory.makeGlobalStat("test", Stat { 0, { 468, 2020 }, true, true });
+
+    BOOST_CHECK_EQUAL(expected, factory.data());
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

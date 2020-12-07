@@ -12,7 +12,7 @@ template<typename Outputable> struct OutputWrapper {
 };
 
 using InventoriesWrapper = OutputWrapper<Rbo::PlayerInventories>;
-using StatsWrapper = OutputWrapper<Rbo::StatsValues>;
+using StatsWrapper = OutputWrapper<Rbo::StatsValue>;
 using StrVecWrapper = OutputWrapper<std::vector<std::string>>;
 
 template<typename Outputable>

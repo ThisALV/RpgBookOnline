@@ -11,9 +11,12 @@ class Session;
 class Gameplay {
 private:
     Session& ctx_;
+    std::map<byte, PlayerState> players_cache_;
 
 public:
     Gameplay(Session& ctx) : ctx_ { ctx } {}
+
+    void initCache(const byte player_id);
 
     StatsManager& global();
     const Game& game() const;
@@ -44,10 +47,10 @@ public:
     void print(const std::string& msg, const byte target = ALL_PLAYERS);
 
     // send et end - Throw : NoPlayerRemaining
-    void sendGlobalStat(const std::string& statName);
-    void sendInfos(const byte playerInfosID);
-    void sendBattleInfos(const GroupDescriptor& enemiesGroupDescriptor);
-    void sendBattleAtk(const byte playerAtk, const std::string& enemiesName, const int dmgs);
+    void sendGlobalStat(const std::string& stat_name);
+    void sendPlayerUpdate(const byte player_id);
+    void sendBattleInit(const GroupDescriptor& enemies_group_descriptor);
+    void sendBattleAtk(const byte atk_player, const std::string& enemies_name, const int dmgs);
     void sendBattleEnd();
 };
 

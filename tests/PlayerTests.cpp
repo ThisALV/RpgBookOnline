@@ -6,7 +6,7 @@
 
 using namespace Rbo;
 
-BOOST_TEST_DONT_PRINT_LOG_VALUE(ItemsBonuses)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(ItemsBonus)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(Stats)
 BOOST_TEST_DONT_PRINT_LOG_VALUE(InventoryContent)
 
@@ -15,17 +15,17 @@ BOOST_AUTO_TEST_SUITE(PlayerTests)
 BOOST_AUTO_TEST_SUITE(Ctor)
 
 const Stat default_stat {
-    0, StatLimits { StatValueLimits::min(), StatValueLimits::max() }, false
+    0, StatLimits { StatsValueLimits::min(), StatsValueLimits::max() }, false
 };
 
-BOOST_AUTO_TEST_CASE(Infos) {
+BOOST_AUTO_TEST_CASE(Informations) {
     const byte id { 1 };
     const std::string name { "TestPlayer" };
     const ItemsList inventories {
         { "inv1", std::vector<std::string> { "A", "B" } },
         { "inv2", std::vector<std::string> { "A" } }
     };
-    const ItemsBonuses bonuses {
+    const ItemsBonus bonuses {
         { "inv1/A", { "a", 2 } }, { "inv2/A", { "c", -5 } }
     };
 
@@ -59,7 +59,7 @@ struct AddFixture {
     Player player {
         1, "TestPlayer", std::vector<std::string> { "A" },
         ItemsList { { "inv1", std::vector<std::string> { "A" } } },
-        ItemsBonuses { { "inv1/A", { "A", -3 } } }
+        ItemsBonus { { "inv1/A", { "A", -3 } } }
     };
 
     AddFixture() {
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(AddUnknownItem) {
 
 BOOST_FIXTURE_TEST_CASE(Add, AddFixture) {
     const bool done { player.add("inv1", "A", 5) };
-    const StatsValues expected_stats { { "A", -15 } };
+    const StatsValue expected_stats { { "A", -15 } };
     PlayerInventories expected_inventories {
         { "inv1", Inventory { std::vector<std::string> { "A" }, 10 } }
     };
@@ -107,7 +107,7 @@ BOOST_FIXTURE_TEST_CASE_WITH_DECOR(Consume, ConsumeFixture,
                                    *boost::unit_test::depends_on { "PlayerTests/Items/Add" })
 {
     const bool done { player.consume("inv1", "A", 2) };
-    const StatsValues expected_stats { { "A", -9 } };
+    const StatsValue expected_stats { { "A", -9 } };
     PlayerInventories expected_inventories {
         { "inv1", Inventory { std::vector<std::string> { "A" }, 10 } }
     };
@@ -120,7 +120,7 @@ BOOST_FIXTURE_TEST_CASE_WITH_DECOR(Consume, ConsumeFixture,
 
 BOOST_FIXTURE_TEST_CASE(AddInventoryFull, AddFixture) {
     const bool done { player.add("inv1", "A", 11) };
-    const StatsValues expected_stats { { "A", 0 } };
+    const StatsValue expected_stats { { "A", 0 } };
     const PlayerInventories expected_inventories {
         { "inv1", Inventory { std::vector<std::string> { "A" }, 10 } }
     };
@@ -134,7 +134,7 @@ BOOST_FIXTURE_TEST_CASE_WITH_DECOR(ConsumeItemEmpty, ConsumeFixture,
                                    *boost::unit_test::depends_on { "PlayerTests/Items/Add" })
 {
     const bool done { player.consume("inv1", "A", 10) };
-    const StatsValues expected_stats { { "A", -15 } };
+    const StatsValue expected_stats { { "A", -15 } };
     PlayerInventories expected_inventories {
         { "inv1", Inventory { std::vector<std::string> { "A" }, 10 } }
     };

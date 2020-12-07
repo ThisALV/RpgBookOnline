@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(Apply) {
     };
 
     effect.apply(target);
-    const StatsValues expected_stats { { "a", -10 }, { "b", -5 } };
+    const StatsValue expected_stats { { "a", -10 }, { "b", -5 } };
 
     PlayerInventories expected_inventories {
         { "inv1", Inventory { std::vector<std::string> { "A", "B" } } },
@@ -375,20 +375,20 @@ BOOST_AUTO_TEST_CASE(EffectUnknownStatAndBonusUnknownItem) {
 }
 
 BOOST_AUTO_TEST_CASE(Ok) {
-    StatsDescriptors global {
+    StatsDescriptor global {
         { "1", { DiceFormula { 2, 0 }, StatLimits { -15, 15 }, false, false, true } },
         { "2", {} }
     };
-    StatsDescriptors player {
+    StatsDescriptor player {
         { "a", { DiceFormula { 1, 0 }, StatLimits { -10, 10 }, true, true, false } },
         { "b", {} }
     };
-    InventoriesDescriptors inventories {
+    InventoriesDescriptor inventories {
         { "inv1", { DiceFormula { 1, 2 }, { "A", "B" }, InventoryContent { { "A", 3 } } } },
         { "inv2", { std::optional<DiceFormula> {}, { "A" }, InventoryContent {} } }
     };
 
-    ItemsBonuses bonuses {
+    ItemsBonus bonuses {
         { itemEntry("inv1", "B"), ItemBonus { "a", 8 } },
         { itemEntry("inv2", "A"), ItemBonus { "b", -5 } }
     };

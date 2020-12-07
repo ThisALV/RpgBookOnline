@@ -72,7 +72,6 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
     : executor_ { io },
       logger_ { rboLogger("Session") },
       game_ { g_builder() },
-      first_state_ { true },
       running_ { false },
       game_builer_ { g_builder } {}
 
@@ -212,7 +211,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
                 return ps.first;
             });
 
-            throw InvalidIDs { expected_players, participants_validity };
+            throw InvalidIDs { std::move(expected_players), participants_validity };
         }
 
         beginning = state.scene;
@@ -230,9 +229,10 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
     logger_.debug("Global : {}", stats().values());
     for (const auto& [id, player] : players_) {
         logger_.debug("Player {} : {}", id, player);
-        interface.sendInfos(id);
+        interface.initCache(id);
+
+        interface.sendPlayerUpdate(id);
     }
-    first_state_ = false;
 
     try {
         for (Next next { beginning }; next && running(); next = playScene(interface, *next));
@@ -351,9 +351,9 @@ void Session::restaurePlayer(const byte id, const PlayerState& state) {
 
     for (const auto& [inv, content] : state.inventories) {
 #ifndef NDEBUG
-        assert(target.inventory(inv).setMaxSize(state.inventoriesMaxCapacity.at(inv)));
+        assert(target.inventory(inv).setMaxSize(state.capacities.at(inv)));
 #else
-        target.inventory(inv).setMaxSize(state.inventoriesMaxCapacity.at(inv));
+        target.inventory(inv).setMaxSize(state.capacities.at(inv));
 #endif
 
         for (const auto& [item, qty] : content)
@@ -366,10 +366,8 @@ void Session::reset() {
     players_.clear();
     connections_.clear();
     leader_ = 0;
-    last_states_.clear();
     current_scene_ = 0;
     running_ = false;
-    first_state_ = true;
 }
 
 void Session::switchLeader(const byte id) {
@@ -386,19 +384,19 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
     if (current_scene_ == INTRO)
         throw IntroductionCheckpoint {};
 
-    PlayersStates states;
-    std::transform(players_.cbegin(), players_.cend(), std::inserter(states, states.begin()), [](const auto& state) -> PlayersStates::value_type {
+    PlayersState states;
+    std::transform(players_.cbegin(), players_.cend(), std::inserter(states, states.begin()), [](const auto& state) -> PlayersState::value_type {
         const auto& [id, player] { state };
 
         const Stats& stats { player.stats().raw() };
         std::unordered_map<std::string, InventoryContent> inventories;
-        std::unordered_map<std::string, InventorySize> inventoriesMaxCapacity;
+        std::unordered_map<std::string, InventorySize> capacities;
         for (const auto& [name, inventory] : player.inventories()) {
             inventories.insert({ name, inventory.content() });
-            inventoriesMaxCapacity.insert({ name, inventory.maxSize() });
+            capacities.insert({ name, inventory.maxSize() });
         }
 
-        return { id, PlayerState { stats, inventories, inventoriesMaxCapacity } };
+        return { id, PlayerState { stats, inventories, capacities } };
     });
 
     return gameBuilder().save(chkpt_name, { id, stats().raw(), leader(), states });
@@ -450,37 +448,6 @@ const Player& Session::player(const byte id) const {
         throw UnknownPlayer { id };
 
     return players_.at(id);
-}
-
-PlayerStateChanges Session::getChanges(const byte id) {
-    Player& p { player(id) };
-    PlayerState& last { last_states_[id] };
-    auto& [stats, inventories, capacities] { last };
-
-    PlayerStateChanges changes;
-    for (const auto& [name, stat] : p.stats()) {
-        if (first_state_ || (!p.stats().hidden(name) && stat != stats.at(name))) {
-            changes.statsChanges[name] = stat;
-            stats[name] = stat;
-        }
-    }
-
-    for (const auto& [name, inv] : p.inventories()) {
-        for (const auto& [item, qty] : inv.content()) {
-            if (first_state_ || qty != inventories.at(name).at(item)) {
-                changes.itemsChanges[name][item] = qty;
-                inventories[name][item] = qty;
-            }
-        }
-
-        const InventorySize inv_max_capacity { inv.maxSize() };
-        if (first_state_ || inv_max_capacity != capacities.at(name)) {
-            changes.capacitiesChanges[name] = inv_max_capacity;
-            capacities[name] = inv_max_capacity;
-        }
-    }
-
-    return changes;
 }
 
 Replies Session::request(const byte target, const Data& data, ReplyController controller, const bool wait) {

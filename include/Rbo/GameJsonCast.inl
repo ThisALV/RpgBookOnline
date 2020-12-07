@@ -95,11 +95,11 @@ inline void to_json(json& data, const PlayerState& player) {
     data["inventories"] = player.inventories;
 
     // optional<T-primitif> non pris en charge par NlohmannJson
-    data["inventoriesMaxCapacity"] = json::object();
-    for (const auto& [inventory, capacity] : player.inventoriesMaxCapacity) {
+    data["capacities"] = json::object();
+    for (const auto& [inventory, capacity] : player.capacities) {
         json opt;
         to_json(opt, capacity);
-        data["inventoriesMaxCapacity"][inventory] = opt;
+        data.at("capacities")[inventory] = opt;
     }
 }
 
@@ -108,10 +108,30 @@ inline void from_json(const json& data, PlayerState& player) {
     data.at("inventories").get_to(player.inventories);
 
     // optional<T-primitif> non pris en charge par NlohmannJson
-    for (const auto& [inventory, capacity] : data.at("inventoriesMaxCapacity").get<json::object_t>()) {
+    for (const auto& [inventory, capacity] : data.at("capacities").get<json::object_t>()) {
         InventorySize opt;
         from_json(capacity, opt);
-        player.inventoriesMaxCapacity[inventory] = opt;
+        player.capacities[inventory] = opt;
+    }
+}
+
+inline void to_json(json& data, const PlayerUpdate& changes) {
+    data["stats"] = json::object();
+    for (const auto& [name, stat] : changes.stats) {
+        if (stat.hidden)
+            data.at("stats")[name] = json::object({ { "hidden", true } });
+        else
+            data.at("stats")[name] = stat;
+    }
+
+    data["inventories"] = changes.items;
+
+    // optional<T-primitif> non pris en charge par NlohmannJson
+    data["capacities"] = json::object();
+    for (const auto& [inventory, capacity] : changes.capacities) {
+        json opt;
+        to_json(opt, capacity);
+        data.at("capacities")[inventory] = opt;
     }
 }
 

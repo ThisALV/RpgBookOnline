@@ -22,7 +22,7 @@ end
 
 function Rbo.PathChoice(interface, args)
     assertArgs(type(args.msg) == "string" and type(args.paths) == "table")
-    
+
     if type(args.wait) ~= "boolean" then
         args.wait = true
     end
@@ -70,7 +70,7 @@ function Rbo.EventTo(interface, args)
         end
         effect:apply(target_p)
 
-        interface:sendInfos(target_id)
+        interface:sendPlayerUpdate(target_id)
         interface:checkPlayer(target_id)
     end
 end
@@ -82,7 +82,7 @@ function Rbo.ActionVote(interface, args)
     local effect = interface:game():effect(args.effect)
 
     effect:apply(interface:player(selected))
-    interface:sendInfos(selected)
+    interface:sendPlayerUpdate(selected)
     interface:checkPlayer(selected)
 end
 
@@ -140,7 +140,7 @@ function Rbo.IfHas(interface, args)
         local target = targets:get(1)
 
         interface:player(target):consume(args.inv, args.item, args.qty)
-        interface:sendInfos(target)
+        interface:sendPlayerUpdate(target)
         interface:checkPlayer(target)
     end
     

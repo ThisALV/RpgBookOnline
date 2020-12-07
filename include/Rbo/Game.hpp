@@ -47,11 +47,11 @@ struct Game {
     static std::string getMessage(const Error errType);
 
     std::string name;
-    StatsDescriptors globalStats;
-    StatsDescriptors playerStats;
-    InventoriesDescriptors playerInventories;
+    StatsDescriptor globalStats;
+    StatsDescriptor playerStats;
+    InventoriesDescriptor playerInventories;
 
-    ItemsBonuses bonuses;
+    ItemsBonus bonuses;
     Effects eventEffects;
     std::unordered_map<std::string, EnemyDescriptor> enemies;
     std::unordered_map<std::string, GroupDescriptor> groups;
@@ -78,7 +78,7 @@ struct Game {
     bool hasItem(const std::string& itemEntry) const;
 
 private:
-    static std::vector<std::string> getNames(const StatsDescriptors& stats);
+    static std::vector<std::string> getNames(const StatsDescriptor& stats);
 };
 
 } // namespace Rbo

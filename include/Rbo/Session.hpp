@@ -64,8 +64,6 @@ private:
     std::map<byte, tcp::socket> connections_;
     Game game_;
     byte leader_;
-    std::map<byte, PlayerState> last_states_;
-    bool first_state_;
     word current_scene_;
     std::atomic_bool running_;
 
@@ -126,9 +124,6 @@ public:
     ConstPlayers players() const;
     std::size_t count() const { return players_.size(); }
     bool playersRemaining() const { return !players_.empty(); }
-
-    const std::map<byte, PlayerState>& lastStates() const { return last_states_; }
-    PlayerStateChanges getChanges(const byte playerID);
 };
 
 } // namespace Rbo

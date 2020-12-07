@@ -219,7 +219,7 @@ std::string Game::getMessage(const Error Error) {
     throw std::invalid_argument { "This isn't an error" };
 }
 
-std::vector<std::string> Game::getNames(const StatsDescriptors& stats) {
+std::vector<std::string> Game::getNames(const StatsDescriptor& stats) {
     std::vector<std::string> names { stats.size() };
     std::transform(stats.cbegin(), stats.cend(), names.begin(), [](const auto& stat) -> std::string {
         return stat.first;

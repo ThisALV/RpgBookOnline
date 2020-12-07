@@ -48,7 +48,7 @@ private:
     std::string name_;
     StatsManager stats_;
     PlayerInventories inventories_;
-    ItemsBonuses bonuses_;
+    ItemsBonus bonuses_;
 
     enum BonusAction : int {
         None = 0, Enable = 1, Disable = -1
@@ -62,7 +62,7 @@ public:
     inline static const int STAT_MAX { StatsLimits::max() };
     inline static const StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
 
-    Player(const byte id, const std::string& name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonuses& bonuses);
+    Player(const byte id, const std::string& name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonus& bonuses);
 
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;
@@ -86,7 +86,7 @@ public:
     const StatsManager& stats() const { return stats_; }
 
     const PlayerInventories& inventories() const { return inventories_; }
-    const ItemsBonuses& statsBonus() const { return bonuses_; }
+    const ItemsBonus& statsBonus() const { return bonuses_; }
 };
 
 template<typename Output>

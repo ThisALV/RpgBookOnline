@@ -81,10 +81,10 @@ bool StatsManager::main(const std::string& stat) const {
     return stats_.at(stat).main;
 }
 
-StatsValues StatsManager::values() const {
-    StatsValues values;
+StatsValue StatsManager::values() const {
+    StatsValue values;
     std::transform(stats_.cbegin(), stats_.cend(), std::inserter(values, values.begin()), [](const auto& s) {
-        return StatsValues::value_type { s.first, s.second.value };
+        return StatsValue::value_type { s.first, s.second.value };
     });
 
     return values;

@@ -6,7 +6,7 @@
 namespace Rbo {
 
 enum struct DataType : byte {
-    Request, Text, Infos, GlobalStat, Die, Switch, Reply, Validation, BattleInfos, Crash,
+    Request, Text, PlayerUpdate, GlobalStat, Die, Switch, Reply, Validation, Battle, Crash,
     LeaderSwitch, Start, Stop
 };
 
@@ -20,7 +20,7 @@ enum struct ReplyValidity : byte {
 
 bool isInvalid(const ReplyValidity validity);
 
-enum struct BattleInfo : byte {
+enum struct Battle : byte {
     Init, Atk, End
 };
 
@@ -34,13 +34,13 @@ struct SessionDataFactory : DataFactory {
     void makePossibilities(const std::string& msg, const OptionsList& options);
     void makeYesNoQuestion(const std::string& question);
     void makeText(const std::string& txt);
-    void makeInfos(const byte id, const PlayerStateChanges& changes);
+    void makePlayerUpdate(const byte id, const PlayerUpdate& changes);
     void makeGlobalStat(const std::string& name, const Stat& stat);
     void makeDie(const byte id);
     void makeSwitch(const word scene);
     void makeReply(const byte id, const byte reply);
     void makeValidation(const ReplyValidity validity);
-    void makeBattleInfos(const BattleInfo infos);
+    void makeBattle(const Battle infos);
     void makeBattleInit(const GroupDescriptor& group, const Game& ctx);
     void makeBattleAtk(const byte player, const std::string& enemy, const int dmg);
     void makeCrash(const byte id);

@@ -56,18 +56,22 @@ using ConstPlayers = std::map<byte, const Player*>;
 
 using InventorySize = std::optional<uint>;
 using InventoryContent = std::unordered_map<std::string, uint>;
+using InventoriesSize = std::unordered_map<std::string, InventorySize>;
+using InventoriesContent = std::unordered_map<std::string, InventoryContent>;
 using PlayerInventories = std::unordered_map<std::string, Inventory>;
 using ItemsList = std::unordered_map<std::string, std::vector<std::string>>;
-using ItemsBonuses = std::unordered_map<std::string, ItemBonus>;
+using ItemsBonus = std::unordered_map<std::string, ItemBonus>;
 
-using StatsValues = std::unordered_map<std::string, int>;
-using StatValueLimits = std::numeric_limits<int>;
+using StatsValue = std::unordered_map<std::string, int>;
+using StatsValueLimits = std::numeric_limits<int>;
 using Stats = std::unordered_map<std::string, Stat>;
 
-using PlayersStates = std::map<byte, PlayerState>;
+using PlayersState = std::map<byte, PlayerState>;
+using InventoryUpdate = std::unordered_map<std::string, int>;
+using InventoriesUpdate = std::unordered_map<std::string, InventoryUpdate>;
 
-using StatsDescriptors = std::unordered_map<std::string, StatDescriptor>;
-using InventoriesDescriptors = std::unordered_map<std::string, InventoryDescriptor>;
+using StatsDescriptor = std::unordered_map<std::string, StatDescriptor>;
+using InventoriesDescriptor = std::unordered_map<std::string, InventoryDescriptor>;
 
 using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<byte>>;
 
@@ -114,8 +118,8 @@ struct PlayerCheckingResult {
 };
 
 struct StatLimits {
-    int min { StatValueLimits::min() };
-    int max { StatValueLimits::max() };
+    int min { StatsValueLimits::min() };
+    int max { StatsValueLimits::max() };
 
     bool operator==(const StatLimits&) const;
 };
@@ -130,16 +134,16 @@ struct Stat {
     bool operator!=(const Stat& rhs) const { return !(*this == rhs); }
 };
 
-struct PlayerStateChanges {
-    std::unordered_map<std::string, Stat> statsChanges;
-    std::unordered_map<std::string, std::unordered_map<std::string, int>> itemsChanges;
-    std::unordered_map<std::string, InventorySize> capacitiesChanges;
+struct PlayerUpdate {
+    Stats stats;
+    InventoriesUpdate items;
+    InventoriesSize capacities;
 };
 
 struct PlayerState {
     Stats stats;
-    std::unordered_map<std::string, InventoryContent> inventories;
-    std::unordered_map<std::string, InventorySize> inventoriesMaxCapacity;
+    InventoriesContent inventories;
+    InventoriesSize capacities;
 };
 
 struct StatDescriptor {

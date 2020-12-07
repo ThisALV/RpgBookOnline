@@ -175,14 +175,55 @@ void Gameplay::sendGlobalStat(const std::string& stat) {
     ctx_.sendToAll(data_factory.dataWithLength());
 }
 
-void Gameplay::sendInfos(const byte id) {
+void Gameplay::initCache(const byte player_id) {
+    Player& target { player(player_id) };
+
+    InventoriesContent inventories;
+    InventoriesSize capacities;
+
+    for (const auto& [name, inv] : target.inventories()) {
+        inventories.insert({ name, inv.content() });
+        capacities.insert({ name, inv.maxSize() });
+    }
+
+    players_cache_.insert({ player_id, PlayerState { target.stats().raw(), std::move(inventories), std::move(capacities) } });
+}
+
+void Gameplay::sendPlayerUpdate(const byte id) {
+    Player& p { player(id) };
+    PlayerState& last { players_cache_.at(id) };
+    auto& [stats, inventories, capacities] { last };
+
+    PlayerUpdate update;
+    for (const auto& [name, stat] : p.stats()) {
+        if (!p.stats().hidden(name) && stat != stats.at(name)) {
+            update.stats.at(name) = stat;
+            stats.at(name) = stat;
+        }
+    }
+
+    for (const auto& [name, inv] : p.inventories()) {
+        for (const auto& [item, qty] : inv.content()) {
+            if (qty != inventories.at(name).at(item)) {
+                update.items.at(name).at(item) = qty;
+                inventories.at(name).at(item) = qty;
+            }
+        }
+
+        const InventorySize inv_max_capacity { inv.maxSize() };
+        if (inv_max_capacity != capacities.at(name)) {
+            update.capacities.at(name) = inv_max_capacity;
+            capacities.at(name) = inv_max_capacity;
+        }
+    }
+
     SessionDataFactory data_factory;
-    data_factory.makeInfos(id, ctx_.getChanges(id));
+    data_factory.makePlayerUpdate(id, update);
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }
 
-void Gameplay::sendBattleInfos(const GroupDescriptor& entities) {
+void Gameplay::sendBattleInit(const GroupDescriptor& entities) {
     SessionDataFactory data_factory;
     data_factory.makeBattleInit(entities, game());
 
@@ -198,7 +239,7 @@ void Gameplay::sendBattleAtk(const byte p_id, const std::string& enemy, const in
 
 void Gameplay::sendBattleEnd() {
     SessionDataFactory data_factory;
-    data_factory.makeBattleInfos(BattleInfo::End);
+    data_factory.makeBattle(Battle::End);
 
     ctx_.sendToAll(data_factory.dataWithLength());
 }

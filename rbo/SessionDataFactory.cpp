@@ -48,17 +48,11 @@ void SessionDataFactory::makeText(const std::string& txt) {
     data_.put(txt);
 }
 
-void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& changes) {
-    json changes_data = json::object({
-        { "inventories", changes.itemsChanges },
-        { "stats", changes.statsChanges },
-        { "inventoriesMaxCapacity", json::object() }
-    });
+void SessionDataFactory::makePlayerUpdate(const byte id, const PlayerUpdate& changes) {
+    // Ce type de constructeur est utilisé car {} ferait appelle à une initializer_list et = à une convertion implicite, ce qui n'est pas souhaitable.
+    const json changes_data(changes);
 
-    for (const auto& [inv, capacity] : changes.capacitiesChanges)
-        changes_data.at("inventoriesMaxCapacity")[inv] = capacity ? json(*capacity) : json(nullptr);
-
-    makeData(DataType::Infos);
+    makeData(DataType::PlayerUpdate);
     data_.add(id);
 
     data_.put(changes_data.dump());
@@ -67,10 +61,14 @@ void SessionDataFactory::makeInfos(const byte id, const PlayerStateChanges& chan
 void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& stat) {
     makeData(DataType::GlobalStat);
     data_.put(name);
+    data_.add(stat.hidden);
+
+    if (stat.hidden)
+        return;
+
     data_.putNumeric(stat.limits.min);
     data_.putNumeric(stat.limits.max);
     data_.putNumeric(stat.value);
-    data_.add(stat.hidden);
     data_.add(stat.main);
 }
 
@@ -95,8 +93,8 @@ void SessionDataFactory::makeValidation(const ReplyValidity reply) {
     data_.add(reply);
 }
 
-void SessionDataFactory::makeBattleInfos(const BattleInfo type) {
-    makeData(DataType::BattleInfos);
+void SessionDataFactory::makeBattle(const Battle type) {
+    makeData(DataType::Battle);
     data_.add(type);
 }
 
@@ -113,12 +111,12 @@ void SessionDataFactory::makeBattleInit(const GroupDescriptor& group, const Game
         };
     }
 
-    makeBattleInfos(BattleInfo::Init);
+    makeBattle(Battle::Init);
     data_.put(infos.dump());
 }
 
 void SessionDataFactory::makeBattleAtk(const byte player, const std::string& enemy, const int dmg) {
-    makeBattleInfos(BattleInfo::Atk);
+    makeBattle(Battle::Atk);
     data_.add(player);
     data_.put(enemy);
     data_.putNumeric(dmg);

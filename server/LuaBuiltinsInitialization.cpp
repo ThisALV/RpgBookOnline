@@ -218,8 +218,8 @@ void InstructionsProvider::initBuiltins() {
         [](Gameplay& ctx, const std::string& text) { ctx.print(text); }, &Gameplay::print
     );
     gameplay_type["sendGlobalStat"] = &Gameplay::sendGlobalStat;
-    gameplay_type["sendInfos"] = &Gameplay::sendInfos;
-    gameplay_type["sendBattleInfos"] = &Gameplay::sendBattleInfos;
+    gameplay_type["sendPlayerUpdate"] = &Gameplay::sendPlayerUpdate;
+    gameplay_type["sendBattleInit"] = &Gameplay::sendBattleInit;
     gameplay_type["sendBattleAtk"] = &Gameplay::sendBattleAtk;
     gameplay_type["sendBattleEnd"] = &Gameplay::sendBattleEnd;
 

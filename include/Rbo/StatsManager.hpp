@@ -43,7 +43,7 @@ public:
 
     bool has(const std::string& stat) const { return stats_.count(stat) == 1; }
 
-    StatsValues values() const;
+    StatsValue values() const;
     const Stats& raw() const { return stats_; }
 
     Stats::iterator begin() { return stats_.begin(); }
@@ -57,7 +57,7 @@ public:
 
 namespace std {
 
-template<typename Output> Output& operator<<(Output& out, const Rbo::StatsValues& stats) {
+template<typename Output> Output& operator<<(Output& out, const Rbo::StatsValue& stats) {
     out << '[';
     for (const auto& [name, value] : stats)
         out << " \"" << name << "\"=" << value << ';';

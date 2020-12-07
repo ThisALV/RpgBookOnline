@@ -17,7 +17,7 @@ struct GameState {
     word scene;
     Stats global;
     byte leader;
-    PlayersStates players;
+    PlayersState players;
 };
 
 struct GameBuilder {

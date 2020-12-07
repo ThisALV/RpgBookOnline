@@ -12,7 +12,7 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(Stats)
 BOOST_AUTO_TEST_SUITE(Ctor)
 
 const Stat default_stat {
-    0, StatLimits { StatValueLimits::min(), StatValueLimits::max() }, false
+    0, StatLimits { StatsValueLimits::min(), StatsValueLimits::max() }, false
 };
 
 BOOST_AUTO_TEST_CASE(StatsNames) {
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_SUITE(Set)
 
 BOOST_FIXTURE_TEST_CASE(InLimits, SetFixture)
 {
-    const StatsValues expected_values { { "a", -177 } };
+    const StatsValue expected_values { { "a", -177 } };
 
     manager.set("a", -177);
 
@@ -60,7 +60,7 @@ BOOST_FIXTURE_TEST_CASE(InLimits, SetFixture)
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMax, SetFixture) {
-    const StatsValues expected_values { { "a", 500 } };
+    const StatsValue expected_values { { "a", 500 } };
 
     manager.set("a", 755);
 
@@ -68,7 +68,7 @@ BOOST_FIXTURE_TEST_CASE(OffLimitsMax, SetFixture) {
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMin, SetFixture) {
-    const StatsValues expected_values { { "a", -500 } };
+    const StatsValue expected_values { { "a", -500 } };
 
     manager.set("a", -833);
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_SUITE(Change, *boost::unit_test::depends_on { "Set" })
 
 BOOST_FIXTURE_TEST_CASE(InLimits, ChangeFixture<>)
 {
-    const StatsValues expected_values { { "a", -450 } };
+    const StatsValue expected_values { { "a", -450 } };
 
     manager.change("a", -550);
 
@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_CASE(InLimits, ChangeFixture<>)
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMax, ChangeFixture<>) {
-    const StatsValues expected_values { { "a", 500 } };
+    const StatsValue expected_values { { "a", 500 } };
 
     manager.change("a", 410);
 
@@ -97,7 +97,7 @@ BOOST_FIXTURE_TEST_CASE(OffLimitsMax, ChangeFixture<>) {
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMin, ChangeFixture<>) {
-    const StatsValues expected_values { { "a", -500 } };
+    const StatsValue expected_values { { "a", -500 } };
 
     manager.change("a", -610);
 
