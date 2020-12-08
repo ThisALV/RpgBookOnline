@@ -83,7 +83,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
                 const ErrCode err { trySend(*ctx_->players.at(playerID_), trunc(reply_data.dataWithLength())) };
 
                 if (err)
-                    throw NetworkError { "receive_answers" + std::to_string(id), err };
+                    throw NetworkError { "receive_answers:" + std::to_string(id), err };
             }
 
             logger_->info("Reply of {} is valid.", playerID_);
