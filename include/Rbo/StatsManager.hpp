@@ -53,19 +53,16 @@ public:
     Stats::const_iterator cend() const { return stats_.cend(); }
 };
 
-} // namespace Rbo
-
-namespace std {
-
-template<typename Output> Output& operator<<(Output& out, const Rbo::StatsValue& stats) {
+template<typename Output>
+Output& operator<<(Output& out, const StatsValue& stats) {
     out << '[';
     for (const auto& [name, value] : stats)
         out << " \"" << name << "\"=" << value << ';';
 
     out << " ]";
-    return out;
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
-}
+} // namespace Rbo
 
 #endif // STATSMANAGER_HPP

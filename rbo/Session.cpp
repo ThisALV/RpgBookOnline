@@ -226,7 +226,7 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
         }
     }
 
-    logger_.debug("Global : {}", stats().values());
+    logger_.debug("Global : {}", StatsValueWrapper { stats().values() });
     for (const auto& [id, player] : players_) {
         logger_.debug("Player {} : {}", id, player);
         interface.initCache(id);
@@ -515,9 +515,9 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         sendToAll(crash_data.dataWithLength());
     }
 
-    logger_.info("Replies : {}", ctx.replies);
+    logger_.info("Replies : {}", RepliesWrapper { ctx.replies });
     if (!ctx.errorIDs.empty())
-        logger_.warn("Crashed players : {}", ctx.errorIDs);
+        logger_.warn("Crashed players : {}", ByteVecWrapper { ctx.errorIDs });
 
     if (!running())
         throw CanceledRequest {};

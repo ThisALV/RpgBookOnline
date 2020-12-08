@@ -12,6 +12,7 @@
 #include <optional>
 #include <random>
 #include <limits>
+#include <iostream>
 #include <spdlog/fwd.h>
 
 using ushort = std::uint16_t;
@@ -74,6 +75,12 @@ using StatsDescriptor = std::unordered_map<std::string, StatDescriptor>;
 using InventoriesDescriptor = std::unordered_map<std::string, InventoryDescriptor>;
 
 using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<byte>>;
+
+template<typename Outputable> struct OutputableWrapper;
+using StatsValueWrapper = OutputableWrapper<StatsValue>;
+using RepliesWrapper = OutputableWrapper<Replies>;
+template<typename T> using VectorWrapper = OutputableWrapper<std::vector<T>>;
+using ByteVecWrapper = VectorWrapper<byte>;
 
 struct DiceFormula {
     uint dices;
@@ -165,6 +172,21 @@ struct InventoryDescriptor {
     InventoryContent initialStuff;
 };
 
+// Pour pouvoir utiliser operator<< avec des using dans Rbo sur des types de la std en utilisant l'ADL
+template<typename Outputable>
+struct OutputableWrapper {
+    const Outputable& value;
+
+    // Pour utiliser le wrapper dans les tests de Boost
+    bool operator==(const OutputableWrapper<Outputable> rhs) const { return value == rhs.value; }
+};
+
+template<typename Output, typename Outputable>
+Output& operator<<(Output& out, const OutputableWrapper<Outputable>& wrapper) {
+    out << wrapper.value;
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
+}
+
 ulong now();
 std::string itemEntry(const std::string& inventory, const std::string& item);
 std::pair<std::string, std::string> splitItemEntry(const std::string& itemEntry);
@@ -190,21 +212,17 @@ std::vector<byte> decompose(const NumType value) {
 const byte ALL_PLAYERS { 0 };
 const word INTRO { 0 };
 
-} // namespace Rbo
-
-namespace std {
-
 template<typename Output>
-Output& operator<<(Output& out, const std::vector<Rbo::byte>& ids) {
+Output& operator<<(Output& out, const std::vector<byte>& ids) {
     out << '[';
-    for (const Rbo::byte id : ids)
+    for (const byte id : ids)
         out << ' ' << std::to_string(id) << ';';
 
     out << " ]";
-    return out; // (ostringstream& << string) ne retourne pas une ostringstream&
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
-}
+} // namespace Rbo
 
 #endif // COMMON_HPP
 

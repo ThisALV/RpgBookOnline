@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_CASE(Add, AddFixture) {
     expected_inventories.at("inv1").add("A", 5);
 
     BOOST_CHECK(done);
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { player.stats().values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { player.stats().values() });
     BOOST_CHECK_EQUAL(expected_inventories, player.inventories());
 }
 
@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE_WITH_DECOR(Consume, ConsumeFixture,
     expected_inventories.at("inv1").add("A", 3);
 
     BOOST_CHECK(done);
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { player.stats().values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { player.stats().values() });
     BOOST_CHECK_EQUAL(expected_inventories, player.inventories());
 }
 
@@ -126,7 +126,7 @@ BOOST_FIXTURE_TEST_CASE(AddInventoryFull, AddFixture) {
     };
 
     BOOST_CHECK(!done);
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { player.stats().values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { player.stats().values() });
     BOOST_CHECK_EQUAL(expected_inventories, player.inventories());
 }
 
@@ -141,7 +141,7 @@ BOOST_FIXTURE_TEST_CASE_WITH_DECOR(ConsumeItemEmpty, ConsumeFixture,
     expected_inventories.at("inv1").add("A", 5);
 
     BOOST_CHECK(!done);
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { player.stats().values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { player.stats().values() });
     BOOST_CHECK_EQUAL(expected_inventories, player.inventories());
 }
 

@@ -56,7 +56,7 @@ BOOST_FIXTURE_TEST_CASE(InLimits, SetFixture)
 
     manager.set("a", -177);
 
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_values }, StatsWrapper { manager.values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_values }, StatsValueWrapper { manager.values() });
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMax, SetFixture) {
@@ -85,7 +85,7 @@ BOOST_FIXTURE_TEST_CASE(InLimits, ChangeFixture<>)
 
     manager.change("a", -550);
 
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_values }, StatsWrapper { manager.values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_values }, StatsValueWrapper { manager.values() });
 }
 
 BOOST_FIXTURE_TEST_CASE(OffLimitsMax, ChangeFixture<>) {

@@ -314,7 +314,7 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
                 ready_members.push_back(id);
         }
 
-        logger_.debug("Ready members : {}", ready_members);
+        logger_.debug("Ready members : {}", ByteVecWrapper { ready_members });
 
         LobbyDataFactory ready_data;
         ready_data.makeReady(id);
@@ -545,7 +545,7 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_particip
     } catch (const InvalidIDs& err) {
         Run run;
         run.expectedIDs = err.expectedIDs;
-        logger_.error("Expected participants IDs : {}", err.expectedIDs);
+        logger_.error("Expected participants IDs : {}", ByteVecWrapper { err.expectedIDs });
 
         if (err.errType == ParticipantsValidity::UnknownPlayer) {
             logger_.error("Unknown IDs among us.");

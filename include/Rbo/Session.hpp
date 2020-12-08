@@ -126,20 +126,16 @@ public:
     bool playersRemaining() const { return !players_.empty(); }
 };
 
-} // namespace Rbo
-
-namespace std {
-
 template<typename Output>
-Output& operator<<(Output& out, const Rbo::Replies& replies) {
+Output& operator<<(Output& out, const Replies& replies) {
     out << '[';
     for (const auto [id, reply] : replies)
         out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
 
     out << " ]";
-    return out;
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
-}
+} // namespace Rbo
 
 #endif // SESSION_HPP

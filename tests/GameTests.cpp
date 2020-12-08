@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(Apply) {
     };
     expected_inventories.at("inv2").add("A", 1);
 
-    BOOST_CHECK_EQUAL(StatsWrapper { expected_stats }, StatsWrapper { target.stats().values() });
+    BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { target.stats().values() });
     BOOST_CHECK_EQUAL(InventoriesWrapper { expected_inventories },
                       InventoriesWrapper { target.inventories() });
 }

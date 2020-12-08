@@ -96,14 +96,14 @@ Output& operator<<(Output& out, const Player& player) {
         out << " \"" << name << "\"=" << inventory << ';';
 
     out << " ] ]";
-    return out;
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
 template<typename Output>
 Output& operator<<(Output& out, const Inventory& inventory) {
     out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" } : std::to_string(*inventory.maxSize())) << "; size=" << inventory.size() << " ]";
 
-    return out;
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
 } // namespace Rbo
