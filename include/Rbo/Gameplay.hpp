@@ -11,11 +11,10 @@ class Session;
 class Gameplay {
 private:
     Session& ctx_;
-    std::map<byte, PlayerState> players_cache_;
-    bool first_player_update_;
+    std::map<byte, PlayerCache> players_cache_;
 
 public:
-    Gameplay(Session& ctx) : ctx_ { ctx }, first_player_update_ { true } {}
+    Gameplay(Session& ctx) : ctx_ { ctx } {}
 
     void initCache(const byte player_id);
 

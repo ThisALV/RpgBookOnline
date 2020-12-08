@@ -146,6 +146,11 @@ struct PlayerState {
     InventoriesSize capacities;
 };
 
+struct PlayerCache {
+    bool initialized;
+    PlayerState playerState;
+};
+
 struct StatDescriptor {
     DiceFormula initialValue;
     StatLimits limits;
