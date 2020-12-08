@@ -7,14 +7,6 @@
 
 namespace Rbo::Server {
 
-void Lobby::logMemberError(spdlog::logger& logger, const byte id, const ErrCode& err) {
-    logger.error("Member {} : {}", id, err.message());
-}
-
-void Lobby::logRegisteringError(spdlog::logger& logger, const tcp::endpoint client, const ErrCode& err) {
-    logger.error("Registration of {} : {}", client, err.message());
-}
-
 Run::Run(const SessionResult r, Participants ps, const std::vector<byte>& expected_ids) : result { r }, participants { std::move(ps) }, expectedIDs { expected_ids } {}
 
 std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) const {
@@ -34,6 +26,14 @@ Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt, cons
       state_ { Closed },
       prepare_timer_ { lobby_io },
       session_ { lobby_io, game_builder } {}
+
+void Lobby::logMemberError(const byte id, const ErrCode& err) {
+    logger_.error("Member {} : {}", id, err.message());
+}
+
+void Lobby::logRegisteringError(const tcp::endpoint client, const ErrCode& err) {
+    logger_.error("Registration of {} : {}", client, err.message());
+}
 
 void Lobby::disconnect(const byte id, const bool crash) {
     tcp::socket& client { connections_.at(id) };
@@ -199,7 +199,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
 
     const tcp::endpoint client_endpt { connection.remote_endpoint() };
     if (accept_err) {
-        logRegisteringError(logger_, client_endpt, accept_err);
+        logRegisteringError(client_endpt, accept_err);
         return;
     }
 
@@ -210,7 +210,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
 
     registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) mutable {
         if (name_err) {
-            logRegisteringError(logger_, client_endpt, name_err);
+            logRegisteringError(client_endpt, name_err);
             return;
         }
 
@@ -240,7 +240,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
         const ErrCode send_register_err { trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength())) };
 
         if (send_register_err) {
-            logRegisteringError(logger_, client_endpt, send_register_err);
+            logRegisteringError(client_endpt, send_register_err);
             return;
         }
 
@@ -287,7 +287,7 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 
     if (request_err) {
         disconnect(id, true);
-        logMemberError(logger_, id, request_err);
+        logMemberError(id, request_err);
         return;
     }
 
