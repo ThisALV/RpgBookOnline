@@ -190,30 +190,40 @@ void Gameplay::initCache(const byte player_id) {
 }
 
 void Gameplay::sendPlayerUpdate(const byte id) {
-    Player& p { player(id) };
-    PlayerState& last { players_cache_.at(id) };
-    auto& [stats, inventories, capacities] { last };
+    Player& p_updated { player(id) };
+    PlayerState& cache { players_cache_.at(id) };
 
     PlayerUpdate update;
-    for (const auto& [name, stat] : p.stats()) {
-        if (!p.stats().hidden(name) && stat != stats.at(name)) {
-            update.stats.at(name) = stat;
-            stats.at(name) = stat;
+    for (const auto& [name, stat] : p_updated.stats()) {
+        Stat& cached_stat { cache.stats.at(name) };
+
+        if (first_player_update_ || stat != cached_stat) {
+            update.stats.insert({ name, stat });
+
+            if (stat.hidden)
+                cached_stat.hidden = true;
+            else
+                cached_stat = stat;
         }
     }
 
-    for (const auto& [name, inv] : p.inventories()) {
+    for (const auto& [name, inv] : p_updated.inventories()) {
+        InventoryContent& cached_inv { cache.inventories.at(name) };
+
         for (const auto& [item, qty] : inv.content()) {
-            if (qty != inventories.at(name).at(item)) {
-                update.items.at(name).at(item) = qty;
-                inventories.at(name).at(item) = qty;
+            uint& cached_item_qty { cached_inv.at(item) };
+
+            if (qty != cached_item_qty) {
+                update.items[name].insert({ item, qty }); // Utilisation de [] pour créer l'inventaire uniquement s'il y a des changements dessus
+                cached_item_qty = qty;
             }
         }
 
-        const InventorySize inv_max_capacity { inv.maxSize() };
-        if (inv_max_capacity != capacities.at(name)) {
-            update.capacities.at(name) = inv_max_capacity;
-            capacities.at(name) = inv_max_capacity;
+        const InventorySize capacity { inv.maxSize() };
+        InventorySize& cached_capacity { cache.capacities.at(name) };
+        if (capacity != cached_capacity) {
+            update.capacities.insert({ name, capacity });
+            cached_capacity = capacity;
         }
     }
 
@@ -221,6 +231,8 @@ void Gameplay::sendPlayerUpdate(const byte id) {
     data_factory.makePlayerUpdate(id, update);
 
     ctx_.sendToAll(data_factory.dataWithLength());
+
+    first_player_update_ = false;
 }
 
 void Gameplay::sendBattleInit(const GroupDescriptor& entities) {
