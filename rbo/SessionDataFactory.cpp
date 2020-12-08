@@ -62,6 +62,7 @@ void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& sta
     makeData(DataType::GlobalStat);
     data_.put(name);
     data_.add(stat.hidden);
+    data_.add(stat.main);
 
     if (stat.hidden)
         return;
@@ -69,7 +70,6 @@ void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& sta
     data_.putNumeric(stat.limits.min);
     data_.putNumeric(stat.limits.max);
     data_.putNumeric(stat.value);
-    data_.add(stat.main);
 }
 
 void SessionDataFactory::makeDie(const byte id) {

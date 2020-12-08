@@ -200,10 +200,12 @@ void Gameplay::sendPlayerUpdate(const byte id) {
         if (first_player_update_ || stat != cached_stat) {
             update.stats.insert({ name, stat });
 
-            if (stat.hidden)
+            if (stat.hidden) {
                 cached_stat.hidden = true;
-            else
+                cached_stat.main = stat.main;
+            } else {
                 cached_stat = stat;
+            }
         }
     }
 

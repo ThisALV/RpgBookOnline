@@ -60,23 +60,28 @@ BOOST_AUTO_TEST_CASE(PlayerUpdates) {
     const json default_limits = json::object({
         { "min", StatsValueLimits::min() }, { "max", StatsValueLimits::max() }
     });
-    const json infos = json::object({
+    const json update = json::object({
         { "inventories", {
               { "inv1", { { "A", 5 }, { "B", -4 } } },
               { "inv2", { { "A", -1 } } }
         } },
         { "capacities", { { "inv1", nullptr }, { "inv2", 55 } } },
         { "stats", {
-              { "a", { { "hidden", true } } },
-              { "b", { { "hidden", false }, { "main", true }, { "limits", default_limits }, { "value", 2 } } }
+              { "a", { { "hidden", true }, { "main", false } } },
+              { "b", { { "hidden", false }, { "main", true }, { "limits", default_limits }, { "value", 2 } } },
+              { "c", { { "hidden", true }, { "main", true } } }
         } }
     });
 
-    expected.put(infos.dump());
+    expected.put(update.dump());
 
     const byte player_id { 4 };
     const PlayerUpdate changes {
-        { { "a", Stat { 1, StatLimits {}, true, false } }, { "b", Stat { 2, StatLimits {}, false, true } } },
+        {
+            { "a", Stat { 1, StatLimits {}, true, false } },
+            { "b", Stat { 2, StatLimits {}, false, true } },
+            { "c", Stat { 3, StatLimits {}, true, true } }
+        },
         {
             { "inv1", { { "A", 5 }, { "B", -4 } } },
             { "inv2", { { "A", -1 } } }
@@ -120,7 +125,7 @@ BOOST_AUTO_TEST_SUITE(GlobalStat)
 BOOST_AUTO_TEST_CASE(Visible) {
     const Data expected {
         std::vector<byte> {
-            3, 0, 4, 't', 'e', 's', 't', 0, 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 0, 0, 0, 0, 1
+            3, 0, 4, 't', 'e', 's', 't', 0, 1, 0, 0, 0x1, 0xD4, 0, 0, 0x7, 0xE4, 0, 0, 0, 0
         }
     };
 
@@ -130,15 +135,28 @@ BOOST_AUTO_TEST_CASE(Visible) {
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
-BOOST_AUTO_TEST_CASE(Hidden) {
+BOOST_AUTO_TEST_CASE(HiddenAndMain) {
     const Data expected {
         std::vector<byte> {
-            3, 0, 4, 't', 'e', 's', 't', 1
+            3, 0, 4, 't', 'e', 's', 't', 1, 1
         }
     };
 
     SessionDataFactory factory;
     factory.makeGlobalStat("test", Stat { 0, { 468, 2020 }, true, true });
+
+    BOOST_CHECK_EQUAL(expected, factory.data());
+}
+
+BOOST_AUTO_TEST_CASE(HiddenNotMain) {
+    const Data expected {
+        std::vector<byte> {
+            3, 0, 4, 't', 'e', 's', 't', 1, 0
+        }
+    };
+
+    SessionDataFactory factory;
+    factory.makeGlobalStat("test", Stat { 0, { 468, 2020 }, true, false });
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

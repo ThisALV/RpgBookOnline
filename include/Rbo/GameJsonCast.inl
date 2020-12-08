@@ -119,7 +119,7 @@ inline void to_json(json& data, const PlayerUpdate& changes) {
     data["stats"] = json::object();
     for (const auto& [name, stat] : changes.stats) {
         if (stat.hidden)
-            data.at("stats")[name] = json::object({ { "hidden", true } });
+            data.at("stats")[name] = json::object({ { "hidden", true }, { "main", stat.main } });
         else
             data.at("stats")[name] = stat;
     }
