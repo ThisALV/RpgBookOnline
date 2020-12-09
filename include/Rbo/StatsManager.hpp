@@ -49,6 +49,9 @@ public:
     Stats::iterator begin() { return stats_.begin(); }
     Stats::iterator end() { return stats_.end(); }
 
+    Stats::const_iterator begin() const { return cbegin(); }
+    Stats::const_iterator end() const { return cend(); }
+
     Stats::const_iterator cbegin() const { return stats_.cbegin(); }
     Stats::const_iterator cend() const { return stats_.cend(); }
 };

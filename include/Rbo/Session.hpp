@@ -61,7 +61,8 @@ using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
 private:
-    static std::string initStatMsg(const DiceFormula& initFormula, const std::string& statName, const int statValue);
+    static std::string initStatMsg(const DiceFormula& dice_roll, const std::string& stat_name, const int stat_value);
+    static void printStatMsg(Gameplay& interface, const std::string& msg_format, const std::string& stat_name, const DiceFormula& dice_roll, const int stat_value);
 
     io::io_context::strand executor_;
     spdlog::logger& logger_;
@@ -84,6 +85,9 @@ private:
 
     void initPlayer(Player& target);
     void restaurePlayer(const byte targetID, const PlayerState& previousState);
+
+    void printGlobal(Gameplay& interface) const;
+    void printPlayer(Gameplay& interface, const byte player_id) const;
 
     Next playScene(Gameplay& interface, const word sceneID);
 

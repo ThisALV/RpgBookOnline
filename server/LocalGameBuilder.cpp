@@ -63,7 +63,10 @@ Game LocalGameBuilder::operator()() const {
         if (in.fail())
             throw GameLoadingError { "Error on input stream" };
 
+        FromJsonWrapper<Messages> messages { game.messages };
+
         data.at("name").get_to(game.name);
+        data.at("messages").get_to(messages);
         data.at("globals").get_to(game.globalStats);
         data.at("players").get_to(game.playerStats);
         data.at("inventories").get_to(game.playerInventories);
@@ -75,7 +78,6 @@ Game LocalGameBuilder::operator()() const {
         data.at("playerDeath").get_to(game.deathConditions);
         data.at("gameEnd").get_to(game.gameEndConditions);
         data.at("voteOnLeaderDeath").get_to(game.voteOnLeaderDeath);
-        data.at("voteLeader").get_to(game.voteLeader);
 
         for (const Game::Error err : game.validity())
             logger_.warn("Spotted errors in game : {}", Game::getMessage(err));

@@ -3,6 +3,7 @@
 
 #include <Rbo/Common.hpp>
 
+#include <algorithm>
 #include <nlohmann/json.hpp>
 #include <Rbo/Game.hpp>
 
@@ -10,12 +11,30 @@ namespace Rbo { // Doivent être dans le même ns que leur type pour fonctionner
 
 using json = nlohmann::json;
 
-template<typename T> void to_json(json& data, const std::optional<T>& opt) {
+template<typename T>
+void to_json(json& data, const std::optional<T>& opt) {
     data = opt ? json(*opt) : json(nullptr);
 }
 
-template<typename T> void from_json(const json& data, std::optional<T>& opt) {
+template<typename T>
+void from_json(const json& data, std::optional<T>& opt) {
     opt = data.is_null() ? std::optional<T> {} : data.get<T>();
+}
+
+inline void from_json(const json& data, Messages& messages) {
+    for (const auto& [name, msg] : data.get<json::object_t>())
+        messages.insert({ name, msg.is_null() ? Message {} : Message { msg.get<std::string>() } });
+}
+
+// Pour pouvoir utiliser from_json avec des using dans Rbo sur des types de la std en utilisant l'ADL
+template<typename Serializable>
+struct FromJsonWrapper {
+    Serializable& value;
+};
+
+template<typename Serializable>
+inline void from_json(const json& data, FromJsonWrapper<Serializable>& serializable) {
+    from_json(data, serializable.value);
 }
 
 inline void from_json(const json& data, DiceFormula& formula) {
@@ -57,7 +76,7 @@ inline void from_json(const json& data, EnemyDescriptor& enemy) {
 
 inline void from_json(const json& data, GroupDescriptor& group) {
     for (const auto& [priority, enemy] : data.get<json::object_t>())
-        group.insert({ std::stoi(priority), EnemyDescriptorBinding { enemy["ctx"].get<std::string>(), enemy["generic"].get<std::string>() } });
+        group.insert({ std::stoi(priority), EnemyDescriptorBinding { enemy.at("ctx").get<std::string>(), enemy.at("generic").get<std::string>() } });
 }
 
 inline void from_json(const json& data, RestProperties& rest) {
@@ -150,6 +169,6 @@ inline void from_json(const json& data, std::map<byte, PlayerState>& players) {
     }
 }
 
-} // namespace Rbo::Server
+} // namespace Rbo
 
 #endif // GAMEJSONCAST_INL

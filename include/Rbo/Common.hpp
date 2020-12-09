@@ -76,6 +76,9 @@ using InventoriesDescriptor = std::unordered_map<std::string, InventoryDescripto
 
 using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<byte>>;
 
+using Message = std::optional<std::string>;
+using Messages = std::unordered_map<std::string, Message>;
+
 template<typename Outputable> struct OutputableWrapper;
 using StatsValueWrapper = OutputableWrapper<StatsValue>;
 using RepliesWrapper = OutputableWrapper<Replies>;

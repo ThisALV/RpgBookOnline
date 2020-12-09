@@ -61,6 +61,8 @@ struct Game {
     bool voteOnLeaderDeath;
     bool voteLeader;
 
+    std::unordered_map<std::string, Message> messages;
+
     const EventEffect& effect(const std::string& name) const;
     const EnemyDescriptor& enemy(const std::string& name) const;
     const GroupDescriptor& group(const std::string& name) const;
