@@ -32,17 +32,17 @@ struct CanceledRequest : std::exception {
     const char* what() const noexcept override;
 };
 
-enum struct ParticipantsValidity {
+enum struct EntrantsValidity {
     Ok, UnknownPlayer, LessMembers
 };
 
 struct InvalidIDs : std::logic_error {
     std::vector<byte> expectedIDs;
-    ParticipantsValidity errType;
+    EntrantsValidity errType;
 
     std::string msg;
 
-    InvalidIDs(const std::vector<byte>& expectedIDs, const ParticipantsValidity errType);
+    InvalidIDs(const std::vector<byte>& expectedIDs, const EntrantsValidity errType);
 
     virtual const char* what() const noexcept override { return msg.data(); }
 };
@@ -56,7 +56,7 @@ struct Particpant {
     tcp::socket socket;
 };
 
-using Participants = std::map<byte, Particpant>;
+using Entrants = std::map<byte, Particpant>;
 using ConstConnections = std::map<byte, const tcp::socket*>;
 
 class Session {
@@ -75,12 +75,12 @@ private:
 
     const GameBuilder& game_builer_;
 
-    void begin(Participants& initial_participants_data);
-    void end(Participants& initial_participants_data);
+    void begin(Entrants& initial_entrants_data);
+    void end(Entrants& initial_entrants_data);
 
     word newGame();
     word gameFromCheckpoint(const std::string& final_name, const bool missing_entrants);
-    ParticipantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants);
+    EntrantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants);
 
     void initPlayer(Player& target);
     void restaurePlayer(const byte targetID, const PlayerState& previousState);
@@ -103,7 +103,7 @@ public:
 
     bool operator==(const Session&) const = delete;
 
-    void start(Participants& initial_entrants_data, const std::string& final_name = "", const bool missing_entrants = false);
+    void start(Entrants& initial_entrants_data, const std::string& final_name = "", const bool missing_entrants = false);
 
     void stop() { running_ = false; }
     bool running() const { return running_; }

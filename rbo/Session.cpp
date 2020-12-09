@@ -11,8 +11,8 @@
 
 namespace Rbo {
 
-InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids, const ParticipantsValidity type) : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type } {
-    assert(type != ParticipantsValidity::Ok);
+InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids, const EntrantsValidity type) : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type } {
+    assert(type != EntrantsValidity::Ok);
 
     msg = "Expected IDs :";
     for (const byte expected : expectedIDs)
@@ -75,8 +75,8 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
       running_ { false },
       game_builer_ { g_builder } {}
 
-void Session::begin(Participants& participants) {
-    for (auto& [id, participant] : participants) {
+void Session::begin(Entrants& entrants) {
+    for (auto& [id, participant] : entrants) {
         logger_.trace("Moving socket of participant {}...", id);
 
         Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
@@ -91,14 +91,14 @@ void Session::begin(Participants& participants) {
     sendToAll(start_msg.dataWithLength());
 }
 
-void Session::end(Participants& participants) {
+void Session::end(Entrants& entrants) {
     SessionDataFactory stop_msg;
     stop_msg.makeData(DataType::Stop);
 
     sendToAll(stop_msg.dataWithLength());
 
     std::vector<byte> error_ids;
-    for (auto& [id, participant] : participants) {
+    for (auto& [id, participant] : entrants) {
         if (connections_.count(id) == 1) {
             logger_.trace("Moving socket of participant {}...", id);
             participant.socket = std::move(connection(id));
@@ -109,7 +109,7 @@ void Session::end(Participants& participants) {
 
     for (const byte id : error_ids) {
         logger_.debug("Removing participant {}...", id);
-        participants.erase(id);
+        entrants.erase(id);
     }
 
     stop();
@@ -162,8 +162,8 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
         sendToAll(global_stat.dataWithLength());
     }
 
-    const ParticipantsValidity entrants_validity { checkEntrants(checkpoint, missing_entrants) };
-    if (entrants_validity != ParticipantsValidity::Ok) {
+    const EntrantsValidity entrants_validity { checkEntrants(checkpoint, missing_entrants) };
+    if (entrants_validity != EntrantsValidity::Ok) {
         std::vector<byte> expected_players;
         expected_players.resize(checkpoint.players.size(), 0);
 
@@ -180,21 +180,21 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
     return checkpoint.scene;
 }
 
-ParticipantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) {
-    ParticipantsValidity entrants_validity { ParticipantsValidity::Ok };
+EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) {
+    EntrantsValidity entrants_validity { EntrantsValidity::Ok };
     for (const auto& player : players_) {
         if (checkpoint.players.count(player.first) == 0) {
-            entrants_validity = ParticipantsValidity::UnknownPlayer;
+            entrants_validity = EntrantsValidity::UnknownPlayer;
             break;
         }
     }
 
-    if (entrants_validity == ParticipantsValidity::Ok) {
+    if (entrants_validity == EntrantsValidity::Ok) {
         for (const auto& [id, p_state] : checkpoint.players) {
             if (players_.count(id) == 1) {
                 restaurePlayer(id, p_state);
             } else if (!missing_entrants) {
-                entrants_validity = ParticipantsValidity::LessMembers;
+                entrants_validity = EntrantsValidity::LessMembers;
                 break;
             }
         }
@@ -278,7 +278,7 @@ void Session::restaurePlayer(const byte id, const PlayerState& state) {
     }
 }
 
-void Session::start(Participants& initial_entrants_data, const std::string& checkpoint, const bool missing_entrants) {
+void Session::start(Entrants& initial_entrants_data, const std::string& checkpoint, const bool missing_entrants) {
     running_ = true;
     logger_.info("Session started.");
 

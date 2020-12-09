@@ -15,7 +15,7 @@ enum struct State : byte {
 };
 
 enum struct YesNoQuestion : byte {
-    MissingParticipants, RetryCheckpoint, KickUnknownPlayers
+    MissingEntrants, RetryCheckpoint, KickUnknownPlayers
 };
 
 enum struct SessionResult : byte {

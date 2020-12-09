@@ -7,7 +7,7 @@
 
 namespace Rbo::Server {
 
-Run::Run(const SessionResult r, Participants ps, const std::vector<byte>& expected_ids) : result { r }, participants { std::move(ps) }, expectedIDs { expected_ids } {}
+Run::Run(const SessionResult r, Entrants ps, const std::vector<byte>& expected_ids) : result { r }, entrants { std::move(ps) }, expectedIDs { expected_ids } {}
 
 std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) const {
     std::ostringstream str;
@@ -450,8 +450,8 @@ void Lobby::launchPreparation() {
         open();
 }
 
-void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<bool> missing_participants) {
-    assert(!(missing_participants && chkpt_name->empty()));
+void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<bool> missing_entrants) {
+    assert(!(missing_entrants && chkpt_name->empty()));
     if (!chkpt_name) {
         LobbyDataFactory select_chkpt_data;
         select_chkpt_data.makeState(State::SelectingCheckpoint);
@@ -461,23 +461,23 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
         chkpt_name = askCheckpoint();
     }
 
-    if (!missing_participants) {
+    if (!missing_entrants) {
         LobbyDataFactory checking_players_data;
         checking_players_data.makeState(State::CheckingPlayers);
 
         sendToAllMasterHandling(checking_players_data.dataWithLength());
 
-        missing_participants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingParticipants);
+        missing_entrants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
 
-    Run run { runSession(*chkpt_name, *missing_participants) };
+    Run run { runSession(*chkpt_name, *missing_entrants) };
     session_.reset();
     members_.clear();
     connections_.clear();
 
-    logger_.trace("Sending session's result to participants...");
+    logger_.trace("Sending session's result to entrants...");
 
-    for (auto& [id, participant] : run.participants) {
+    for (auto& [id, participant] : run.entrants) {
         members_.insert({ id, Member { participant.name, false } });
         connections_.insert({ id, std::move(participant.socket) });
     }
@@ -501,7 +501,7 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
 
         if (!retry_chkpt) {
             makeSession(new_ckpt);
-        } else if (run.result == SessionResult::LessMembers && askYesNo(YesNoQuestion::MissingParticipants)) {
+        } else if (run.result == SessionResult::LessMembers && askYesNo(YesNoQuestion::MissingEntrants)) {
             makeSession(new_ckpt, true);
         } else if (run.result == SessionResult::UnknownPlayer && askYesNo(YesNoQuestion::KickUnknownPlayers)) {
             const auto cb { run.expectedIDs.cbegin() };
@@ -521,45 +521,45 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
     }
 }
 
-Run Lobby::runSession(const std::string& chkpt_name, const bool missing_participants) {
+Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants) {
     LobbyDataFactory start_data;
     start_data.makeState(State::Start);
 
     logger_.info("Starting session...");
-    logger_.trace("Checkpoint=\"{}\" ; Missing participants ? {}", chkpt_name, missing_participants);
+    logger_.trace("Checkpoint=\"{}\" ; Missing entrants ? {}", chkpt_name, missing_entrants);
     sendToAllMasterHandling(start_data.dataWithLength());
 
-    Participants participants;
+    Entrants entrants;
     for (const auto& [id, member] : members())
-        participants.insert({ id, Particpant { member.name, std::move(connections_.at(id)) } });
+        entrants.insert({ id, Particpant { member.name, std::move(connections_.at(id)) } });
 
     try {
         if (isClosed())
-            return { SessionResult::Ok, std::move(participants) };
+            return { SessionResult::Ok, std::move(entrants) };
 
-        session_.start(participants, chkpt_name, missing_participants);
+        session_.start(entrants, chkpt_name, missing_entrants);
         logger_.info("Session end.");
     } catch (const CheckpointLoadingError& err) {
         logger_.error("Unable to load checkpoint \"{}\" : {}", chkpt_name, err.what());
-        return { SessionResult::CheckpointLoadingError, std::move(participants) };
+        return { SessionResult::CheckpointLoadingError, std::move(entrants) };
     } catch (const InvalidIDs& err) {
         Run run;
         run.expectedIDs = err.expectedIDs;
-        logger_.error("Expected participants IDs : {}", ByteVecWrapper { err.expectedIDs });
+        logger_.error("Expected entrants IDs : {}", ByteVecWrapper { err.expectedIDs });
 
-        if (err.errType == ParticipantsValidity::UnknownPlayer) {
+        if (err.errType == EntrantsValidity::UnknownPlayer) {
             logger_.error("Unknown IDs among us.");
-            return { SessionResult::UnknownPlayer, std::move(participants), err.expectedIDs };
+            return { SessionResult::UnknownPlayer, std::move(entrants), err.expectedIDs };
         } else {
-            logger_.error("Less participants then expected.");
-            return { SessionResult::LessMembers, std::move(participants), err.expectedIDs };
+            logger_.error("Less entrants then expected.");
+            return { SessionResult::LessMembers, std::move(entrants), err.expectedIDs };
         }
     } catch (const std::exception& err) {
         logger_.error("Session crashed : {}", err.what());
-        return { SessionResult::Crashed, std::move(participants) };
+        return { SessionResult::Crashed, std::move(entrants) };
     }
 
-    return { SessionResult::Ok, std::move(participants) };
+    return { SessionResult::Ok, std::move(entrants) };
 }
 
 } // namespace Rbo::Server

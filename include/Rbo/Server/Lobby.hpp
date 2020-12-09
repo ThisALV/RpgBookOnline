@@ -22,11 +22,11 @@ struct PreparationError : std::runtime_error {
 
 struct Run {
     SessionResult result;
-    Participants participants;
+    Entrants entrants;
     std::vector<byte> expectedIDs;
 
     Run() = default;
-    Run(const SessionResult, Participants, const std::vector<byte>& = {});
+    Run(const SessionResult, Entrants, const std::vector<byte>& = {});
 };
 
 class Lobby {
@@ -73,8 +73,8 @@ private:
     void registerMember(const boost::system::error_code err, tcp::socket connection);
     void handleMemberRequest(const byte member_id, const boost::system::error_code err, const std::size_t);
     void launchPreparation();
-    void makeSession(std::optional<std::string> checkpt_final_name = {}, std::optional<bool> missing_participants = {});
-    Run runSession(const std::string& checkpt_final_name, const bool missing_participants = false);
+    void makeSession(std::optional<std::string> checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
+    Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);
 
     void preparation();
     void cancelPreparation(const bool is_crash = false);
