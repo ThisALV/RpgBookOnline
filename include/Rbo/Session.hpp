@@ -12,6 +12,8 @@ class GameBuilder;
 class Data;
 class Gameplay;
 
+struct GameState;
+
 enum struct ReplyValidity : byte;
 
 struct NoPlayerRemaining : std::runtime_error {
@@ -20,6 +22,10 @@ struct NoPlayerRemaining : std::runtime_error {
 
 struct UnknownPlayer : std::logic_error {
     UnknownPlayer(const byte id) : std::logic_error { "Unknown player " + std::to_string(id) } {}
+};
+
+struct UninitializedLeader : std::logic_error {
+    UninitializedLeader() : std::logic_error { "Game's leader isn't initialized yet" } {}
 };
 
 struct CanceledRequest : std::exception {
@@ -63,18 +69,23 @@ private:
     std::map<byte, Player> players_;
     std::map<byte, tcp::socket> connections_;
     Game game_;
-    byte leader_;
+    std::optional<byte> leader_;
     word current_scene_;
     std::atomic_bool running_;
 
     const GameBuilder& game_builer_;
 
-    void initPlayers(Gameplay& interface);
-    void initPlayer(Gameplay& interface, Player& target);
+    void begin(Participants& initial_participants_data);
+    void end(Participants& initial_participants_data);
+
+    word newGame();
+    word gameFromCheckpoint(const std::string& final_name, const bool missing_entrants);
+    ParticipantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants);
+
+    void initPlayer(Player& target);
     void restaurePlayer(const byte targetID, const PlayerState& previousState);
 
     Next playScene(Gameplay& interface, const word sceneID);
-    void end(Participants& initialParticipantsData);
 
     void removePlayer(const byte targetID);
 
@@ -92,7 +103,7 @@ public:
 
     bool operator==(const Session&) const = delete;
 
-    void start(Participants& initialParticipantsData, const std::string& checkpt = "", const bool missing_participants = false);
+    void start(Participants& initial_entrants_data, const std::string& final_name = "", const bool missing_entrants = false);
 
     void stop() { running_ = false; }
     bool running() const { return running_; }
@@ -113,7 +124,7 @@ public:
 
     void disconnect(const byte target, const bool is_crash = false);
 
-    byte leader() const { return leader_; }
+    byte leader() const;
     void switchLeader(const byte new_leader);
 
     Player& player(const byte id);

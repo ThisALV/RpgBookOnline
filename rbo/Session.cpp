@@ -75,6 +75,22 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
       running_ { false },
       game_builer_ { g_builder } {}
 
+void Session::begin(Participants& participants) {
+    for (auto& [id, participant] : participants) {
+        logger_.trace("Moving socket of participant {}...", id);
+
+        Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
+
+        players_.insert({ id, std::move(player) });
+        connections_.insert({ id, std::move(participant.socket) });
+    }
+
+    SessionDataFactory start_msg;
+    start_msg.makeStart(game().name);
+
+    sendToAll(start_msg.dataWithLength());
+}
+
 void Session::end(Participants& participants) {
     SessionDataFactory stop_msg;
     stop_msg.makeData(DataType::Stop);
@@ -99,131 +115,200 @@ void Session::end(Participants& participants) {
     stop();
 };
 
-void Session::start(std::map<byte, Particpant>& participants, const std::string& checkpoint, const bool missing_participants) {
-    assert(participants.size() <= std::numeric_limits<byte>::max());
-    running_ = true;
-    logger_.info("Session started.");
-
-    for (auto& [id, participant] : participants) {
-        logger_.trace("Moving socket of participant {}...", id);
-
-        Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
-
-        players_.insert({ id, std::move(player) });
-        connections_.insert({ id, std::move(participant.socket) });
-    }
+word Session::newGame() {
+    logger_.info("New game on \"{}\".", game().name);
 
     stats_ = { game().global() };
 
-    SessionDataFactory start_msg;
-    start_msg.makeStart(game().name);
+    for (const auto& [name, stat] : game().globalStats) {
+        const auto [init, limits, capped, hidden, main] { stat };
+        const int value { init() };
 
-    sendToAll(start_msg.dataWithLength());
+        stats_.setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
+        stats_.set(name, value);
+        stats_.setHidden(name, hidden);
+        stats_.setMain(name, main);
+    }
 
-    Gameplay interface { *this };
-    word beginning;
-    if (checkpoint.empty()) {
-        logger_.info("New game on \"{}\".", game().name);
-        playScene(interface, INTRO);
+    for (auto& player : players_)
+        initPlayer(player.second);
 
-        if (!game().globalStats.empty())
-            interface.print("Global stats :");
+    switchLeader(players_.cbegin()->first);
 
-        for (const auto& [name, stat] : game().globalStats) {
-            const auto [init, limits, capped, hidden, main] { stat };
-            const int value { init() };
+    return INTRO;
+}
 
-            assert((static_cast<int>(init.dices) + init.bonus) >= limits.min);
+word Session::gameFromCheckpoint(const std::string& final_name, const bool missing_entrants) {
+    GameState checkpoint;
+    try {
+        checkpoint = gameBuilder().load(final_name);
+    } catch (const std::exception& err) {
+        throw CheckpointLoadingError { err.what() };
+    }
 
-            stats_.setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
-            stats_.set(name, value);
-            stats_.setHidden(name, hidden);
-            stats_.setMain(name, main);
+    for (const auto& [name, stat] : checkpoint.global) {
+        const auto [value, limits, hidden, main] { stat };
+        const auto [min, max] { limits };
+        assert(!(value < min || value > max));
 
-            const std::string stat_msg { initStatMsg(init, name, value) };
-            if (!hidden) {
-                interface.sendGlobalStat(name);
-                interface.print(stat_msg);
+        stats().setLimits(name, min, max);
+        stats().set(name, value);
+        stats().setHidden(name, hidden);
+        stats().setMain(name, main);
+
+        SessionDataFactory global_stat;
+        global_stat.makeGlobalStat(name, stat);
+
+        sendToAll(global_stat.dataWithLength());
+    }
+
+    const ParticipantsValidity entrants_validity { checkEntrants(checkpoint, missing_entrants) };
+    if (entrants_validity != ParticipantsValidity::Ok) {
+        std::vector<byte> expected_players;
+        expected_players.resize(checkpoint.players.size(), 0);
+
+        std::transform(checkpoint.players.cbegin(), checkpoint.players.cend(), expected_players.begin(), [](const auto& ps) -> byte {
+            return ps.first;
+        });
+
+        throw InvalidIDs { std::move(expected_players), entrants_validity };
+    }
+
+    if (players_.count(checkpoint.leader))
+        switchLeader(checkpoint.leader);
+
+    return checkpoint.scene;
+}
+
+ParticipantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) {
+    ParticipantsValidity entrants_validity { ParticipantsValidity::Ok };
+    for (const auto& player : players_) {
+        if (checkpoint.players.count(player.first) == 0) {
+            entrants_validity = ParticipantsValidity::UnknownPlayer;
+            break;
+        }
+    }
+
+    if (entrants_validity == ParticipantsValidity::Ok) {
+        for (const auto& [id, p_state] : checkpoint.players) {
+            if (players_.count(id) == 1) {
+                restaurePlayer(id, p_state);
+            } else if (!missing_entrants) {
+                entrants_validity = ParticipantsValidity::LessMembers;
+                break;
             }
+        }
+    }
 
-            logger_.info("[Global stats] {}", stat_msg);
+    return entrants_validity;
+}
+
+void Session::initPlayer(Player& target) {
+    for (const auto& [name, stat] : game().playerStats) {
+        const auto [init, limits, capped, hidden, main] { stat };
+        const int value { init() };
+
+        target.stats().setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
+        target.stats().set(name, value);
+        target.stats().setHidden(name, hidden);
+        target.stats().setMain(name, main);
+
+        const std::string stat_msg { initStatMsg(init, name, value) };
+        logger_.info("[Player {} stats] {}", target.id(), stat_msg);
+    }
+
+    for (const auto& [name, inv] : game().playerInventories) {
+        const auto& [limit, items, initial] { inv };
+
+        std::string size_msg { name + " - size : " };
+        InventorySize size;
+        if (limit) {
+            const DiceFormula& formula { *limit };
+            size = formula();
+
+            size_msg += formula.dices == 0 ? std::to_string(*size)
+                                           : std::to_string(formula.dices) + " dices(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
+        } else {
+            size = {};
+            size_msg += "Inf";
         }
 
-        initPlayers(interface);
+        target.inventory(name).setMaxSize(size);
+        if (initial.empty())
+            continue;
 
+#ifndef NDEBUG
+        const InventorySize capacity { target.inventory(name).maxSize() };
+#endif
+        assert(!capacity || std::accumulate(initial.cbegin(), initial.cend(), std::size_t { 0 }, [](const std::size_t s, const auto& i) { return s + i.second; }) <= capacity);
+
+        std::string initial_msg { name + " - initial content :" };
+        for (const auto& [item, qty] : initial) {
+            target.add(name, item, qty);
+            initial_msg += ' ' + item + '*' + std::to_string(qty);
+        }
+
+        logger_.info("[Player {} inventories] {}", target.id(), initial_msg);
+    }
+}
+
+void Session::restaurePlayer(const byte id, const PlayerState& state) {
+    Player& target { player(id) };
+
+    for (const auto& [name, stat] : state.stats) {
+        const auto [value, limits, hidden, main] { stat };
+        const auto [min, max] { limits };
+        assert(!(stat.value < min || stat.value > max));
+
+        target.stats().setLimits(name, min, max);
+        target.stats().set(name, stat.value);
+        target.stats().setHidden(name, hidden);
+        target.stats().setMain(name, main);
+    }
+
+    for (const auto& [inv, content] : state.inventories) {
+#ifndef NDEBUG
+        assert(target.inventory(inv).setMaxSize(state.capacities.at(inv)));
+#else
+        target.inventory(inv).setMaxSize(state.capacities.at(inv));
+#endif
+
+        for (const auto& [item, qty] : content)
+            target.add(inv, item, qty);
+    }
+}
+
+void Session::start(Participants& initial_entrants_data, const std::string& checkpoint, const bool missing_entrants) {
+    running_ = true;
+    logger_.info("Session started.");
+
+    begin(initial_entrants_data);
+
+    const bool new_game { checkpoint.empty() };
+    word beginning;
+    try {
+        beginning = checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants);
+    } catch (const CheckpointLoadingError& err) {
+        end(initial_entrants_data);
+        throw;
+    } catch (const InvalidIDs& err) {
+        end(initial_entrants_data);
+        throw;
+    }
+
+    Gameplay interface { *this };
+
+    for (const auto& player : players_)
+        interface.initCache(player.first);
+
+    if (new_game && game().voteLeader)
+        interface.voteForLeader();
+
+    if (!leader_) {
         if (game().voteLeader)
             interface.voteForLeader();
         else
             switchLeader(players_.cbegin()->first);
-
-        beginning = 1;
-    } else {
-        GameState state;
-        try {
-            state = gameBuilder().load(checkpoint);
-        } catch (const std::exception& err) {
-            end(participants);
-            throw CheckpointLoadingError { err.what() };
-        }
-
-        for (const auto& [name, stat] : state.global) {
-            const auto [value, limits, hidden, main] { stat };
-            const auto [min, max] { limits };
-            assert(!(value < min || value > max));
-
-            stats().setLimits(name, min, max);
-            stats().set(name, value);
-            stats().setHidden(name, hidden);
-            stats().setMain(name, main);
-
-            SessionDataFactory global_stat;
-            interface.sendGlobalStat(name);
-
-            sendToAll(global_stat.dataWithLength());
-        }
-
-        ParticipantsValidity participants_validity { ParticipantsValidity::Ok };
-        for (const auto& player : players_) {
-            if (state.players.count(player.first) == 0) {
-                participants_validity = ParticipantsValidity::UnknownPlayer;
-                break;
-            }
-        }
-
-        if (participants_validity == ParticipantsValidity::Ok) {
-            for (const auto& [id, p_state] : state.players) {
-                if (players_.count(id) == 1) {
-                    restaurePlayer(id, p_state);
-                } else if (!missing_participants) {
-                    participants_validity = ParticipantsValidity::LessMembers;
-                    break;
-                }
-            }
-        }
-
-        if (participants_validity != ParticipantsValidity::Ok) {
-            end(participants);
-
-            std::vector<byte> expected_players;
-            expected_players.resize(state.players.size(), 0);
-
-            std::transform(state.players.cbegin(), state.players.cend(), expected_players.begin(), [](const auto& ps) -> byte {
-                return ps.first;
-            });
-
-            throw InvalidIDs { std::move(expected_players), participants_validity };
-        }
-
-        beginning = state.scene;
-
-        if (players_.count(state.leader) == 0) {
-            if (game().voteOnLeaderDeath)
-                interface.voteForLeader();
-            else
-                switchLeader(players_.cbegin()->first);
-        } else {
-            switchLeader(state.leader);
-        }
     }
 
     logger_.debug("Global : {}", StatsValueWrapper { stats().values() });
@@ -237,11 +322,11 @@ void Session::start(std::map<byte, Particpant>& participants, const std::string&
     try {
         for (Next next { beginning }; next && running(); next = playScene(interface, *next));
     } catch (const std::runtime_error& err) {
-        end(participants);
+        end(initial_entrants_data);
         throw err;
     }
 
-    end(participants);
+    end(initial_entrants_data);
 }
 
 Next Session::playScene(Gameplay& interface, const word id) {
@@ -274,93 +359,6 @@ Next Session::playScene(Gameplay& interface, const word id) {
     return {};
 }
 
-void Session::initPlayers(Gameplay& interface) {
-    for (auto& target : players_)
-        initPlayer(interface, target.second);
-}
-
-void Session::initPlayer(Gameplay& interface, Player& target) {
-    interface.print("Stats of " + target.name() + " :");
-    for (const auto& [name, stat] : game().playerStats) {
-        const auto [init, limits, capped, hidden, main] { stat };
-        const int value { init() };
-
-        target.stats().setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
-        target.stats().set(name, value);
-        target.stats().setHidden(name, hidden);
-        target.stats().setMain(name, main);
-
-        const std::string stat_msg { initStatMsg(init, name, value) };
-        logger_.info("[Player {} stats] {}", target.id(), stat_msg);
-        interface.print(stat_msg);
-    }
-
-    interface.print("Inventories of " + target.name() + " :");
-    for (const auto& [name, inv] : game().playerInventories) {
-        const auto& [limit, items, initial] { inv };
-
-        std::string size_msg { name + " - size : " };
-        InventorySize size;
-        if (limit) {
-            const DiceFormula& formula { *limit };
-            size = formula();
-
-            size_msg += formula.dices == 0
-                    ? std::to_string(*size)
-                    : std::to_string(formula.dices) + " dices(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
-        } else {
-            size = {};
-            size_msg += "Inf";
-        }
-
-        interface.print(size_msg);
-
-        target.inventory(name).setMaxSize(size);
-        if (initial.empty())
-            continue;
-
-#ifndef NDEBUG
-        const InventorySize capacity { target.inventory(name).maxSize() };
-#endif
-        assert(!capacity || std::accumulate(initial.cbegin(), initial.cend(), std::size_t { 0 }, [](const std::size_t s, const auto& i) { return s + i.second; }) <= capacity);
-
-        std::string initial_msg { name + " - initial content :" };
-        for (const auto& [item, qty] : initial) {
-            target.add(name, item, qty);
-            initial_msg += ' ' + item + '*' + std::to_string(qty);
-        }
-
-        logger_.info("[Player {} inventories] {}", target.id(), initial_msg);
-        interface.print(initial_msg);
-    }
-}
-
-void Session::restaurePlayer(const byte id, const PlayerState& state) {
-    Player& target { player(id) };
-
-    for (const auto& [name, stat] : state.stats) {
-        const auto [value, limits, hidden, main] { stat };
-        const auto [min, max] { limits };
-        assert(!(stat.value < min || stat.value > max));
-
-        target.stats().setLimits(name, min, max);
-        target.stats().set(name, stat.value);
-        target.stats().setHidden(name, hidden);
-        target.stats().setMain(name, main);
-    }
-
-    for (const auto& [inv, content] : state.inventories) {
-#ifndef NDEBUG
-        assert(target.inventory(inv).setMaxSize(state.capacities.at(inv)));
-#else
-        target.inventory(inv).setMaxSize(state.capacities.at(inv));
-#endif
-
-        for (const auto& [item, qty] : content)
-            target.add(inv, item, qty);
-    }
-}
-
 void Session::reset() {
     stats_ = {};
     players_.clear();
@@ -368,6 +366,13 @@ void Session::reset() {
     leader_ = 0;
     current_scene_ = 0;
     running_ = false;
+}
+
+byte Session::leader() const {
+    if (!leader_)
+        throw UninitializedLeader {};
+
+    return *leader_;
 }
 
 void Session::switchLeader(const byte id) {
@@ -422,7 +427,8 @@ Players Session::players() {
     return ptrs;
 }
 
-template<typename T> std::map<byte, const T*> constPtrMap(const std::map<byte, T>& map) {
+template<typename T>
+std::map<byte, const T*> constPtrMap(const std::map<byte, T>& map) {
     std::map<byte, const T*> const_ptrs;
 
     std::transform(map.cbegin(), map.cend(), std::inserter(const_ptrs, const_ptrs.end()), [](const auto& v) -> std::pair<byte, const T*> {
