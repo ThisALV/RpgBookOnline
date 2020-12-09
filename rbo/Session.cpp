@@ -315,7 +315,7 @@ void Session::printPlayer(Gameplay& interface, const byte player_id) const {
 
     const Message& stats_title_msg { msgs.at("player_stats_title") };
     if (!target.stats().raw().empty() && stats_title_msg)
-        interface.print(fmt::format(*stats_title_msg, fmt::arg("player", player_id)));
+        interface.print(fmt::format(*stats_title_msg, fmt::arg("player", target.name())));
 
     const Message& stat_msg { msgs.at("player_stat") };
     if (!stat_msg)
