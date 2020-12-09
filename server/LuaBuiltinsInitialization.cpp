@@ -235,7 +235,7 @@ void InstructionsProvider::initBuiltins() {
         [](Gameplay& interface, const std::string& msg) { return votePlayer(interface, msg); },
         votePlayer
     );
-    ctx_["ALL_PLAYERS"] = 0;
+    ctx_["ALL_PLAYERS"] = ALL_PLAYERS;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
 #ifdef NDEBUG
