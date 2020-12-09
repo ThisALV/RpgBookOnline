@@ -80,7 +80,7 @@ private:
 
     word newGame();
     word gameFromCheckpoint(const std::string& final_name, const bool missing_entrants);
-    EntrantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants);
+    EntrantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants) const;
 
     void initPlayer(Player& target);
     void restaurePlayer(const byte targetID, const PlayerState& previousState);
@@ -104,7 +104,6 @@ public:
     bool operator==(const Session&) const = delete;
 
     void start(Entrants& initial_entrants_data, const std::string& final_name = "", const bool missing_entrants = false);
-
     void stop() { running_ = false; }
     bool running() const { return running_; }
     void reset();

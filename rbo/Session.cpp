@@ -174,13 +174,22 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
         throw InvalidIDs { std::move(expected_players), entrants_validity };
     }
 
+    for (const auto& [player_id, state] : checkpoint.players) {
+        if (players_.count(player_id) == 1)
+            restaurePlayer(player_id, state);
+#ifndef NDEBUG // Pour éviter d'avoir un bloc else vide
+        else
+            assert(missing_entrants);
+#endif
+    }
+
     if (players_.count(checkpoint.leader))
         switchLeader(checkpoint.leader);
 
     return checkpoint.scene;
 }
 
-EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) {
+EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) const {
     EntrantsValidity entrants_validity { EntrantsValidity::Ok };
     for (const auto& player : players_) {
         if (checkpoint.players.count(player.first) == 0) {
@@ -191,9 +200,7 @@ EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool 
 
     if (entrants_validity == EntrantsValidity::Ok) {
         for (const auto& [id, p_state] : checkpoint.players) {
-            if (players_.count(id) == 1) {
-                restaurePlayer(id, p_state);
-            } else if (!missing_entrants) {
+            if (players_.count(id) == 0 && !missing_entrants) {
                 entrants_validity = EntrantsValidity::LessMembers;
                 break;
             }
