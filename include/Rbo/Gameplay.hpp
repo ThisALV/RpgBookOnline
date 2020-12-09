@@ -22,15 +22,17 @@ public:
     const Game& game() const;
     const RestProperties& rest() const;
 
-    std::string checkpoint(const std::string& name, const word scene);
+    // Throw : IntroductionCheckpoint, GameBuilder::save() implementation exceptions
+    std::string checkpoint(const std::string& name, const word scene) const;
 
     Player& player(const byte id);
     std::vector<byte> players() const;
     OptionsList names() const;
     std::size_t count() const;
 
+    // Throw : UninitializedLeader
     byte leader() const;
-    // Throw : NePlayerRemaining
+    // Throw : NoPlayerRemaining
     void switchLeader(const byte leader);
     void voteForLeader();
 
@@ -40,13 +42,13 @@ public:
     Replies askConfirm(const byte target, const bool wait = true);
     Replies askYesNo(const byte target, const std::string& question, const bool wait = true);
 
-    PlayerCheckingResult checkPlayer(const byte id);
+    PlayerCheckingResult checkPlayer(const byte id); // Throw : NoPlayerRemaining
     bool checkGame();
 
     // print - Throw : NoPlayerRemaining
     void print(const std::string& msg, const byte target = ALL_PLAYERS);
 
-    // send et end - Throw : NoPlayerRemaining
+    // send - Throw : NoPlayerRemaining
     void sendGlobalStat(const std::string& stat_name);
     void sendPlayerUpdate(const byte player_id);
     void sendBattleInit(const GroupDescriptor& enemies_group_descriptor);

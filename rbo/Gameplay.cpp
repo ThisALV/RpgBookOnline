@@ -47,7 +47,7 @@ const RestProperties& Gameplay::rest() const {
     return game().rest;
 }
 
-std::string Gameplay::checkpoint(const std::string& chkpt, const word id) {
+std::string Gameplay::checkpoint(const std::string& chkpt, const word id) const {
     return ctx_.checkpoint(chkpt, id);
 }
 
