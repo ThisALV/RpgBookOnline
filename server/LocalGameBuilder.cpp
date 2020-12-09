@@ -77,6 +77,7 @@ Game LocalGameBuilder::operator()() const {
         data.at("rest").get_to(game.rest);
         data.at("playerDeath").get_to(game.deathConditions);
         data.at("gameEnd").get_to(game.gameEndConditions);
+        data.at("voteLeader").get_to(game.voteLeader);
         data.at("voteOnLeaderDeath").get_to(game.voteOnLeaderDeath);
 
         for (const Game::Error err : game.validity())
