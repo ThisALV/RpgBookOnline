@@ -180,7 +180,7 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
 
     for (const auto& [player_id, state] : checkpoint.players) {
         if (players_.count(player_id) == 1)
-            restaurePlayer(player_id, state);
+            restorePlayer(player_id, state);
 #ifndef NDEBUG // Pour éviter d'avoir un bloc else vide
         else
             assert(missing_entrants);
@@ -263,7 +263,7 @@ void Session::initPlayer(Player& target) {
     }
 }
 
-void Session::restaurePlayer(const byte id, const PlayerState& state) {
+void Session::restorePlayer(const byte id, const PlayerState& state) {
     Player& target { player(id) };
 
     for (const auto& [name, stat] : state.stats) {

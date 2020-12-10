@@ -84,7 +84,7 @@ private:
     EntrantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants) const;
 
     void initPlayer(Player& target);
-    void restaurePlayer(const byte targetID, const PlayerState& previousState);
+    void restorePlayer(const byte targetID, const PlayerState& previousState);
 
     void printGlobal(Gameplay& interface) const;
     void printPlayer(Gameplay& interface, const byte player_id) const;
