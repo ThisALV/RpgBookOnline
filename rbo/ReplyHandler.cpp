@@ -41,9 +41,6 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
     const io::const_buffer anwser_buffer { trunc(anwser.dataWithLength()) };
 
     for (auto [remote_id, remote_player] : ctx_->players) {
-        if (ctx_->replies.count(remote_id) == 0)
-            continue;
-
         const ErrCode err { trySend(*remote_player, anwser_buffer) };
 
         if (err)
@@ -76,16 +73,6 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
             logger_->error("Invalid reply for [{}] : error code #{}.", playerID_, reply_validity);
             listenReply();
         } else {
-            for (const auto [id, reply] : ctx_->replies) {
-                SessionDataFactory reply_data;
-                reply_data.makeReply(id, reply);
-
-                const ErrCode err { trySend(*ctx_->players.at(playerID_), trunc(reply_data.dataWithLength())) };
-
-                if (err)
-                    throw NetworkError { "receive_answers:" + std::to_string(id), err };
-            }
-
             logger_->info("Reply of {} is valid.", playerID_);
             ctx_->counter++;
         }
