@@ -354,55 +354,55 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
 
     begin(initial_entrants_data);
 
-    const bool new_game { checkpoint.empty() };
-    word beginning;
     try {
-        beginning = checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants);
-    } catch (const CheckpointLoadingError& err) {
-        end(initial_entrants_data);
-        throw;
-    } catch (const InvalidIDs& err) {
-        end(initial_entrants_data);
-        throw;
-    }
+        const bool new_game { checkpoint.empty() };
+        word beginning;
+        try {
+            beginning = checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants);
+        } catch (const CheckpointLoadingError& err) {
+            end(initial_entrants_data);
+            throw;
+        } catch (const InvalidIDs& err) {
+            end(initial_entrants_data);
+            throw;
+        }
 
-    Gameplay interface { *this };
-
-    if (new_game)
-        printGlobal(interface);
-
-    for (const auto& player : players_) {
-        const byte id { player.first };
-
-        interface.initCache(id);
+        Gameplay interface { *this };
 
         if (new_game)
-            printPlayer(interface, id);
-    }
+            printGlobal(interface);
 
-    if (new_game && game().voteLeader)
-        interface.voteForLeader();
+        for (const auto& player : players_) {
+            const byte id { player.first };
 
-    if (!leader_) {
-        if (game().voteLeader)
+            interface.initCache(id);
+
+            if (new_game)
+                printPlayer(interface, id);
+        }
+
+        if (new_game && game().voteLeader)
             interface.voteForLeader();
-        else
-            switchLeader(players_.cbegin()->first);
-    }
 
-    logger_.debug("Global : {}", StatsValueWrapper { stats().values() });
-    for (const auto& [id, player] : players_) {
-        logger_.debug("Player {} : {}", id, player);
-        interface.initCache(id);
+        if (!leader_) {
+            if (game().voteLeader)
+                interface.voteForLeader();
+            else
+                switchLeader(players_.cbegin()->first);
+        }
 
-        interface.sendPlayerUpdate(id);
-    }
+        logger_.debug("Global : {}", StatsValueWrapper { stats().values() });
+        for (const auto& [id, player] : players_) {
+            logger_.debug("Player {} : {}", id, player);
+            interface.initCache(id);
 
-    try {
+            interface.sendPlayerUpdate(id);
+        }
+
         for (Next next { beginning }; next && running(); next = playScene(interface, *next));
-    } catch (const std::runtime_error& err) {
+    } catch (const std::exception& err) {
         end(initial_entrants_data);
-        throw err;
+        throw;
     }
 
     end(initial_entrants_data);
