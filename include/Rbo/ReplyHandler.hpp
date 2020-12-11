@@ -9,10 +9,15 @@ enum struct ReplyValidity : byte;
 
 struct InvalidReply;
 
+struct RequestProfile {
+    tcp::socket* connection;
+    bool targetted;
+};
+
 struct RequestCtx {
-    std::map<byte, tcp::socket*> players;
+    std::map<byte, RequestProfile> players;
     Replies replies;
-    std::atomic<ulong> counter;
+    std::atomic<ulong> repliesHandled;
     std::atomic<ulong> limit;
     std::vector<byte> errorIDs;
 
@@ -55,6 +60,7 @@ private:
     void handleReply(const ErrCode error, const std::size_t replyLength);
     ReplyValidity treatReply(const std::size_t replyLength);
 
+    void reportError(const byte player_id, const NetworkError& error) const;
     void handleError(const NetworkError& error) const;
 };
 

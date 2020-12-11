@@ -121,7 +121,7 @@ public:
 
     const GameBuilder& gameBuilder() const { return game_builer_; }
 
-    Replies request(const byte targetsID, const Data& request_data, ReplyController controller, const bool wait_all_players);
+    Replies request(const byte targets_id, const Data& request_data, ReplyController controller, const bool wait_all_players);
     void sendTo(const byte target, const Data& data);
     void sendToAll(const Data& data);
 

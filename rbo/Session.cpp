@@ -1,6 +1,6 @@
 #include <Rbo/Session.hpp>
 
-#include <iostream>
+#include <cassert>
 #include <numeric>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
@@ -535,32 +535,41 @@ const Player& Session::player(const byte id) const {
     return players_.at(id);
 }
 
-Replies Session::request(const byte target, const Data& data, ReplyController controller, const bool wait) {
+Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool wait) {
     RequestCtx ctx;
+    const bool all_players { targets_id == ALL_PLAYERS };
 
-    if (target == ALL_PLAYERS) {
-        for (auto& [id, connection] : connections_)
-            ctx.players.insert({ id, &connection });
-    } else {
-        ctx.players.insert({ target, &connection(target) });
+    ulong replies_to_handle { 0 };
+    for (auto& [id, connection] : connections_) {
+        const bool targetted { all_players || id == targets_id };
+
+        ctx.players.insert({ id, RequestProfile { &connection, targetted } });
+        if (targetted)
+            replies_to_handle++;
     }
 
-    ctx.counter = 0;
-    ctx.limit = wait ? ctx.players.size() : 1;
-    const ulong to_handle { ctx.players.size() };
-
-    std::map<byte, ReplyHandler> handlers;
-    std::transform(ctx.players.cbegin(), ctx.players.cend(), std::inserter(handlers, handlers.end()), [&ctx, &controller, this](const auto p) -> std::pair<byte, ReplyHandler> {
-        return { p.first, ReplyHandler { executor_, logger_, ctx, controller, p.first } };
-    });
+    ctx.repliesHandled = 0;
+    ctx.limit = wait ? replies_to_handle : 1;
 
     const io::const_buffer buffer { trunc(data) };
+    std::map<byte, ReplyHandler> handlers;
     for (auto [id, player] : ctx.players) {
-        player->async_send(buffer, io::bind_executor(executor_, std::bind(&ReplyHandler::handle, &handlers.at(id), std::placeholders::_1, std::placeholders::_2)));
+        if (player.targetted) {
+            handlers.insert({ id, ReplyHandler { executor_, logger_, ctx, controller, id } });
+
+            player.connection->async_send(buffer, io::bind_executor(executor_, std::bind(&ReplyHandler::handle, &handlers.at(id), std::placeholders::_1, std::placeholders::_2)));
+        } else {
+            const ErrCode send_err { trySend(*player.connection, buffer) };
+
+            if (send_err) {
+                ctx.players.erase(ctx.players.find(id));
+                ctx.errorIDs.push_back(id);
+            }
+        }
     }
 
     logger_.info("Waiting for {} replies in total...", ctx.limit);
-    while (ctx.counter < to_handle && running())
+    while (ctx.repliesHandled < replies_to_handle && running())
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
     logger_.info("Replies received.");
 
@@ -573,7 +582,7 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
         const auto e { ctx.errorIDs.cend() };
 
         if (std::find(b, e, id) == e) {
-            const ErrCode end_err { trySend(*player, ending_buffer) };
+            const ErrCode end_err { trySend(*player.connection, ending_buffer) };
 
             if (end_err) {
                 logPlayerError(id, end_err.message());

@@ -12,10 +12,14 @@ ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& log
       controlValidity { controller },
       playerID_ { p_id } {}
 
-void ReplyHandler::handleError(const NetworkError& err) const {
-    logger_->error("[ReplyHandler {}] {}", playerID_, err.what());
-    ctx_->errorIDs.push_back(playerID_);
-    ctx_->counter++;
+void ReplyHandler::reportError(const byte player_id, const NetworkError& error) const {
+    logger_->error("[ReplyHandler {}] {}", playerID_, error.what());
+    ctx_->errorIDs.push_back(player_id);
+}
+
+void ReplyHandler::handleError(const NetworkError& error) const {
+    reportError(playerID_, error);
+    ctx_->repliesHandled++;
 }
 
 ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
@@ -41,10 +45,14 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
     const io::const_buffer anwser_buffer { trunc(anwser.dataWithLength()) };
 
     for (auto [remote_id, remote_player] : ctx_->players) {
-        const ErrCode err { trySend(*remote_player, anwser_buffer) };
+        try {
+            const ErrCode send_err { trySend(*remote_player.connection, anwser_buffer) };
 
-        if (err)
-            throw NetworkError { "send_answer:" + std::to_string(remote_id), err };
+            if (send_err)
+                throw NetworkError { "send_reply:" + std::to_string(remote_id), send_err };
+        } catch (const NetworkError& err) {
+            reportError(remote_id, err);
+        }
     }
 
     logger_->info("Reply of [{}] : {}", playerID_, reply);
@@ -64,7 +72,7 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
         SessionDataFactory validity_data;
         validity_data.makeValidation(reply_validity);
 
-        const ErrCode validation_err { trySend(*ctx_->players.at(playerID_), trunc(validity_data.dataWithLength())) };
+        const ErrCode validation_err { trySend(*ctx_->players.at(playerID_).connection, trunc(validity_data.dataWithLength())) };
 
         if (validation_err)
             throw NetworkError { "send_validation", validation_err };
@@ -73,8 +81,8 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
             logger_->error("Invalid reply for [{}] : error code #{}.", playerID_, reply_validity);
             listenReply();
         } else {
-            logger_->info("Reply of {} is valid.", playerID_);
-            ctx_->counter++;
+            logger_->info("Reply of [{}] is valid.", playerID_);
+            ctx_->repliesHandled++;
         }
     } catch (const NetworkError& err) {
         handleError(err);
@@ -83,17 +91,17 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 
 void ReplyHandler::listenReply() {
     logger_->debug("Listening reply for [{}]...", playerID_);
-    ctx_->players.at(playerID_)->async_receive(
+    ctx_->players.at(playerID_).connection->async_receive(
                 io::buffer(replyBuffer_), io::bind_executor(*executor_, std::bind(&ReplyHandler::handleReply, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {
     if (send_err) {
-        handleError({ "request:send", send_err });
+        handleError({ "send_request", send_err });
         return;
     }
 
-    logger_->debug("Request sent to {}.", playerID_);
+    logger_->debug("Request sent to [{}].", playerID_);
     replyBuffer_.fill(0);
     listenReply();
 }
