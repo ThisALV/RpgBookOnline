@@ -18,7 +18,7 @@ Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const
         if (std::string { err.what() } == "CanceledRequest")
             return {};
 
-        throw std::runtime_error { err.what() };
+        throw err;
     }
 
     const auto next { result.get<sol::optional<Next>>() };
