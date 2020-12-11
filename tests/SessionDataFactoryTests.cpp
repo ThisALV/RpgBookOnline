@@ -54,15 +54,6 @@ BOOST_AUTO_TEST_CASE(Possibilities) {
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
 
-BOOST_AUTO_TEST_CASE(RequestEnd) {
-    const Data expected { std::vector<byte> { 0, 1, 4 } };
-
-    SessionDataFactory factory;
-    factory.makeRequest(Request::End, 1);
-
-    BOOST_CHECK_EQUAL(expected, factory.data());
-}
-
 BOOST_AUTO_TEST_CASE(PlayerUpdates) {
     Data expected { std::vector<byte> { 2, 4 } };
 

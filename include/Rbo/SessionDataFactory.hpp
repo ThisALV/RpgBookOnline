@@ -7,11 +7,11 @@ namespace Rbo {
 
 enum struct DataType : byte {
     Request, Text, PlayerUpdate, GlobalStat, Die, Switch, Reply, Validation, Battle, Crash,
-    LeaderSwitch, Start, Stop
+    LeaderSwitch, Start, Stop, FinishRequest
 };
 
 enum struct Request : byte {
-    Range, Possibilities, Confirm, YesNo, End
+    Range, Possibilities, Confirm, YesNo
 };
 
 enum struct ReplyValidity : byte {

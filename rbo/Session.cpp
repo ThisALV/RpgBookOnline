@@ -565,7 +565,7 @@ Replies Session::request(const byte target, const Data& data, ReplyController co
     logger_.info("Replies received.");
 
     SessionDataFactory end;
-    end.makeRequest(Request::End, target);
+    end.makeData(DataType::FinishRequest);
     const io::const_buffer ending_buffer { trunc(end.dataWithLength()) };
 
     for (const auto [id, player] : ctx.players) {
