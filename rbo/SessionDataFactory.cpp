@@ -20,26 +20,27 @@ void SessionDataFactory::makeStart(const std::string& game_name) {
     data_.put(game_name);
 }
 
-void SessionDataFactory::makeRequest(const Request type) {
+void SessionDataFactory::makeRequest(const Request type, const byte target) {
     makeData(DataType::Request);
+    data_.add(target);
     data_.add(type);
 }
 
-void SessionDataFactory::makeRange(const std::string& msg, const byte min, const byte max) {
-    makeRequest(Request::Range);
+void SessionDataFactory::makeRange(const byte target, const std::string& msg, const byte min, const byte max) {
+    makeRequest(Request::Range, target);
     data_.put(msg);
     data_.add(min);
     data_.add(max);
 }
 
-void SessionDataFactory::makePossibilities(const std::string& msg, const OptionsList& options) {
-    makeRequest(Request::Possibilities);
+void SessionDataFactory::makePossibilities(const byte target, const std::string& msg, const OptionsList& options) {
+    makeRequest(Request::Possibilities, target);
     data_.put(msg);
     data_.putList(options);
 }
 
-void SessionDataFactory::makeYesNoQuestion(const std::string& question) {
-    makeRequest(Request::YesNo);
+void SessionDataFactory::makeYesNoQuestion(const byte target, const std::string& question) {
+    makeRequest(Request::YesNo, target);
     data_.put(question);
 }
 

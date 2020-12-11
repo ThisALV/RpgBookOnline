@@ -29,13 +29,13 @@ BOOST_AUTO_TEST_SUITE(Make)
 BOOST_AUTO_TEST_CASE(Range) {
     const Data expected {
         std::vector<byte> {
-            0, 0, 0, 12, 'H', 'o', 'w', ' ', 'a', 'r', 'e', ' ', 'y', 'o', 'u', '?', 5, 15
+            0, 255, 0, 0, 12, 'H', 'o', 'w', ' ', 'a', 'r', 'e', ' ', 'y', 'o', 'u', '?', 5, 15
         }
     };
     const std::string msg { "How are you?" };
 
     SessionDataFactory factory;
-    factory.makeRange(msg, 5, 15);
+    factory.makeRange(ALL_PLAYERS, msg, 5, 15);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
@@ -43,13 +43,22 @@ BOOST_AUTO_TEST_CASE(Range) {
 BOOST_AUTO_TEST_CASE(Possibilities) {
     const Data expected {
         std::vector<byte> {
-            0, 1, 0, 5, 'C', 'h', 'o', 'i', 'x', 4, 0, 0, 4, 'Z', 'e', 'r', 'o', 1, 0, 3, 'O', 'n', 'e', 2, 0, 3, 'T', 'w', 'o', 4, 0, 4, 'F', 'o', 'u', 'r'
+            0, 0, 1, 0, 5, 'C', 'h', 'o', 'i', 'x', 4, 0, 0, 4, 'Z', 'e', 'r', 'o', 1, 0, 3, 'O', 'n', 'e', 2, 0, 3, 'T', 'w', 'o', 4, 0, 4, 'F', 'o', 'u', 'r'
         }
     };
     const OptionsList arg { { 0, "Zero" }, { 1, "One" }, { 2, "Two" }, { 4, "Four" } };
 
     SessionDataFactory factory;
-    factory.makePossibilities("Choix", arg);
+    factory.makePossibilities(0, "Choix", arg);
+
+    BOOST_CHECK_EQUAL(expected, factory.data());
+}
+
+BOOST_AUTO_TEST_CASE(RequestEnd) {
+    const Data expected { std::vector<byte> { 0, 1, 4 } };
+
+    SessionDataFactory factory;
+    factory.makeRequest(Request::End, 1);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

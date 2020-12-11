@@ -29,10 +29,10 @@ class Data;
 struct SessionDataFactory : DataFactory {
     void makeData(const DataType type);
     void makeStart(const std::string& game_name);
-    void makeRequest(const Request type);
-    void makeRange(const std::string& msg, const byte min, const byte max);
-    void makePossibilities(const std::string& msg, const OptionsList& options);
-    void makeYesNoQuestion(const std::string& question);
+    void makeRequest(const Request type, const byte target);
+    void makeRange(const byte target, const std::string& msg, const byte min, const byte max);
+    void makePossibilities(const byte target, const std::string& msg, const OptionsList& options);
+    void makeYesNoQuestion(const byte target, const std::string& question);
     void makeText(const std::string& txt);
     void makePlayerUpdate(const byte id, const PlayerUpdate& changes);
     void makeGlobalStat(const std::string& name, const Stat& stat);
