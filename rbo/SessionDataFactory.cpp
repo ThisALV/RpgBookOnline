@@ -22,8 +22,8 @@ void SessionDataFactory::makeStart(const std::string& game_name) {
 
 void SessionDataFactory::makeRequest(const Request type, const byte target) {
     makeData(DataType::Request);
-    data_.add(target);
     data_.add(type);
+    data_.add(target);
 }
 
 void SessionDataFactory::makeRange(const byte target, const std::string& msg, const byte min, const byte max) {
