@@ -491,6 +491,13 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
 
     sendToAllMasterHandling(run_data.dataWithLength());
 
+    if (isParametersError(run.result)) {
+        LobbyDataFactory revising_session_data;
+        revising_session_data.makeState(State::RevisingParameters);
+
+        sendToAllMasterHandling(revising_session_data.dataWithLength());
+    }
+
     switch (run.result) {
     case SessionResult::Ok:
     case SessionResult::Crashed:

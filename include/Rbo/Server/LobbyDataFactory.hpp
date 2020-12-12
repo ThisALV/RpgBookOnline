@@ -11,7 +11,7 @@ enum struct RegistrationResult : byte {
 enum struct State : byte {
     MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
     AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing,
-    SelectingCheckpoint, CheckingPlayers
+    SelectingCheckpoint, CheckingPlayers, RevisingParameters
 };
 
 enum struct YesNoQuestion : byte {
