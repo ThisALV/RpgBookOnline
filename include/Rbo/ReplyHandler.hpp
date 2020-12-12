@@ -3,6 +3,8 @@
 
 #include <Rbo/AsioCommon.hpp>
 
+#include <memory>
+
 namespace Rbo {
 
 struct InvalidReply;
@@ -28,13 +30,15 @@ struct RequestCtx {
     bool operator==(const RequestCtx&) = delete;
 };
 
+using RequestCtxPtr = std::shared_ptr<RequestCtx>;
+
 class ReplyHandler {
 public:
     struct NetworkError : std::runtime_error {
         NetworkError(const std::string& operation, const ErrCode& err) : std::runtime_error { operation + " : " + err.category().name() + (" - " + err.message()) } {}
     };
 
-    ReplyHandler(io::io_context::strand& handlersExecutor, spdlog::logger& sessionlogger, RequestCtx& ctx, const ReplyController controller, const byte player);
+    ReplyHandler(io::io_context::strand& handlersExecutor, spdlog::logger& sessionlogger, const RequestCtxPtr ctx, const ReplyController controller, const byte player);
 
     ReplyHandler(const ReplyHandler&) = delete;
     ReplyHandler& operator=(const ReplyHandler&) = delete;
@@ -49,7 +53,7 @@ public:
 private:
     io::io_context::strand* executor_;
     spdlog::logger* logger_;
-    RequestCtx* ctx_;
+    RequestCtxPtr ctx_;
     ReplyController controlValidity;
     byte playerID_;
 

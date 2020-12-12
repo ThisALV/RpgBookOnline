@@ -5,10 +5,10 @@
 
 namespace Rbo {
 
-ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger, RequestCtx& ctx, const ReplyController controller, const byte p_id)
+ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger, const RequestCtxPtr ctx, const ReplyController controller, const byte p_id)
     : executor_ { &exectuor },
       logger_ { &logger },
-      ctx_ { &ctx },
+      ctx_ { ctx },
       controlValidity { controller },
       playerID_ { p_id } {}
 

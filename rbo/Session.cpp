@@ -536,30 +536,30 @@ const Player& Session::player(const byte id) const {
 }
 
 Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies) {
-    RequestCtx ctx;
+    const RequestCtxPtr ctx { std::make_shared<RequestCtx>() };
     const bool all_players { targets_id == ALL_PLAYERS };
 
     byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
         const bool targetted { all_players || id == targets_id };
 
-        ctx.players.insert({ id, RequestProfile { &connection, targetted } });
+        ctx->players.insert({ id, RequestProfile { &connection, targetted } });
         if (targetted)
             targets_count++;
     }
 
     ulong replies_to_receive;
     if (first_reply_only) {
-        ctx.repliesToAccept = 1;
+        ctx->repliesToAccept = 1;
         replies_to_receive = wait_all_replies ? targets_count : 1;
     } else {
-        ctx.repliesToAccept = targets_count;
+        ctx->repliesToAccept = targets_count;
         replies_to_receive = targets_count;
     }
 
     const io::const_buffer buffer { trunc(data) };
     std::map<byte, ReplyHandler> handlers;
-    for (auto [id, player] : ctx.players) {
+    for (auto [id, player] : ctx->players) {
         if (player.targetted) {
             handlers.insert({ id, ReplyHandler { executor_, logger_, ctx, controller, id } });
 
@@ -568,42 +568,42 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
             const ErrCode send_err { trySend(*player.connection, buffer) };
 
             if (send_err) {
-                ctx.players.erase(ctx.players.find(id));
-                ctx.errorIDs.push_back(id);
+                ctx->players.erase(ctx->players.find(id));
+                ctx->errorIDs.push_back(id);
             }
         }
     }
 
     logger_.info("Waiting for {} replies in total...", replies_to_receive);
-    while (ctx.repliesHandled < replies_to_receive && running())
+    while (ctx->repliesHandled < replies_to_receive && running())
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
-    logger_.info("{} replies received.", ctx.repliesHandled.load());
+    logger_.info("{} replies received.", ctx->repliesHandled.load());
 
-    ctx.requestDone = true;
-    for (auto& player : ctx.players)
+    ctx->requestDone = true;
+    for (auto& player : ctx->players)
         player.second.connection->cancel();
 
     SessionDataFactory end;
     end.makeData(DataType::FinishRequest);
     const io::const_buffer ending_buffer { trunc(end.dataWithLength()) };
 
-    for (const auto [id, player] : ctx.players) {
-        const auto b { ctx.errorIDs.cbegin() };
-        const auto e { ctx.errorIDs.cend() };
+    for (const auto [id, player] : ctx->players) {
+        const auto b { ctx->errorIDs.cbegin() };
+        const auto e { ctx->errorIDs.cend() };
 
         if (std::find(b, e, id) == e) {
             const ErrCode end_err { trySend(*player.connection, ending_buffer) };
 
             if (end_err) {
                 logPlayerError(id, end_err.message());
-                ctx.errorIDs.push_back(id);
+                ctx->errorIDs.push_back(id);
             }
         }
     }
 
     // Méthode de déconnexion différente pour éviter d'essayer d'envoyer des paquets
     // d'informations aux joueurs ayant crash
-    for (const byte player : ctx.errorIDs)
+    for (const byte player : ctx->errorIDs)
         removePlayer(player);
 
     if (!playersRemaining())
@@ -612,21 +612,21 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
     if (players_.count(leader()) == 0)
         switchLeader(players_.cbegin()->first);
 
-    for (const byte player : ctx.errorIDs) {
+    for (const byte player : ctx->errorIDs) {
         SessionDataFactory crash_data;
         crash_data.makeCrash(player);
 
         sendToAll(crash_data.dataWithLength());
     }
 
-    logger_.info("Replies : {}", RepliesWrapper { ctx.replies });
-    if (!ctx.errorIDs.empty())
-        logger_.warn("Crashed players : {}", ByteVecWrapper { ctx.errorIDs });
+    logger_.info("Replies : {}", RepliesWrapper { ctx->replies });
+    if (!ctx->errorIDs.empty())
+        logger_.warn("Crashed players : {}", ByteVecWrapper { ctx->errorIDs });
 
     if (!running())
         throw CanceledRequest {};
 
-    return ctx.replies;
+    return ctx->replies;
 }
 
 void Session::sendTo(const byte target_id, const Data& data) {
