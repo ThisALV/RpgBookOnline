@@ -122,8 +122,6 @@ void Session::end(Entrants& entrants) {
 word Session::newGame() {
     logger_.info("New game on \"{}\".", game().name);
 
-    stats_ = { game().global() };
-
     for (const auto& [name, stat] : game().globalStats) {
         const auto [init, limits, capped, hidden, main] { stat };
         const int value { init() };
@@ -355,17 +353,10 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
     begin(initial_entrants_data);
 
     try {
+        stats_ = { game().global() };
+
         const bool new_game { checkpoint.empty() };
-        word beginning;
-        try {
-            beginning = checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants);
-        } catch (const CheckpointLoadingError& err) {
-            end(initial_entrants_data);
-            throw;
-        } catch (const InvalidIDs& err) {
-            end(initial_entrants_data);
-            throw;
-        }
+        const word beginning { checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants) };
 
         Gameplay interface { *this };
 

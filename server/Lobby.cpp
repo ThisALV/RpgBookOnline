@@ -1,5 +1,6 @@
 #include <Rbo/Server/Lobby.hpp>
 
+#include <algorithm>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
 #include <Rbo/GameBuilder.hpp>
@@ -490,34 +491,43 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
 
     sendToAllMasterHandling(run_data.dataWithLength());
 
-    if (!isParametersError(run.result))
+    switch (run.result) {
+    case SessionResult::Ok:
+    case SessionResult::Crashed:
         return;
+    case SessionResult::CheckpointLoadingError:
+        if (askYesNo(YesNoQuestion::RetryCheckpoint))
+            makeSession();
 
-    if (run.result == SessionResult::CheckpointLoadingError) {
-        makeSession();
-    } else {
-        const bool retry_chkpt { askYesNo(YesNoQuestion::RetryCheckpoint) };
-        const std::string new_ckpt = retry_chkpt ? *chkpt_name : askCheckpoint();
+        break;
+    case SessionResult::LessMembers:
+        if (askYesNo(YesNoQuestion::MissingEntrants))
+            makeSession(chkpt_name, true);
+        else if (askYesNo(YesNoQuestion::RetryCheckpoint))
+            makeSession();
 
-        if (!retry_chkpt) {
-            makeSession(new_ckpt);
-        } else if (run.result == SessionResult::LessMembers && askYesNo(YesNoQuestion::MissingEntrants)) {
-            makeSession(new_ckpt, true);
-        } else if (run.result == SessionResult::UnknownPlayer && askYesNo(YesNoQuestion::KickUnknownPlayers)) {
-            const auto cb { run.expectedIDs.cbegin() };
-            const auto ce { run.expectedIDs.cend() };
+        break;
+    case SessionResult::UnknownPlayer:
+        if (askYesNo(YesNoQuestion::KickUnknownPlayers)) {
+            const auto& b { run.expectedIDs.cbegin() };
+            const auto& e { run.expectedIDs.cend() };
 
+            if (std::find(b, e, master_) == e) {
+                disconnect(master_);
+                throw MasterDisconnected { master_ };
+            }
 
             for (const byte id : ids()) {
-                if (std::find(cb, ce, id) == ce)
+                if (std::find(b, e, id) == e)
                     disconnect(id);
             }
 
-            if (!registered(master_))
-                throw MasterDisconnected { master_ };
-
-            makeSession(new_ckpt);
+            makeSession(chkpt_name);
+        } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
+            makeSession();
         }
+
+        break;
     }
 }
 
