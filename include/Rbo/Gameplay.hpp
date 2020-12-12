@@ -37,10 +37,10 @@ public:
     void voteForLeader();
 
     // ask - Throw : NoPlayerRemaining
-    Replies askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool wait = true);
-    Replies askReply(const byte target, const std::string& msg, const OptionsList& options, const bool wait = true);
-    Replies askConfirm(const byte target, const bool wait = true);
-    Replies askYesNo(const byte target, const std::string& question, const bool wait = true);
+    Replies askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only = false, const bool wait_all_replies = false);
+    Replies askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
+    Replies askConfirm(const byte target, const bool first_reply_only = false);
+    Replies askYesNo(const byte target, const std::string& question, const bool first_reply_only = false, const bool wait_all_replies = false);
 
     PlayerCheckingResult checkPlayer(const byte id); // Throw : NoPlayerRemaining
     bool checkGame();

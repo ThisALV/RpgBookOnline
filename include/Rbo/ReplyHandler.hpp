@@ -5,8 +5,6 @@
 
 namespace Rbo {
 
-enum struct ReplyValidity : byte;
-
 struct InvalidReply;
 
 struct RequestProfile {
@@ -18,10 +16,11 @@ struct RequestCtx {
     std::map<byte, RequestProfile> players;
     Replies replies;
     std::atomic<ulong> repliesHandled;
-    std::atomic<ulong> limit;
+    std::atomic<ulong> repliesToAccept;
+    std::atomic_bool requestDone;
     std::vector<byte> errorIDs;
 
-    RequestCtx() = default;
+    RequestCtx() : repliesHandled { 0 }, repliesToAccept { 0 }, requestDone { false } {}
 
     RequestCtx(const RequestCtx&) = delete;
     RequestCtx& operator=(const RequestCtx&) = delete;

@@ -535,21 +535,27 @@ const Player& Session::player(const byte id) const {
     return players_.at(id);
 }
 
-Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool wait) {
+Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies) {
     RequestCtx ctx;
     const bool all_players { targets_id == ALL_PLAYERS };
 
-    ulong replies_to_handle { 0 };
+    byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
         const bool targetted { all_players || id == targets_id };
 
         ctx.players.insert({ id, RequestProfile { &connection, targetted } });
         if (targetted)
-            replies_to_handle++;
+            targets_count++;
     }
 
-    ctx.repliesHandled = 0;
-    ctx.limit = wait ? replies_to_handle : 1;
+    ulong replies_to_receive;
+    if (first_reply_only) {
+        ctx.repliesToAccept = 1;
+        replies_to_receive = wait_all_replies ? targets_count : 1;
+    } else {
+        ctx.repliesToAccept = targets_count;
+        replies_to_receive = targets_count;
+    }
 
     const io::const_buffer buffer { trunc(data) };
     std::map<byte, ReplyHandler> handlers;
@@ -568,10 +574,14 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
         }
     }
 
-    logger_.info("Waiting for {} replies in total...", ctx.limit);
-    while (ctx.repliesHandled < replies_to_handle && running())
+    logger_.info("Waiting for {} replies in total...", replies_to_receive);
+    while (ctx.repliesHandled < replies_to_receive && running())
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
-    logger_.info("Replies received.");
+    logger_.info("{} replies received.", ctx.repliesHandled.load());
+
+    ctx.requestDone = true;
+    for (auto& player : ctx.players)
+        player.second.connection->cancel();
 
     SessionDataFactory end;
     end.makeData(DataType::FinishRequest);

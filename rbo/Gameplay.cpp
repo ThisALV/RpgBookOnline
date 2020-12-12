@@ -86,14 +86,14 @@ void Gameplay::voteForLeader() {
     switchLeader(vote(askReply(ALL_PLAYERS, "Qui doit devenir leader ?", names(), true)));
 }
 
-Replies Gameplay::askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool wait) {
+Replies Gameplay::askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only, const bool wait_all_replies) {
     SessionDataFactory data_factory;
     data_factory.makeRange(target, msg, min, max);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { min, max }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { min, max }, first_reply_only, wait_all_replies);
 }
 
-Replies Gameplay::askReply(const byte target, const std::string& msg, const OptionsList& options, const bool wait) {
+Replies Gameplay::askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only, const bool wait_all_replies) {
     SessionDataFactory data_factory;
     data_factory.makePossibilities(target, msg, options);
 
@@ -104,21 +104,22 @@ Replies Gameplay::askReply(const byte target, const std::string& msg, const Opti
         return o.first;
     });
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { ids }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { ids }, first_reply_only, wait_all_replies);
 }
 
-Replies Gameplay::askConfirm(const byte target, const bool wait) {
+Replies Gameplay::askConfirm(const byte target, const bool first_reply_only) {
     SessionDataFactory data_factory;
     data_factory.makeRequest(Request::Confirm, target);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, wait);
+    // Il n'y a aucun intérêt à ne pas prendre en compte une confirmation reçue car elle serait arrivée trop tard
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, first_reply_only, false);
 }
 
-Replies Gameplay::askYesNo(const byte target, const std::string& question, const bool wait) {
+Replies Gameplay::askYesNo(const byte target, const std::string& question, const bool first_reply_only, const bool wait_all_replies) {
     SessionDataFactory data_factory;
     data_factory.makeYesNoQuestion(target, question);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, wait);
+    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, first_reply_only, wait_all_replies);
 }
 
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {

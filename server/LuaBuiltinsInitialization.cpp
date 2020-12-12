@@ -196,11 +196,17 @@ void InstructionsProvider::initBuiltins() {
         [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max) {
             return ctx.askReply(target, msg, min, max);
         },
+        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only) {
+            return ctx.askReply(target, msg, min, max, first_reply_only);
+        },
         [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options) {
             return ctx.askReply(target, msg, options);
         },
-        sol::resolve<Replies(const byte, const std::string&, const byte, const byte, const bool)>(&Gameplay::askReply),
-        sol::resolve<Replies(const byte, const std::string&, const OptionsList&, const bool)>(&Gameplay::askReply)
+        [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only) {
+            return ctx.askReply(target, msg, options, first_reply_only);
+        },
+        sol::resolve<Replies(const byte, const std::string&, const byte, const byte, const bool, const bool)>(&Gameplay::askReply),
+        sol::resolve<Replies(const byte, const std::string&, const OptionsList&, const bool, const bool)>(&Gameplay::askReply)
     );
     gameplay_type["askConfirm"] = sol::overload(
         [](Gameplay& ctx, const byte target) { return ctx.askConfirm(target); },
@@ -209,6 +215,9 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["askYesNo"] = sol::overload(
         [](Gameplay& ctx, const byte target, const std::string& question) {
             return ctx.askYesNo(target, question);
+        },
+        [](Gameplay& ctx, const byte target, const std::string& question, const bool first_reply_only) {
+            return ctx.askYesNo(target, question, first_reply_only);
         },
         &Gameplay::askYesNo
     );

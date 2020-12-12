@@ -35,7 +35,7 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
         return err.type;
     }
 
-    if (ctx_->replies.size() >= ctx_->limit) {
+    if (ctx_->replies.size() >= ctx_->repliesToAccept) {
         logger_->info("Reply of [{}] ignored (too late).", playerID_);
         return ReplyValidity::TooLate;
     }
@@ -64,8 +64,14 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
 void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
     logger_->debug("Handling reply for [{}].", playerID_);
     try {
-        if (r_err)
+        if (r_err) {
+            if (r_err == io::error::basic_errors::operation_aborted && ctx_->requestDone) {
+                logger_->debug("Reply handling canceled for [{}].", playerID_);
+                return;
+            }
+
             throw NetworkError { "receive_reply", r_err };
+        }
 
         const ReplyValidity reply_validity { treatReply(length) };
 
