@@ -86,6 +86,9 @@ private:
     void initPlayer(Player& target);
     void restorePlayer(const byte targetID, const PlayerState& previousState);
 
+    void globalDiceRolls(Gameplay& interface) const;
+    void playersDiceRolls(Gameplay& interface) const;
+
     void printGlobal(Gameplay& interface) const;
     void printPlayer(Gameplay& interface, const byte player_id) const;
 

@@ -1,6 +1,7 @@
 #include <Rbo/Session.hpp>
 
 #include <cassert>
+#include <algorithm>
 #include <numeric>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
@@ -287,6 +288,49 @@ void Session::restorePlayer(const byte id, const PlayerState& state) {
     }
 }
 
+void Session::globalDiceRolls(Gameplay& interface) const {
+    const Message& dice_roll_msg { game().messages.at("stat_dice_roll") };
+    const std::string& msg { dice_roll_msg ? *dice_roll_msg : "Dice roll for stat \"{stat}\"" };
+
+    for (const auto& [name, stat_descriptor] : game().globalStats) {
+        if (stat_descriptor.initialValue.dices == 0)
+            continue;
+
+        const DiceRollResults stat_value { { GLOBAL, stats().get(name) } };
+        interface.askDiceRoll(leader(), fmt::format(msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stat_value);
+    }
+}
+
+void Session::playersDiceRolls(Gameplay& interface) const {
+    const Message& stat_dice_roll_msg { game().messages.at("stat_dice_roll") };
+    const std::string& stat_msg { stat_dice_roll_msg ? *stat_dice_roll_msg : "Dice roll for stat \"{stat}\"" };
+
+    for (const auto& [name, stat_descriptor] : game().playerStats) {
+        if (stat_descriptor.initialValue.dices == 0)
+            continue;
+
+        DiceRollResults stats_value;
+        for (const auto& [id, player] : players_)
+            stats_value.insert({ id, player.stats().get(name) });
+
+        interface.askDiceRoll(ALL_PLAYERS, fmt::format(stat_msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stats_value);
+    }
+
+    const Message& capacity_dice_roll_msg { game().messages.at("inventory_capacity_dice_roll") };
+    const std::string& capacity_msg { capacity_dice_roll_msg ? *capacity_dice_roll_msg : "Dice roll for capacity of inventory \"{inventory}\"" };
+
+    for (const auto& [name, inv_descriptor] : game().playerInventories) {
+        if (!inv_descriptor.limit || inv_descriptor.limit->dices)
+            continue;
+
+        DiceRollResults invs_capacity;
+        for (const auto& [id, player] : players_)
+            invs_capacity.insert({ id, *player.inventory(name).maxSize() });
+
+        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::format("inventory", name)), *inv_descriptor.limit, invs_capacity);
+    }
+}
+
 void Session::printGlobal(Gameplay& interface) const {
     const Messages& msgs { game().messages };
 
@@ -359,6 +403,9 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
         const word beginning { checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants) };
 
         Gameplay interface { *this };
+
+        globalDiceRolls(interface);
+        playersDiceRolls(interface);
 
         if (new_game)
             printGlobal(interface);

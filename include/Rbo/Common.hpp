@@ -214,6 +214,7 @@ std::vector<byte> decompose(const NumType value) {
 }
 
 const byte ALL_PLAYERS { std::numeric_limits<byte>::max() };
+const byte GLOBAL { std::numeric_limits<byte>::max() };
 const word INTRO { 0 };
 
 template<typename Output>
