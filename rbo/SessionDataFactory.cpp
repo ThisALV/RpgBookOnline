@@ -44,6 +44,19 @@ void SessionDataFactory::makeYesNoQuestion(const byte target, const std::string&
     data_.put(question);
 }
 
+void SessionDataFactory::makeDiceRoll(const byte target, const std::string &msg, const byte dices, const int bonus, const DiceRollResults& results) {
+    makeRequest(Request::DiceRoll, target);
+    data_.put(msg);
+    data_.add(dices);
+    data_.putNumeric(bonus);
+
+    data_.add(results.size());
+    for (const auto [id, result] : results) {
+        data_.add(id);
+        data_.putNumeric(result);
+    }
+}
+
 void SessionDataFactory::makeText(const std::string& txt) {
     makeData(DataType::Text);
     data_.put(txt);

@@ -8,6 +8,10 @@ namespace Rbo {
 struct RestProperties;
 class Session;
 
+struct InvalidDiceRollResults : std::logic_error {
+    InvalidDiceRollResults(const byte player_id) : std::logic_error { "No dice roll result for player [" + std::to_string(player_id) + "]" } {}
+};
+
 class Gameplay {
 private:
     Session& ctx_;
@@ -41,6 +45,7 @@ public:
     Replies askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
     Replies askConfirm(const byte target, const bool first_reply_only = false);
     Replies askYesNo(const byte target, const std::string& question, const bool first_reply_only = false, const bool wait_all_replies = false);
+    Replies askDiceRoll(const byte target, const std::string& msg, const DiceFormula& formula, const DiceRollResults& results);
 
     PlayerCheckingResult checkPlayer(const byte id); // Throw : NoPlayerRemaining
     bool checkGame();

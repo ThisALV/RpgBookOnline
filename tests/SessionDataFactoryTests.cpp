@@ -32,10 +32,9 @@ BOOST_AUTO_TEST_CASE(Range) {
             0, 0, 255, 0, 12, 'H', 'o', 'w', ' ', 'a', 'r', 'e', ' ', 'y', 'o', 'u', '?', 5, 15
         }
     };
-    const std::string msg { "How are you?" };
 
     SessionDataFactory factory;
-    factory.makeRange(ALL_PLAYERS, msg, 5, 15);
+    factory.makeRange(ALL_PLAYERS, "How are you?", 5, 15);
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
@@ -50,6 +49,19 @@ BOOST_AUTO_TEST_CASE(Possibilities) {
 
     SessionDataFactory factory;
     factory.makePossibilities(0, "Choix", arg);
+
+    BOOST_CHECK_EQUAL(expected, factory.data());
+}
+
+BOOST_AUTO_TEST_CASE(DiceRoll) {
+    const Data expected {
+        std::vector<byte> {
+            0, 4, 255, 0, 9, 'A', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e', 10, 0xff, 0xff, 0xff, 0xff, 2, 0, 0xff, 0xff, 0xff, 0xfb, 2, 0x00, 0x00, 0x00, 0x08
+        }
+    };
+
+    SessionDataFactory factory;
+    factory.makeDiceRoll(ALL_PLAYERS, "A message", 10, -1, DiceRollResults { { 0, -5 }, { 2, 8} });
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }

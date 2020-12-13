@@ -45,6 +45,7 @@ enum struct ReplyValidity : byte;
 
 using OptionsList = std::map<byte, std::string>;
 using Replies = std::map<byte, byte>;
+using DiceRollResults = std::map<byte, int>;
 using ReplyController = std::function<void(const byte reply)>;
 
 using Next = std::optional<word>;
@@ -86,7 +87,7 @@ template<typename T> using VectorWrapper = OutputableWrapper<std::vector<T>>;
 using ByteVecWrapper = VectorWrapper<byte>;
 
 struct DiceFormula {
-    uint dices;
+    byte dices;
     int bonus;
 
     int operator()() const;

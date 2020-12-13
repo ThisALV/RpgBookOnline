@@ -11,7 +11,7 @@ enum struct DataType : byte {
 };
 
 enum struct Request : byte {
-    Range, Possibilities, Confirm, YesNo
+    Range, Possibilities, Confirm, YesNo, DiceRoll
 };
 
 enum struct ReplyValidity : byte {
@@ -33,6 +33,7 @@ struct SessionDataFactory : DataFactory {
     void makeRange(const byte target, const std::string& msg, const byte min, const byte max);
     void makePossibilities(const byte target, const std::string& msg, const OptionsList& options);
     void makeYesNoQuestion(const byte target, const std::string& question);
+    void makeDiceRoll(const byte target, const std::string& msg, const byte dices, const int bonus, const DiceRollResults& results);
     void makeText(const std::string& txt);
     void makePlayerUpdate(const byte id, const PlayerUpdate& changes);
     void makeGlobalStat(const std::string& name, const Stat& stat);

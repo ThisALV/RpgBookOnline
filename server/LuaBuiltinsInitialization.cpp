@@ -90,6 +90,13 @@ void InstructionsProvider::initBuiltins() {
     ctx_.new_usertype<std::unordered_map<std::string, std::string>>( "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
     ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
 
+    sol::usertype<DiceFormula> dice_formula_type { ctx_.new_usertype<DiceFormula>("DiceFormula") };
+    dice_formula_type["dices"] = &DiceFormula::dices;
+    dice_formula_type["bonus"] = &DiceFormula::bonus;
+    dice_formula_type["min"] = &DiceFormula::min;
+    dice_formula_type["max"] = &DiceFormula::max;
+    dice_formula_type[sol::metatable_key][sol::meta_function::call] = &DiceFormula::operator();
+
     sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);
     rest_type["availables"] = sol::readonly(&RestProperties::availables);
@@ -221,6 +228,7 @@ void InstructionsProvider::initBuiltins() {
         },
         &Gameplay::askYesNo
     );
+    gameplay_type["askDiceRoll"] = &Gameplay::askDiceRoll;
     gameplay_type["checkPlayer"] = &Gameplay::checkPlayer;
     gameplay_type["checkGame"] = &Gameplay::checkGame;
     gameplay_type["print"] = sol::overload(
