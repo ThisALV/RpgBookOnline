@@ -118,6 +118,19 @@ BOOST_AUTO_TEST_CASE(String) {
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
+BOOST_AUTO_TEST_CASE(StringUTF8) {
+    const DataBuffer expected_buffer {
+        0, 0, 0, 6, 'L', 0xc3, 0xa9, 'l', 'i', 'o'
+    };
+    const std::string arg { "Lélio" };
+
+    Data data;
+    data.put(arg);
+
+    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
+    BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
+}
+
 BOOST_AUTO_TEST_CASE(StringOverflow) {
     const std::string big_str(10000, ' '); // Syntaxe C++14 pour éviter l'initializer_list constructor
 
@@ -167,15 +180,6 @@ BOOST_AUTO_TEST_CASE(List) {
     data.putList(options);
 
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
-}
-
-BOOST_AUTO_TEST_CASE(ListOptionsCountOverflow) {
-    OptionsList options;
-    for (int i { 0 }; i < std::numeric_limits<byte>::max() + 1; i++)
-        options.insert({ i, "" });
-
-    Data data;
-    BOOST_CHECK_THROW(data.putList(options), BufferOverflow);
 }
 
 BOOST_AUTO_TEST_CASE(ListDataSizeOverflow) {
