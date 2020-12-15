@@ -320,14 +320,14 @@ void Session::playersDiceRolls(Gameplay& interface) const {
     const std::string& capacity_msg { capacity_dice_roll_msg ? *capacity_dice_roll_msg : "Dice roll for capacity of inventory \"{inventory}\"" };
 
     for (const auto& [name, inv_descriptor] : game().playerInventories) {
-        if (!inv_descriptor.limit || inv_descriptor.limit->dices)
+        if (!inv_descriptor.limit || inv_descriptor.limit->dices == 0)
             continue;
 
         DiceRollResults invs_capacity;
         for (const auto& [id, player] : players_)
             invs_capacity.insert({ id, *player.inventory(name).maxSize() });
 
-        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::format("inventory", name)), *inv_descriptor.limit, invs_capacity);
+        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::arg("inventory", name)), *inv_descriptor.limit, invs_capacity);
     }
 }
 
