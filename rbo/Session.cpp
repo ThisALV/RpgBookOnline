@@ -296,7 +296,7 @@ void Session::globalDiceRolls(Gameplay& interface) const {
         if (stat_descriptor.initialValue.dices == 0)
             continue;
 
-        const DiceRollResults stat_value { { GLOBAL, stats().get(name) } };
+        const DiceRollResults stat_value { { leader(), stats().get(name) } };
         interface.askDiceRoll(leader(), fmt::format(msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stat_value);
     }
 }
