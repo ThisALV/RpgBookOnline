@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_SUITE(Valid)
 
 BOOST_AUTO_TEST_CASE(InitialInventoriesFull) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "A" },
         InventoryContent {
             { { itemEntry("inv1", "A"), 2 }, { itemEntry("inv1", "B"), 3 } }
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesFull) {
 
 BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
     const InventoryDescriptor inventory {
-        DiceFormula { 2, 2 },
+        DicesRoll { 2, 2 },
         std::vector<std::string> { "A", "B" },
         InventoryContent { { { "A", 2 }, { "B", 3 } } }
     };
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE(InitialInventoriesUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
     };
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownStat) {
 
 BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "B" },
         InventoryContent {}
     };
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(BonusesUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
     };
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(EffectsUnknownStat) {
 
 BOOST_AUTO_TEST_CASE(EffectsUnknownItem) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
     };
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(RestAvailablesUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(RestAvailablesUnknownEffect) {
     const InventoryDescriptor inventory {
-        std::optional<DiceFormula> {},
+        std::optional<DicesRoll> {},
         std::vector<std::string> { "A" },
         InventoryContent {}
     };
@@ -376,16 +376,16 @@ BOOST_AUTO_TEST_CASE(EffectUnknownStatAndBonusUnknownItem) {
 
 BOOST_AUTO_TEST_CASE(Ok) {
     StatsDescriptor global {
-        { "1", { DiceFormula { 2, 0 }, StatLimits { -15, 15 }, false, false, true } },
+        { "1", { DicesRoll { 2, 0 }, StatLimits { -15, 15 }, false, false, true } },
         { "2", {} }
     };
     StatsDescriptor player {
-        { "a", { DiceFormula { 1, 0 }, StatLimits { -10, 10 }, true, true, false } },
+        { "a", { DicesRoll { 1, 0 }, StatLimits { -10, 10 }, true, true, false } },
         { "b", {} }
     };
     InventoriesDescriptor inventories {
-        { "inv1", { DiceFormula { 1, 2 }, { "A", "B" }, InventoryContent { { "A", 3 } } } },
-        { "inv2", { std::optional<DiceFormula> {}, { "A" }, InventoryContent {} } }
+        { "inv1", { DicesRoll { 1, 2 }, { "A", "B" }, InventoryContent { { "A", 3 } } } },
+        { "inv2", { std::optional<DicesRoll> {}, { "A" }, InventoryContent {} } }
     };
 
     ItemsBonus bonuses {

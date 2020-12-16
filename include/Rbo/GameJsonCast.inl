@@ -37,7 +37,7 @@ inline void from_json(const json& data, FromJsonWrapper<Serializable>& serializa
     from_json(data, serializable.value);
 }
 
-inline void from_json(const json& data, DiceFormula& formula) {
+inline void from_json(const json& data, DicesRoll& formula) {
     data.at("dices").get_to(formula.dices);
     data.at("bonus").get_to(formula.bonus);
 }
@@ -45,7 +45,7 @@ inline void from_json(const json& data, DiceFormula& formula) {
 inline void from_json(const json& data, StatDescriptor& stat) {
     const json& limits { data.at("limits") };
 
-    data.at("formula").get_to(stat.initialValue);
+    data.at("initialValue").get_to(stat.initialValue);
     limits.at("min").get_to(stat.limits.min);
     limits.at("max").get_to(stat.limits.max);
     data.at("capped").get_to(stat.capped);

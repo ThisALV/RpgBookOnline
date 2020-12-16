@@ -86,7 +86,7 @@ using RepliesWrapper = OutputableWrapper<Replies>;
 template<typename T> using VectorWrapper = OutputableWrapper<std::vector<T>>;
 using ByteVecWrapper = VectorWrapper<byte>;
 
-struct DiceFormula {
+struct DicesRoll {
     byte dices;
     int bonus;
 
@@ -163,7 +163,7 @@ struct PlayerCache {
 };
 
 struct StatDescriptor {
-    DiceFormula initialValue;
+    DicesRoll initialValue;
     StatLimits limits;
     bool capped;
     bool hidden;
@@ -171,7 +171,7 @@ struct StatDescriptor {
 };
 
 struct InventoryDescriptor {
-    std::optional<DiceFormula> limit;
+    std::optional<DicesRoll> limit;
     std::vector<std::string> items;
     InventoryContent initialStuff;
 };

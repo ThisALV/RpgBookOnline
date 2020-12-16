@@ -24,7 +24,7 @@ const char* CanceledRequest::what() const noexcept {
     return "CanceledRequest";
 }
 
-std::string Session::initStatMsg(const DiceFormula& init, const std::string& name, const int value) {
+std::string Session::initStatMsg(const DicesRoll& init, const std::string& name, const int value) {
     std::string msg { name + " = " };
     if (init.dices == 0)
         msg += std::to_string(init.bonus);
@@ -34,7 +34,7 @@ std::string Session::initStatMsg(const DiceFormula& init, const std::string& nam
     return msg;
 }
 
-void Session::printStatMsg(Gameplay &interface, const std::string& msg_format, const std::string &stat_name, const DiceFormula &dice_roll, const int stat_value) {
+void Session::printStatMsg(Gameplay &interface, const std::string& msg_format, const std::string &stat_name, const DicesRoll &dice_roll, const int stat_value) {
     interface.print(fmt::format(msg_format, fmt::arg("stat", stat_name), fmt::arg("dices", dice_roll.dices), fmt::arg("bonus", dice_roll.bonus), fmt::arg("value", stat_value)));
 }
 
@@ -233,7 +233,7 @@ void Session::initPlayer(Player& target) {
         std::string size_msg { name + " - size : " };
         InventorySize size;
         if (limit) {
-            const DiceFormula& formula { *limit };
+            const DicesRoll& formula { *limit };
             size = formula();
 
             size_msg += formula.dices == 0 ? std::to_string(*size)

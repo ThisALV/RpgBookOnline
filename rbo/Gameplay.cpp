@@ -122,7 +122,7 @@ Replies Gameplay::askYesNo(const byte target, const std::string& question, const
     return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, first_reply_only, wait_all_replies);
 }
 
-Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const DiceFormula& formula, const DiceRollResults& results) {
+Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const DicesRoll& formula, const DiceRollResults& results) {
     if (target != ALL_PLAYERS && results.count(target) == 0)
         throw InvalidDiceRollResults { target };
 

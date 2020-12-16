@@ -91,10 +91,10 @@ InvalidReply::InvalidReply(const ReplyValidity err_type) : std::logic_error { "I
     assert(isInvalid(type));
 }
 
-RandomEngine DiceFormula::rd_ { now() };
-std::uniform_int_distribution<uint> DiceFormula::rd_distributor_ { 1, 6 };
+RandomEngine DicesRoll::rd_ { now() };
+std::uniform_int_distribution<uint> DicesRoll::rd_distributor_ { 1, 6 };
 
-int DiceFormula::operator()() const {
+int DicesRoll::operator()() const {
     int result { 0 };
 
     for (uint i { 0 }; i < dices; i++)

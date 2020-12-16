@@ -45,7 +45,7 @@ public:
     Replies askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
     Replies askConfirm(const byte target, const bool first_reply_only = false);
     Replies askYesNo(const byte target, const std::string& question, const bool first_reply_only = false, const bool wait_all_replies = false);
-    Replies askDiceRoll(const byte target, const std::string& msg, const DiceFormula& formula, const DiceRollResults& results);
+    Replies askDiceRoll(const byte target, const std::string& msg, const DicesRoll& formula, const DiceRollResults& results);
 
     PlayerCheckingResult checkPlayer(const byte id); // Throw : NoPlayerRemaining
     bool checkGame();
