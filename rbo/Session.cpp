@@ -125,7 +125,11 @@ word Session::newGame() {
 
     for (const auto& [name, stat] : game().globalStats) {
         const auto [init, limits, capped, hidden, main] { stat };
-        const int value { init() };
+
+        RollResult result { init() };
+        const int value { result.total() };
+
+        rolls_results_.globalStats.insert({ name, std::move(result) });
 
         stats_.setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
         stats_.set(name, value);
@@ -133,8 +137,13 @@ word Session::newGame() {
         stats_.setMain(name, main);
     }
 
-    for (auto& player : players_)
-        initPlayer(player.second);
+    for (auto& [id, player] : players_) {
+        // On initialise les entrées dans la collection pour les résultats des lancés de dés du joueur
+        rolls_results_.playersStats.insert({ id, {} });
+        rolls_results_.playersInvsCapacity.insert({ id, {} });
+
+        initPlayer(player);
+    }
 
     switchLeader(players_.cbegin()->first);
 
@@ -214,9 +223,15 @@ EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool 
 }
 
 void Session::initPlayer(Player& target) {
+    std::unordered_map<std::string, RollResult>& stats_rolls_result { rolls_results_.playersStats.at(target.id()) };
+    std::unordered_map<std::string, RollResult>& invs_capacity_rolls_result { rolls_results_.playersInvsCapacity.at(target.id()) };
+
     for (const auto& [name, stat] : game().playerStats) {
         const auto [init, limits, capped, hidden, main] { stat };
-        const int value { init() };
+        const RollResult result { init() };
+        const int value { result.total() };
+
+        stats_rolls_result.insert({ name, result });
 
         target.stats().setLimits(name, limits.min, capped ? std::min(value, limits.max) : limits.max);
         target.stats().set(name, value);
@@ -233,11 +248,16 @@ void Session::initPlayer(Player& target) {
         std::string size_msg { name + " - size : " };
         InventorySize size;
         if (limit) {
-            const DicesRoll& formula { *limit };
-            size = formula();
+            const DicesRoll& dice_roll { *limit };
 
-            size_msg += formula.dices == 0 ? std::to_string(*size)
-                                           : std::to_string(formula.dices) + " dices(s) 6 + " + std::to_string(formula.bonus) + " = " + std::to_string(*size);
+            RollResult result { dice_roll() };
+
+            size = result.total();
+
+            invs_capacity_rolls_result.insert({ name, std::move(result) });
+
+            size_msg += dice_roll.dices == 0 ? std::to_string(*size)
+                                             : std::to_string(dice_roll.dices) + " dices(s) 6 + " + std::to_string(dice_roll.bonus) + " = " + std::to_string(*size);
         } else {
             size = {};
             size_msg += "Inf";
@@ -296,7 +316,7 @@ void Session::globalDiceRolls(Gameplay& interface) const {
         if (stat_descriptor.initialValue.dices == 0)
             continue;
 
-        const DiceRollResults stat_value { { leader(), stats().get(name) } };
+        const DiceRollResults stat_value { { leader(), rolls_results_.globalStats.at(name) } };
         interface.askDiceRoll(leader(), fmt::format(msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stat_value);
     }
 }
@@ -309,11 +329,11 @@ void Session::playersDiceRolls(Gameplay& interface) const {
         if (stat_descriptor.initialValue.dices == 0)
             continue;
 
-        DiceRollResults stats_value;
-        for (const auto& [id, player] : players_)
-            stats_value.insert({ id, player.stats().get(name) });
+        DiceRollResults stats_results;
+        for (auto& [id, player_stats] : rolls_results_.playersStats)
+            stats_results.insert({ id, player_stats.at(name) });
 
-        interface.askDiceRoll(ALL_PLAYERS, fmt::format(stat_msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stats_value);
+        interface.askDiceRoll(ALL_PLAYERS, fmt::format(stat_msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stats_results);
     }
 
     const Message& capacity_dice_roll_msg { game().messages.at("inventory_capacity_dice_roll") };
@@ -323,11 +343,11 @@ void Session::playersDiceRolls(Gameplay& interface) const {
         if (!inv_descriptor.limit || inv_descriptor.limit->dices == 0)
             continue;
 
-        DiceRollResults invs_capacity;
-        for (const auto& [id, player] : players_)
-            invs_capacity.insert({ id, *player.inventory(name).maxSize() });
+        DiceRollResults inv_capacity_results;
+        for (const auto& [id, player_invs_capacity] : rolls_results_.playersInvsCapacity)
+            inv_capacity_results.insert({ id, player_invs_capacity.at(name) });
 
-        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::arg("inventory", name)), *inv_descriptor.limit, invs_capacity);
+        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::arg("inventory", name)), *inv_descriptor.limit, inv_capacity_results);
     }
 }
 
@@ -389,6 +409,7 @@ void Session::printPlayer(Gameplay& interface, const byte player_id) const {
         }
     }
 }
+
 
 void Session::start(Entrants& initial_entrants_data, const std::string& checkpoint, const bool missing_entrants) {
     running_ = true;

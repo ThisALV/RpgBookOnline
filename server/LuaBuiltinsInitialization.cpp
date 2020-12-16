@@ -90,12 +90,17 @@ void InstructionsProvider::initBuiltins() {
     ctx_.new_usertype<std::unordered_map<std::string, std::string>>( "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
     ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
 
-    sol::usertype<DicesRoll> dice_formula_type { ctx_.new_usertype<DicesRoll>("DicesRoll") };
-    dice_formula_type["dices"] = &DicesRoll::dices;
-    dice_formula_type["bonus"] = &DicesRoll::bonus;
-    dice_formula_type["min"] = &DicesRoll::min;
-    dice_formula_type["max"] = &DicesRoll::max;
-    dice_formula_type[sol::metatable_key][sol::meta_function::call] = &DicesRoll::operator();
+    sol::usertype<RollResult> roll_result_type { ctx_.new_usertype<RollResult>("RollResult") };
+    roll_result_type["dices"] = &RollResult::dices;
+    roll_result_type["bonus"] = &RollResult::bonus;
+    roll_result_type["total"] = &RollResult::total;
+
+    sol::usertype<DicesRoll> dices_roll_type { ctx_.new_usertype<DicesRoll>("DicesRoll") };
+    dices_roll_type["dices"] = &DicesRoll::dices;
+    dices_roll_type["bonus"] = &DicesRoll::bonus;
+    dices_roll_type["min"] = &DicesRoll::min;
+    dices_roll_type["max"] = &DicesRoll::max;
+    dices_roll_type[sol::metatable_key][sol::meta_function::call] = &DicesRoll::operator();
 
     sol::usertype<RestProperties> rest_type { ctx_.new_usertype<RestProperties>("RestProperties") };
     rest_type["givables"] = sol::readonly(&RestProperties::givables);

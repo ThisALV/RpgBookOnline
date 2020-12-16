@@ -1,6 +1,5 @@
 #include <Rbo/Common.hpp>
 
-#include <iostream>
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -91,16 +90,24 @@ InvalidReply::InvalidReply(const ReplyValidity err_type) : std::logic_error { "I
     assert(isInvalid(type));
 }
 
+int RollResult::total() const {
+    return std::accumulate(dices.cbegin(), dices.cend(), 0) + bonus;
+}
+
 RandomEngine DicesRoll::rd_ { now() };
 std::uniform_int_distribution<uint> DicesRoll::rd_distributor_ { 1, 6 };
 
-int DicesRoll::operator()() const {
-    int result { 0 };
+RollResult DicesRoll::operator()() const {
+    RollResult result;
+    result.dices.reserve(dices);
+    result.bonus = bonus;
 
-    for (uint i { 0 }; i < dices; i++)
-        result += rd_distributor_(rd_);
+    for (uint i { 0 }; i < dices; i++) {
+        const uint dice_result { rd_distributor_(rd_) };
+        result.dices.push_back(dice_result);
+    }
 
-    return result + bonus;
+    return result;
 }
 
 namespace ItemEntry {

@@ -34,6 +34,7 @@ struct StatDescriptor;
 struct InventoryDescriptor;
 struct PlayerState;
 struct EnemyDescriptorBinding;
+struct RollResult;
 
 using byte = std::uint8_t;
 using s_byte = std::int8_t;
@@ -45,7 +46,7 @@ enum struct ReplyValidity : byte;
 
 using OptionsList = std::map<byte, std::string>;
 using Replies = std::map<byte, byte>;
-using DiceRollResults = std::map<byte, int>;
+using DiceRollResults = std::map<byte, RollResult>;
 using ReplyController = std::function<void(const byte reply)>;
 
 using Next = std::optional<word>;
@@ -86,11 +87,18 @@ using RepliesWrapper = OutputableWrapper<Replies>;
 template<typename T> using VectorWrapper = OutputableWrapper<std::vector<T>>;
 using ByteVecWrapper = VectorWrapper<byte>;
 
+struct RollResult  {
+    std::vector<byte> dices;
+    int bonus;
+
+    int total() const;
+};
+
 struct DicesRoll {
     byte dices;
     int bonus;
 
-    int operator()() const;
+    RollResult operator()() const;
     int min() const { return dices + bonus; }
     int max() const { return dices * 6 + bonus; };
 

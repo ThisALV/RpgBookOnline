@@ -53,7 +53,9 @@ void SessionDataFactory::makeDiceRoll(const byte target, const std::string &msg,
     data_.add(results.size());
     for (const auto [id, result] : results) {
         data_.add(id);
-        data_.putNumeric(result);
+
+        for (const byte dice : result.dices)
+            data_.add(dice);
     }
 }
 

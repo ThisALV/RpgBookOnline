@@ -59,6 +59,13 @@ struct Particpant {
 using Entrants = std::map<byte, Particpant>;
 using ConstConnections = std::map<byte, const tcp::socket*>;
 
+// Nécessaire pour conserver les détails des lancés de dés et les envoyés aux joueurs par la suite
+struct DiceRollsDetails {
+    std::unordered_map<std::string, RollResult> globalStats;
+    std::map<byte, std::unordered_map<std::string, RollResult>> playersStats;
+    std::map<byte, std::unordered_map<std::string, RollResult>> playersInvsCapacity;
+};
+
 class Session {
 private:
     static std::string initStatMsg(const DicesRoll& dice_roll, const std::string& stat_name, const int stat_value);
@@ -66,6 +73,7 @@ private:
 
     io::io_context::strand executor_;
     spdlog::logger& logger_;
+    DiceRollsDetails rolls_results_;
     StatsManager stats_;
     std::map<byte, Player> players_;
     std::map<byte, tcp::socket> connections_;
@@ -84,7 +92,7 @@ private:
     EntrantsValidity checkEntrants(const GameState& checkpoint, const bool missing_entrants) const;
 
     void initPlayer(Player& target);
-    void restorePlayer(const byte targetID, const PlayerState& previousState);
+    void restorePlayer(const byte target_id, const PlayerState& previous_state);
 
     void globalDiceRolls(Gameplay& interface) const;
     void playersDiceRolls(Gameplay& interface) const;

@@ -56,12 +56,22 @@ BOOST_AUTO_TEST_CASE(Possibilities) {
 BOOST_AUTO_TEST_CASE(DiceRoll) {
     const Data expected {
         std::vector<byte> {
-            0, 4, 255, 0, 9, 'A', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e', 10, 0xff, 0xff, 0xff, 0xff, 2, 0, 0xff, 0xff, 0xff, 0xfb, 2, 0x00, 0x00, 0x00, 0x08
+            0, 4, 255, 0, 9, 'A', ' ', 'm', 'e', 's', 's', 'a', 'g', 'e', 3, 0xff, 0xff, 0xff, 0xff, 3,
+            0, 2, 3, 4,
+            1, 1, 6, 5,
+            254, 5, 4, 1
         }
     };
 
+    DiceRollResults results {
+        { 0, {} }, { 1, {} }, { 254, {} }
+    };
+    results.at(0).dices = { 2, 3, 4 };
+    results.at(1).dices = { 1, 6, 5 };
+    results.at(254).dices = { 5, 4, 1 };
+
     SessionDataFactory factory;
-    factory.makeDiceRoll(ALL_PLAYERS, "A message", 10, -1, DiceRollResults { { 0, -5 }, { 2, 8} });
+    factory.makeDiceRoll(ALL_PLAYERS, "A message", 3, -1, std::move(results));
 
     BOOST_CHECK_EQUAL(expected, factory.data());
 }
