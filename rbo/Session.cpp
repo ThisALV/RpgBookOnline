@@ -425,11 +425,12 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
 
         Gameplay interface { *this };
 
-        globalDiceRolls(interface);
-        playersDiceRolls(interface);
+        if (new_game) {
+            globalDiceRolls(interface);
+            playersDiceRolls(interface);
 
-        if (new_game)
             printGlobal(interface);
+        }
 
         for (const auto& player : players_) {
             const byte id { player.first };
