@@ -500,6 +500,7 @@ Next Session::playScene(Gameplay& interface, const word id) {
 
 void Session::reset() {
     stats_ = {};
+    rolls_results_ = {};
     players_.clear();
     connections_.clear();
     leader_ = 0;
