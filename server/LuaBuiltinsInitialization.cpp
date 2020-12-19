@@ -129,8 +129,8 @@ void InstructionsProvider::initBuiltins() {
     inv_type["count"] = &Inventory::count;
     inv_type["has"] = &Inventory::has;
     inv_type["limited"] = &Inventory::limited;
-    inv_type["maxSize"] = &Inventory::maxSize;
-    inv_type["setMaxSize"] = &Inventory::setMaxSize;
+    inv_type["capacity"] = &Inventory::capacity;
+    inv_type["setCapacity"] = &Inventory::setCapacity;
 
     sol::usertype<Player> player_type { ctx_.new_usertype<Player>("Player") };
     player_type["same"] = &Player::same;

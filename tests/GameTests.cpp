@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(Apply) {
 BOOST_AUTO_TEST_CASE(ApplyLimitExceeded) {
     const ItemsList inventories { { "inv1", std::vector<std::string> { "A", "B", "C", "D" } } };
     Player target { 1, "TestPlayer", {}, inventories, {} };
-    target.inventory("inv1").setMaxSize(20);
+    target.inventory("inv1").setCapacity(20);
 
     target.add("inv1", "A", 5);
     target.add("inv1", "B", 5);
@@ -88,7 +88,7 @@ struct SimulateItemsChangeFixture {
     Player target { 1, "TestPlayer", {}, inventories, {} };
 
     SimulateItemsChangeFixture() {
-        target.inventory("inv1").setMaxSize(10);
+        target.inventory("inv1").setCapacity(10);
 
         target.add("inv1", "A", 1);
         target.add("inv1", "B", 2);

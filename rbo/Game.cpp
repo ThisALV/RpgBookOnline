@@ -62,7 +62,7 @@ EventEffect::ItemsChanges EventEffect::simulateItemsChanges(const Player& target
     }
 
     const bool full = std::any_of(supposed_sizes.cbegin(), supposed_sizes.cend(), [&target](const auto& size) {
-        return size.second > target.inventory(size.first).maxSize();
+        return size.second > target.inventory(size.first).capacity();
     });
 
     return full ? ItemsChanges::InvFull : ItemsChanges::Ok;

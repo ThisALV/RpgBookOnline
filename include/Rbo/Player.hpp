@@ -23,7 +23,7 @@ struct UnknownItem : std::logic_error {
 
 class Inventory {
 private:
-    InventorySize size_;
+    InventorySize capacity_;
     InventoryContent content_;
 
     static void checkqQtyForChange(const std::string& item, const int qty);
@@ -43,9 +43,9 @@ public:
     int count(const std::string& item) const;
     bool has(const std::string& item) const { return count(item) != 0; }
 
-    bool limited() const { return size_.has_value(); }
-    InventorySize maxSize() const { return size_; }
-    bool setMaxSize(const InventorySize new_capacity);
+    bool limited() const { return capacity_.has_value(); }
+    InventorySize capacity() const { return capacity_; }
+    bool setCapacity(const InventorySize new_capacity);
 
     const InventoryContent& content() const { return content_; }
 };
@@ -111,7 +111,7 @@ Output& operator<<(Output& out, const Player& player) {
 
 template<typename Output>
 Output& operator<<(Output& out, const Inventory& inventory) {
-    out << "[ maxSize=" << (!inventory.limited() ? std::string { "Inf" } : std::to_string(*inventory.maxSize())) << "; size=" << inventory.size() << " ]";
+    out << "[ capacity=" << (!inventory.limited() ? std::string { "Inf" } : std::to_string(*inventory.capacity())) << "; size=" << inventory.size() << " ]";
 
     return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }

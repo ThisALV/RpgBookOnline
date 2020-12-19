@@ -70,8 +70,8 @@ void Inventory::checkCapacity(const InventorySize capacity) {
         throw InvalidCapacity { "Can't be negative" };
 }
 
-Inventory::Inventory(const std::vector<std::string>& items, InventorySize size) : size_ { size } {
-    checkCapacity(size_);
+Inventory::Inventory(const std::vector<std::string>& items, InventorySize size) : capacity_ { size } {
+    checkCapacity(capacity_);
 
     std::transform(items.cbegin(), items.cend(), std::inserter(content_, content_.end()), [](const std::string& item) -> InventoryContent::value_type {
         return { item, 0 };
@@ -79,14 +79,14 @@ Inventory::Inventory(const std::vector<std::string>& items, InventorySize size) 
 }
 
 bool Inventory::operator==(const Inventory& rhs) const {
-    return content() == rhs.content() && size_ == rhs.size_;
+    return content() == rhs.content() && capacity_ == rhs.capacity_;
 }
 
 bool Inventory::add(const std::string& item, const int qty) {
     checkqQtyForChange(item, qty);
     checkExists(item);
 
-    const bool ok { !maxSize().has_value() || (size() + qty <= maxSize()) };
+    const bool ok { !capacity().has_value() || (size() + qty <= capacity()) };
     if (ok)
         content_.at(item) += qty;
 
@@ -117,12 +117,12 @@ int Inventory::size() const {
     return std::accumulate(content().cbegin(), content().cend(), int { 0 }, accumulate);
 }
 
-bool Inventory::setMaxSize(const InventorySize capacity) {
+bool Inventory::setCapacity(const InventorySize capacity) {
     checkCapacity(capacity);
 
     const bool ok { !capacity || (*capacity >= size()) };
     if (ok)
-        size_ = capacity;
+        capacity_ = capacity;
 
     return ok;
 }

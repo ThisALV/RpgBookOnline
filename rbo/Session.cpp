@@ -263,12 +263,12 @@ void Session::initPlayer(Player& target) {
             size_msg += "Inf";
         }
 
-        target.inventory(name).setMaxSize(size);
+        target.inventory(name).setCapacity(size);
         if (initial.empty())
             continue;
 
 #ifndef NDEBUG
-        const InventorySize capacity { target.inventory(name).maxSize() };
+        const InventorySize capacity { target.inventory(name).capacity() };
 #endif
         assert(!capacity || std::accumulate(initial.cbegin(), initial.cend(), std::size_t { 0 }, [](const std::size_t s, const auto& i) { return s + i.second; }) <= capacity);
 
@@ -298,9 +298,9 @@ void Session::restorePlayer(const byte id, const PlayerState& state) {
 
     for (const auto& [inv, content] : state.inventories) {
 #ifndef NDEBUG
-        assert(target.inventory(inv).setMaxSize(state.capacities.at(inv)));
+        assert(target.inventory(inv).setCapacity(state.capacities.at(inv)));
 #else
-        target.inventory(inv).setMaxSize(state.capacities.at(inv));
+        target.inventory(inv).setCapacity(state.capacities.at(inv));
 #endif
 
         for (const auto& [item, qty] : content)
@@ -398,7 +398,7 @@ void Session::printPlayer(Gameplay& interface, const byte player_id) const {
     const Message& item_msg { msgs.at("player_item") };
     for (const auto& [name, inv] : target.inventories()) {
         if (inv_title_msg) {
-            const std::string capacity { inv.maxSize() ? std::to_string(*inv.maxSize()) : "Inf" };
+            const std::string capacity { inv.capacity() ? std::to_string(*inv.capacity()) : "Inf" };
 
             interface.print(fmt::format(*inv_title_msg, fmt::arg("inventory", name), fmt::arg("size", inv.size()), fmt::arg("capacity", capacity)));
         }
@@ -541,7 +541,7 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
         std::unordered_map<std::string, InventorySize> capacities;
         for (const auto& [name, inventory] : player.inventories()) {
             inventories.insert({ name, inventory.content() });
-            capacities.insert({ name, inventory.maxSize() });
+            capacities.insert({ name, inventory.capacity() });
         }
 
         return { id, PlayerState { stats, inventories, capacities } };

@@ -194,7 +194,7 @@ void Gameplay::initCache(const byte player_id) {
 
     for (const auto& [name, inv] : target.inventories()) {
         inventories.insert({ name, inv.content() });
-        capacities.insert({ name, inv.maxSize() });
+        capacities.insert({ name, inv.capacity() });
     }
 
     players_cache_.insert({ player_id, PlayerCache { false,  PlayerState { target.stats().raw(), std::move(inventories), std::move(capacities) } } });
@@ -234,7 +234,7 @@ void Gameplay::sendPlayerUpdate(const byte id) {
             }
         }
 
-        const InventorySize capacity { inv.maxSize() };
+        const InventorySize capacity { inv.capacity() };
         InventorySize& cached_capacity { cached_state.capacities.at(name) };
         if (!cache_initialized || capacity != cached_capacity) {
             update.capacities.insert({ name, capacity });

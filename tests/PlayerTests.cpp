@@ -64,7 +64,7 @@ struct AddFixture {
 
     AddFixture() {
         assert(player.inventories().count("inv1") == 1);
-        player.inventory("inv1").setMaxSize(10);
+        player.inventory("inv1").setCapacity(10);
     }
 };
 
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(ItemsWithCapacity) {
     const InventoryContent expected_content { { "A", 0 }, { "B", 0 } };
 
     BOOST_CHECK(inventory.limited());
-    BOOST_CHECK_EQUAL(*inventory.maxSize(), 2);
+    BOOST_CHECK_EQUAL(*inventory.capacity(), 2);
     BOOST_CHECK_EQUAL(inventory.content(), expected_content);
 }
 
@@ -209,15 +209,15 @@ struct SetCapacityFixture {
 BOOST_FIXTURE_TEST_SUITE(SetCapacity, SetCapacityFixture)
 
 BOOST_AUTO_TEST_CASE(NegativeCapacity) {
-    BOOST_CHECK_THROW(inventory.setMaxSize(-1), InvalidCapacity);
+    BOOST_CHECK_THROW(inventory.setCapacity(-1), InvalidCapacity);
 }
 
 BOOST_AUTO_TEST_CASE(NotEnoughCapacity) {
-    BOOST_CHECK(!inventory.setMaxSize(2));
+    BOOST_CHECK(!inventory.setCapacity(2));
 }
 
 BOOST_AUTO_TEST_CASE(EnoughCapacity) {
-    BOOST_CHECK(inventory.setMaxSize({}));
+    BOOST_CHECK(inventory.setCapacity({}));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
