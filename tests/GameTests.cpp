@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE(Ok) {
         "TestGame",
         std::move(global), std::move(player), std::move(inventories), std::move(bonuses),
         std::move(effects), std::move(enemies), std::move(groups), std::move(rest),
-        std::move(deathConditions), std::move(gameEndConditions), true, true
+        std::move(deathConditions), std::move(gameEndConditions), true, true, {}
     };
 
     const std::vector<Game::Error> validity { game.validity() };
