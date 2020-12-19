@@ -100,7 +100,7 @@ std::vector<Game::Error> Game::validity() const {
     const bool valid_init_invs = std::all_of(playerInventories.cbegin(), playerInventories.cend(), [](const auto& i) {
         const InventoryDescriptor& inv { i.second };
 
-        uint init_size { 0 };
+        int init_size { 0 };
         return std::all_of(inv.initialStuff.cbegin(), inv.initialStuff.cend(), [&init_size, &inv](const auto& item) {
             if (inv.limit && (init_size += item.second) > inv.limit->min())
                 return false;

@@ -5,6 +5,14 @@
 
 namespace Rbo {
 
+struct InvalidCapacity : std::logic_error {
+    InvalidCapacity(const std::string& reason) : std::logic_error { "Inventory has invalid capacity : " + reason } {}
+};
+
+struct InvalidQty : std::logic_error {
+    InvalidQty(const std::string& item, const std::string& reason) : std::logic_error { "Unable to apply changes for item \"" + item + "\", invalid quantity : " + reason } {}
+};
+
 struct UnknownInventory : std::logic_error {
     UnknownInventory(const std::string& name) : std::logic_error { "Unknown inventory \"" + name + '"' } {}
 };
@@ -14,30 +22,32 @@ struct UnknownItem : std::logic_error {
 };
 
 class Inventory {
-public:
-    explicit Inventory(const std::vector<std::string>&, const InventorySize& = {});
-    Inventory() : Inventory { {}, {} } {}
-
-    bool operator==(const Inventory& rhs) const;
-
-    bool add(const std::string& item, const uint qty);
-    bool consume(const std::string& item, const uint qty);
-
-    uint size() const;
-    uint count(const std::string& item) const;
-    bool has(const std::string& item) const { return count(item) != 0; }
-
-    bool limited() const { return size_.has_value(); }
-    InventorySize maxSize() const { return size_; }
-    bool setMaxSize(const InventorySize newMaxSize);
-
-    const InventoryContent& content() const { return content_; }
-
 private:
     InventorySize size_;
     InventoryContent content_;
 
+    static void checkqQtyForChange(const std::string& item, const int qty);
+    static void checkCapacity(const InventorySize capacity);
+
     void checkExists(const std::string& item) const;
+public:
+    explicit Inventory(const std::vector<std::string>& items_name, const InventorySize capacity = {});
+    Inventory() : Inventory { {}, {} } {}
+
+    bool operator==(const Inventory& rhs) const;
+
+    bool add(const std::string& item, const int qty);
+    bool consume(const std::string& item, const int qty);
+
+    int size() const;
+    int count(const std::string& item) const;
+    bool has(const std::string& item) const { return count(item) != 0; }
+
+    bool limited() const { return size_.has_value(); }
+    InventorySize maxSize() const { return size_; }
+    bool setMaxSize(const InventorySize new_capacity);
+
+    const InventoryContent& content() const { return content_; }
 };
 
 class Player {
@@ -76,8 +86,8 @@ public:
     byte id() const { return id_; }
     const std::string& name() const { return name_; }
 
-    bool add(const std::string& inventory, const std::string& item, const uint qty);
-    bool consume(const std::string& inventory, const std::string& item, const uint qty);
+    bool add(const std::string& inventory, const std::string& item, const int qty);
+    bool consume(const std::string& inventory, const std::string& item, const int qty);
 
     Inventory& inventory(const std::string& name);
     const Inventory& inventory(const std::string& name) const;

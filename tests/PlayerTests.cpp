@@ -74,6 +74,18 @@ struct ConsumeFixture : AddFixture {
     }
 };
 
+BOOST_AUTO_TEST_CASE(AddNegativeQty) {
+    Player player { 0, "", {}, { { "1", { "A" } } }, {} };
+
+    BOOST_CHECK_THROW(player.add("1", "A", -1), InvalidQty);
+}
+
+BOOST_AUTO_TEST_CASE(ConsumeNegativeQty) {
+    Player player { 0, "", {}, { { "1", { "A" } } }, {} };
+
+    BOOST_CHECK_THROW(player.consume("1", "A", -1), InvalidQty);
+}
+
 BOOST_AUTO_TEST_CASE(AddUnknownInventory) {
     BOOST_CHECK_THROW(Player(0, "", {}, {}, {}).add("", "", 0), UnknownInventory);
 }
@@ -153,7 +165,20 @@ BOOST_AUTO_TEST_SUITE(InventoryTests)
 
 BOOST_AUTO_TEST_SUITE(Ctor)
 
-BOOST_AUTO_TEST_CASE(ItemsAndSize) {
+BOOST_AUTO_TEST_CASE(NegativeCapacity) {
+    BOOST_CHECK_THROW(Inventory(std::vector<std::string>(), -1), InvalidCapacity);
+}
+
+BOOST_AUTO_TEST_CASE(ItemsWithCapacity) {
+    const Inventory inventory { std::vector<std::string> { "A", "B" }, 2 };
+    const InventoryContent expected_content { { "A", 0 }, { "B", 0 } };
+
+    BOOST_CHECK(inventory.limited());
+    BOOST_CHECK_EQUAL(*inventory.maxSize(), 2);
+    BOOST_CHECK_EQUAL(inventory.content(), expected_content);
+}
+
+BOOST_AUTO_TEST_CASE(ItemsWithoutCapacity) {
     const Inventory inventory { std::vector<std::string> { "A", "B" } };
     const InventoryContent expected_content { { "A", 0 }, { "B", 0 } };
 
@@ -172,16 +197,20 @@ BOOST_AUTO_TEST_CASE(Size) {
     BOOST_CHECK_EQUAL(inventory.size(), 90);
 }
 
-struct SetMaxSizeFixture {
+struct SetCapacityFixture {
     Inventory inventory { std::vector<std::string> { "A", "B" }, 5 };
 
-    SetMaxSizeFixture() {
+    SetCapacityFixture() {
         inventory.add("A", 1);
         inventory.add("B", 2);
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(SetMaxSize, SetMaxSizeFixture)
+BOOST_FIXTURE_TEST_SUITE(SetCapacity, SetCapacityFixture)
+
+BOOST_AUTO_TEST_CASE(NegativeCapacity) {
+    BOOST_CHECK_THROW(inventory.setMaxSize(-1), InvalidCapacity);
+}
 
 BOOST_AUTO_TEST_CASE(NotEnoughCapacity) {
     BOOST_CHECK(!inventory.setMaxSize(2));

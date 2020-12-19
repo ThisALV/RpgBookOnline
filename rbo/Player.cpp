@@ -25,7 +25,7 @@ Player::Player(const byte id, const std::string& name, const std::vector<std::st
     });
 }
 
-bool Player::add(const std::string& inv, const std::string& item, const uint qty) {
+bool Player::add(const std::string& inv, const std::string& item, const int qty) {
     const bool ok { inventory(inv).add(item, qty) };
     if (ok)
         refreshBonuses(BonusAction::Enable, inv, item, qty);
@@ -33,7 +33,7 @@ bool Player::add(const std::string& inv, const std::string& item, const uint qty
     return ok;
 }
 
-bool Player::consume(const std::string& inv, const std::string& item, const uint qty) {
+bool Player::consume(const std::string& inv, const std::string& item, const int qty) {
     const bool ok { inventory(inv).consume(item, qty) };
     if (ok)
         refreshBonuses(BonusAction::Disable, inv, item, qty);
@@ -55,7 +55,24 @@ const Inventory& Player::inventory(const std::string &inv) const {
     return inventories().at(inv);
 }
 
-Inventory::Inventory(const std::vector<std::string>& items, const InventorySize& size) : size_ { size } {
+void Inventory::checkExists(const std::string& item) const {
+    if (content().count(item) == 0)
+        throw UnknownItem { item };
+}
+
+void Inventory::checkqQtyForChange(const std::string& item, const int qty) {
+    if (qty < 0)
+        throw InvalidQty { item, "Can't be negative" };
+}
+
+void Inventory::checkCapacity(const InventorySize capacity) {
+    if (capacity && *capacity < 0)
+        throw InvalidCapacity { "Can't be negative" };
+}
+
+Inventory::Inventory(const std::vector<std::string>& items, InventorySize size) : size_ { size } {
+    checkCapacity(size_);
+
     std::transform(items.cbegin(), items.cend(), std::inserter(content_, content_.end()), [](const std::string& item) -> InventoryContent::value_type {
         return { item, 0 };
     });
@@ -65,13 +82,10 @@ bool Inventory::operator==(const Inventory& rhs) const {
     return content() == rhs.content() && size_ == rhs.size_;
 }
 
-void Inventory::checkExists(const std::string& item) const {
-    if (content().count(item) == 0)
-        throw UnknownItem { item };
-}
-
-bool Inventory::add(const std::string& item, const uint qty) {
+bool Inventory::add(const std::string& item, const int qty) {
+    checkqQtyForChange(item, qty);
     checkExists(item);
+
     const bool ok { !maxSize().has_value() || (size() + qty <= maxSize()) };
     if (ok)
         content_.at(item) += qty;
@@ -79,16 +93,18 @@ bool Inventory::add(const std::string& item, const uint qty) {
     return ok;
 }
 
-bool Inventory::consume(const std::string &item, const uint qty) {
+bool Inventory::consume(const std::string &item, const int qty) {
+    checkqQtyForChange(item, qty);
     checkExists(item);
-    const bool ok { count(item) >= qty };
+
+    const bool ok { count(item) >= static_cast<int>(qty) };
     if (ok)
         content_.at(item) -= qty;
 
     return ok;
 }
 
-uint Inventory::count(const std::string& item) const {
+int Inventory::count(const std::string& item) const {
     checkExists(item);
     return content().at(item);
 }
@@ -97,11 +113,13 @@ std::size_t accumulate(const std::size_t total, const InventoryContent::value_ty
     return total + qty.second;
 }
 
-uint Inventory::size() const {
-    return std::accumulate(content().cbegin(), content().cend(), std::size_t { 0 }, accumulate);
+int Inventory::size() const {
+    return std::accumulate(content().cbegin(), content().cend(), int { 0 }, accumulate);
 }
 
 bool Inventory::setMaxSize(const InventorySize capacity) {
+    checkCapacity(capacity);
+
     const bool ok { !capacity || (*capacity >= size()) };
     if (ok)
         size_ = capacity;

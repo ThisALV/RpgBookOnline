@@ -57,8 +57,8 @@ using SceneBuilder = std::function<Scene(const Game& currentGame, const word sce
 using Players = std::map<byte, Player*>;
 using ConstPlayers = std::map<byte, const Player*>;
 
-using InventorySize = std::optional<uint>;
-using InventoryContent = std::unordered_map<std::string, uint>;
+using InventorySize = std::optional<int>;
+using InventoryContent = std::unordered_map<std::string, int>;
 using InventoriesSize = std::unordered_map<std::string, InventorySize>;
 using InventoriesContent = std::unordered_map<std::string, InventoryContent>;
 using PlayerInventories = std::unordered_map<std::string, Inventory>;

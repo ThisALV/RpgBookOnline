@@ -226,7 +226,7 @@ void Gameplay::sendPlayerUpdate(const byte id) {
         InventoryContent& cached_inv { cached_state.inventories.at(name) };
 
         for (const auto& [item, qty] : inv.content()) {
-            uint& cached_item_qty { cached_inv.at(item) };
+            int& cached_item_qty { cached_inv.at(item) };
 
             if (!cache_initialized || qty != cached_item_qty) {
                 update.items[name].insert({ item, qty }); // Utilisation de [] pour créer l'inventaire uniquement s'il y a des changements dessus
