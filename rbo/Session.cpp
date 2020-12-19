@@ -459,6 +459,9 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
             interface.sendPlayerUpdate(id);
         }
 
+        for (const auto& stat : stats())
+            interface.sendGlobalStat(stat.first);
+
         for (Next next { beginning }; next && running(); next = playScene(interface, *next));
     } catch (const std::exception& err) {
         end(initial_entrants_data);
