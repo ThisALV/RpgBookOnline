@@ -277,7 +277,7 @@ enum struct MemberRequest : byte {
     Ready, Disconnect
 };
 
-void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const std::size_t) {
+void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const std::size_t request_len) {
     if (request_err == io::error::basic_errors::operation_aborted && isPreparing()) {
         logger_.debug("Listening to requests canceled for [{}].", id);
         return;
@@ -294,7 +294,7 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
     }
 
     ReceiveBuffer& request_buffer { request_buffers_.at(id) };
-    if (std::any_of(request_buffer.cbegin() + 1, request_buffer.cend(), [](const byte b) { return b != 0; }) || request_buffer[0] > 1) {
+    if (request_len != 1 || request_buffer[0] > static_cast<byte>(MemberRequest::Disconnect)) {
         disconnect(id, true);
         logger_.error("Member {} : Invalid request.", id);
         return;
