@@ -23,7 +23,7 @@ bool LobbyExecutor::start() {
     lobby_.open();
 
     for (std::thread& thread : threads_)
-        thread = std::thread { std::bind(&LobbyExecutor::runExecutor, this) };
+        thread = std::thread { [this]() { runExecutor(); } };
 
     logger_.info("{} given threads for server execution.", threads_.size());
 

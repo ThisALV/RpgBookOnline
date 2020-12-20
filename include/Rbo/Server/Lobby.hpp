@@ -70,8 +70,8 @@ private:
 
     void acceptMember();
     void listenMember(const byte id);
-    void registerMember(const boost::system::error_code err, tcp::socket connection);
-    void handleMemberRequest(const byte member_id, const boost::system::error_code err, const std::size_t);
+    void registerMember(const ErrCode err, tcp::socket connection);
+    void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t);
     void launchPreparation();
     void makeSession(std::optional<std::string> checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
     Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);

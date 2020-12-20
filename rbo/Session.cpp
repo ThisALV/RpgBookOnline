@@ -624,7 +624,10 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
         if (player.targetted) {
             handlers.insert({ id, ReplyHandler { executor_, logger_, ctx, controller, id } });
 
-            player.connection->async_send(buffer, io::bind_executor(executor_, std::bind(&ReplyHandler::handle, &handlers.at(id), std::placeholders::_1, std::placeholders::_2)));
+            const byte player_id { id }; // Nécessaire pour pouvoir être capturé par la lambda
+            player.connection->async_send(buffer, io::bind_executor(executor_, [&handlers, player_id](const ErrCode err, const std::size_t len) {
+                handlers.at(player_id).handle(err, len);
+            }));
         } else {
             const ErrCode send_err { trySend(*player.connection, buffer) };
 

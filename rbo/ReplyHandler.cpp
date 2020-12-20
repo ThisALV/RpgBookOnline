@@ -97,8 +97,9 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 
 void ReplyHandler::listenReply() {
     logger_->debug("Listening reply for [{}]...", playerID_);
-    ctx_->players.at(playerID_).connection->async_receive(
-                io::buffer(replyBuffer_), io::bind_executor(*executor_, std::bind(&ReplyHandler::handleReply, this, std::placeholders::_1, std::placeholders::_2)));
+    ctx_->players.at(playerID_).connection->async_receive(io::buffer(replyBuffer_), io::bind_executor(*executor_, [this](const ErrCode err, const std::size_t len) {
+        handleReply(err, len);
+    }));
 }
 
 void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {

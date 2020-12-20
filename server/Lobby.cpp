@@ -171,8 +171,9 @@ void Lobby::close(const bool crash) {
 
 void Lobby::acceptMember() {
     logger_.debug("Waiting for connection on port {}...", port());
-    new_players_acceptor_.async_accept(
-                io::bind_executor(member_handling_, std::bind(&Lobby::registerMember, this, std::placeholders::_1, std::placeholders::_2)));
+    new_players_acceptor_.async_accept(io::bind_executor(member_handling_, [this](const ErrCode err, tcp::socket client_connection) {
+        registerMember(err, std::move(client_connection));
+    }));
 }
 
 void Lobby::listenMember(const byte id) {
@@ -181,8 +182,9 @@ void Lobby::listenMember(const byte id) {
         return;
 
     logger_.debug("Listening requests of [{}]...", id);
-    connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)),
-                                      io::bind_executor(member_handling_, std::bind(&Lobby::handleMemberRequest, this, id, std::placeholders::_1, std::placeholders::_2)));
+    connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)), io::bind_executor(member_handling_, [this, id](const ErrCode err, const std::size_t len) {
+        handleMemberRequest(id, err, len);
+    }));
 }
 
 void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
