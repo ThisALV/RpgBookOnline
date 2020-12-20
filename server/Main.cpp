@@ -1,4 +1,3 @@
-#include <iostream>
 #include <spdlog/logger.h>
 #include <Rbo/Server/Lobby.hpp>
 #include <Rbo/Server/LobbyExecutor.hpp>

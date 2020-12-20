@@ -1,8 +1,5 @@
 #include <Rbo/Session.hpp>
 
-#include <cassert>
-#include <algorithm>
-#include <numeric>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
 #include <Rbo/SessionDataFactory.hpp>

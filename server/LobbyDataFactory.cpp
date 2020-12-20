@@ -1,7 +1,5 @@
 #include <Rbo/Server/LobbyDataFactory.hpp>
 
-#include <cassert>
-
 namespace Rbo::Server {
 
 bool isParametersError(const SessionResult result) {

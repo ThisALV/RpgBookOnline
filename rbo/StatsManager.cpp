@@ -1,7 +1,5 @@
 #include <Rbo/StatsManager.hpp>
 
-#include <cassert>
-
 namespace Rbo {
 
 StatsManager::StatsManager(const std::vector<std::string>& stats) {

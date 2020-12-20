@@ -1,6 +1,5 @@
 #include <Rbo/Game.hpp>
 
-#include <cassert>
 #include <Rbo/Player.hpp>
 
 namespace Rbo {

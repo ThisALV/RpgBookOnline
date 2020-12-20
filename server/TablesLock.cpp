@@ -1,4 +1,4 @@
-#include "Rbo/Server/TablesLock.hpp"
+#include <Rbo/Server/TablesLock.hpp>
 
 namespace Rbo::Server {
 

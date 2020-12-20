@@ -1,6 +1,5 @@
 #include <Rbo/Server/Lobby.hpp>
 
-#include <algorithm>
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
 #include <Rbo/GameBuilder.hpp>

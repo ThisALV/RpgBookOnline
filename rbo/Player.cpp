@@ -1,8 +1,5 @@
 #include <Rbo/Player.hpp>
 
-#include <cassert>
-#include <numeric>
-
 namespace Rbo {
 
 void Player::refreshBonuses(const BonusAction action, const std::string& inv, const std::string& item, const uint qty) {

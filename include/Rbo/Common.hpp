@@ -1,18 +1,22 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include <stdexcept>
+#include <algorithm>
 #include <array>
-#include <iterator>
-#include <string>
-#include <unordered_map>
-#include <map>
-#include <vector>
+#include <cassert>
 #include <functional>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <map>
+#include <numeric>
 #include <optional>
 #include <random>
-#include <limits>
-#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <spdlog/fwd.h>
 
 using ushort = std::uint16_t;
