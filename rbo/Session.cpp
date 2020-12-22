@@ -31,10 +31,6 @@ std::string Session::initStatMsg(const DicesRoll& init, const std::string& name,
     return msg;
 }
 
-void Session::printStatMsg(Gameplay &interface, const std::string& msg_format, const std::string &stat_name, const DicesRoll &dice_roll, const int stat_value) {
-    interface.print(fmt::format(msg_format, fmt::arg("stat", stat_name), fmt::arg("dices", dice_roll.dices), fmt::arg("bonus", dice_roll.bonus), fmt::arg("value", stat_value)));
-}
-
 tcp::socket& Session::connection(const byte id) {
     assert(connections_.count(id) == 1);
 
@@ -348,66 +344,6 @@ void Session::playersDiceRolls(Gameplay& interface) const {
     }
 }
 
-void Session::printGlobal(Gameplay& interface) const {
-    const Messages& msgs { game().messages };
-
-    const Message& title_msg { msgs.at("global_stats_title") };
-    if (!stats().raw().empty() && title_msg)
-        interface.print(*title_msg);
-
-    const Message& stat_msg { msgs.at("global_stat") };
-    if (!stat_msg)
-        return;
-
-    const std::string& msg { *stat_msg };
-    for (const auto& [name, stat] : stats()) {
-        if (stat.hidden)
-            continue;
-
-        printStatMsg(interface, msg, name, game().globalStats.at(name).initialValue, stat.value);
-    }
-}
-
-void Session::printPlayer(Gameplay& interface, const byte player_id) const {
-    const Messages& msgs { game().messages };
-    const Player& target { player(player_id) };
-
-    const Message& stats_title_msg { msgs.at("player_stats_title") };
-    if (!target.stats().raw().empty() && stats_title_msg)
-        interface.print(fmt::format(*stats_title_msg, fmt::arg("player", target.name())));
-
-    const Message& stat_msg { msgs.at("player_stat") };
-    if (!stat_msg)
-        return;
-
-    for (const auto& [name, stat] : target.stats()) {
-        if (stat.hidden)
-            continue;
-
-        printStatMsg(interface, *stat_msg, name, game().playerStats.at(name).initialValue, stat.value);
-    }
-
-    const Message& inventories_title_msg { msgs.at("player_inventories_title") };
-    if (!target.inventories().empty() && inventories_title_msg)
-        interface.print(fmt::format(*inventories_title_msg, fmt::arg("player", target.name())));
-
-    const Message& inv_title_msg { msgs.at("player_inventory_title") };
-    const Message& item_msg { msgs.at("player_item") };
-    for (const auto& [name, inv] : target.inventories()) {
-        if (inv_title_msg) {
-            const std::string capacity { inv.capacity() ? std::to_string(*inv.capacity()) : "Inf" };
-
-            interface.print(fmt::format(*inv_title_msg, fmt::arg("inventory", name), fmt::arg("size", inv.size()), fmt::arg("capacity", capacity)));
-        }
-
-        for (const auto& [item, qty] : inv.content()) {
-            if (item_msg)
-                interface.print(fmt::format(*item_msg, fmt::arg("item", item), fmt::arg("count", qty)));
-        }
-    }
-}
-
-
 void Session::start(Entrants& initial_entrants_data, const std::string& checkpoint, const bool missing_entrants) {
     running_ = true;
     logger_.info("Session started.");
@@ -425,17 +361,12 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
         if (new_game) {
             globalDiceRolls(interface);
             playersDiceRolls(interface);
-
-            printGlobal(interface);
         }
 
         for (const auto& player : players_) {
             const byte id { player.first };
 
             interface.initCache(id);
-
-            if (new_game)
-                printPlayer(interface, id);
         }
 
         if (new_game && game().voteLeader)

@@ -69,7 +69,6 @@ struct DiceRollsDetails {
 class Session {
 private:
     static std::string initStatMsg(const DicesRoll& dice_roll, const std::string& stat_name, const int stat_value);
-    static void printStatMsg(Gameplay& interface, const std::string& msg_format, const std::string& stat_name, const DicesRoll& dice_roll, const int stat_value);
 
     io::io_context::strand executor_;
     spdlog::logger& logger_;
@@ -96,9 +95,6 @@ private:
 
     void globalDiceRolls(Gameplay& interface) const;
     void playersDiceRolls(Gameplay& interface) const;
-
-    void printGlobal(Gameplay& interface) const;
-    void printPlayer(Gameplay& interface, const byte player_id) const;
 
     Next playScene(Gameplay& interface, const word sceneID);
 
