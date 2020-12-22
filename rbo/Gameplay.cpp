@@ -174,9 +174,30 @@ bool Gameplay::checkGame() {
 
 void Gameplay::print(const std::string& txt, const byte target) {
     SessionDataFactory data_factory;
-    data_factory.makeText(txt);
+    data_factory.makeNormalText(txt);
 
     ctx_.sendTo(target, data_factory.dataWithLength());
+}
+
+void Gameplay::printImportant(const std::string& txt, const byte target) {
+    SessionDataFactory data_factory;
+    data_factory.makeImportantText(txt);
+
+    ctx_.sendTo(target, data_factory.dataWithLength());
+}
+
+void Gameplay::printNote(const std::string& note, const byte target) {
+    SessionDataFactory data_factory;
+    data_factory.makeNote(note);
+
+    ctx_.sendTo(target, data_factory.dataWithLength());
+}
+
+void Gameplay::printTitle(const std::string& title) {
+    SessionDataFactory data_factory;
+    data_factory.makeImportantText(title);
+
+    ctx_.sendTo(ALL_PLAYERS, data_factory.dataWithLength());
 }
 
 void Gameplay::sendGlobalStat(const std::string& stat) {

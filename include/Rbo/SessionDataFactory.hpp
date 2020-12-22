@@ -14,6 +14,10 @@ enum struct Request : byte {
     Range, Possibilities, Confirm, YesNo, DiceRoll
 };
 
+enum struct Text : byte {
+    Normal, Important, Title, Note
+};
+
 enum struct ReplyValidity : byte {
     Ok, TooLate, OutOfRangeError, InavlidLengthError, NotConfirmError
 };
@@ -34,7 +38,11 @@ struct SessionDataFactory : DataFactory {
     void makePossibilities(const byte target, const std::string& msg, const OptionsList& options);
     void makeYesNoQuestion(const byte target, const std::string& question);
     void makeDiceRoll(const byte target, const std::string& msg, const byte dices, const int bonus, const DiceRollResults& results);
-    void makeText(const std::string& txt);
+    void makeText(const Text txt_type);
+    void makeNormalText(const std::string& txt);
+    void makeImportantText(const std::string& txt);
+    void makeTitle(const std::string& title);
+    void makeNote(const std::string& note);
     void makePlayerUpdate(const byte id, const PlayerUpdate& changes);
     void makeGlobalStat(const std::string& name, const Stat& stat);
     void makeDie(const byte id);

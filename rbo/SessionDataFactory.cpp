@@ -59,9 +59,29 @@ void SessionDataFactory::makeDiceRoll(const byte target, const std::string &msg,
     }
 }
 
-void SessionDataFactory::makeText(const std::string& txt) {
+void SessionDataFactory::makeText(const Text txt_type) {
     makeData(DataType::Text);
+    data_.add(txt_type);
+}
+
+void SessionDataFactory::makeNormalText(const std::string& txt) {
+    makeText(Text::Normal);
     data_.put(txt);
+}
+
+void SessionDataFactory::makeImportantText(const std::string& txt) {
+    makeText(Text::Important);
+    data_.put(txt);
+}
+
+void SessionDataFactory::makeTitle(const std::string& title) {
+    makeText(Text::Title);
+    data_.put(title);
+}
+
+void SessionDataFactory::makeNote(const std::string& note) {
+    makeText(Text::Note);
+    data_.put(note);
 }
 
 void SessionDataFactory::makePlayerUpdate(const byte id, const PlayerUpdate& changes) {

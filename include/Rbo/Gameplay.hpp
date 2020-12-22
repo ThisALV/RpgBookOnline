@@ -51,7 +51,10 @@ public:
     bool checkGame();
 
     // print - Throw : NoPlayerRemaining
-    void print(const std::string& msg, const byte target = ALL_PLAYERS);
+    void print(const std::string& txt, const byte target = ALL_PLAYERS);
+    void printImportant(const std::string& txt, const byte target = ALL_PLAYERS);
+    void printNote(const std::string& note, const byte target = ALL_PLAYERS);
+    void printTitle(const std::string& title);
 
     // send - Throw : NoPlayerRemaining
     void sendGlobalStat(const std::string& stat_name);

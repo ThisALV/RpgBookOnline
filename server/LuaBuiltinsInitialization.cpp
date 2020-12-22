@@ -239,6 +239,13 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["print"] = sol::overload(
         [](Gameplay& ctx, const std::string& text) { ctx.print(text); }, &Gameplay::print
     );
+    gameplay_type["printImportant"] = sol::overload(
+        [](Gameplay& ctx, const std::string& text) { ctx.printImportant(text); }, &Gameplay::printImportant
+    );
+    gameplay_type["printNote"] = sol::overload(
+        [](Gameplay& ctx, const std::string& note) { ctx.printNote(note); }, &Gameplay::printNote
+    );
+    gameplay_type["printTitle"] = &Gameplay::printTitle;
     gameplay_type["sendGlobalStat"] = &Gameplay::sendGlobalStat;
     gameplay_type["sendPlayerUpdate"] = &Gameplay::sendPlayerUpdate;
     gameplay_type["sendBattleInit"] = &Gameplay::sendBattleInit;
