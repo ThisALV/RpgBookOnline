@@ -195,7 +195,7 @@ void Gameplay::printNote(const std::string& note, const byte target) {
 
 void Gameplay::printTitle(const std::string& title) {
     SessionDataFactory data_factory;
-    data_factory.makeImportantText(title);
+    data_factory.makeTitle(title);
 
     ctx_.sendTo(ALL_PLAYERS, data_factory.dataWithLength());
 }
