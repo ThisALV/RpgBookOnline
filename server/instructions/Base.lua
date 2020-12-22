@@ -10,7 +10,34 @@ function Rbo.Text(interface, args)
     assertArgs(isStr(args.text))
 
     interface:print(args.text)
-    if args.wait == nil or args.wait == true then
+    if args.wait then
+        interface:askConfirm(ALL_PLAYERS)
+    end
+end
+
+function Rbo.Alert(interface, args)
+    assertArgs(isStr(args.text))
+
+    interface:printImportant(args.text)
+    if args.wait then
+        interface:askConfirm(ALL_PLAYERS)
+    end
+end
+
+function Rbo.Title(interface, args)
+    assertArgs(isStr(args.text))
+
+    interface:printTitle(args.text)
+    if args.wait then
+        interface:askConfirm(ALL_PLAYERS)
+    end
+end
+
+function Rbo.Note(interface, args)
+    assertArgs(isStr(args.text))
+
+    interface:printNote(args.text)
+    if args.wait then
         interface:askConfirm(ALL_PLAYERS)
     end
 end
@@ -40,7 +67,8 @@ function Rbo.Checkpoint(interface, args)
     assertArgs(isStr(args.name) and isNum(args.scene))
 
     local name = interface:checkpoint(args.name, args.scene)
-    interface:print("Sauvegarde sur \""..name.."\".")
+    interface:printNote("Sauvegarde sur \""..name.."\".")
+    interface:askConfirm(interface:leader())
 end
 
 function Rbo.EventTo(interface, args)
