@@ -106,7 +106,7 @@ int Inventory::count(const std::string& item) const {
     return content().at(item);
 }
 
-std::size_t accumulate(const std::size_t total, const InventoryContent::value_type& qty) {
+int accumulate(const int total, const InventoryContent::value_type& qty) {
     return total + qty.second;
 }
 
