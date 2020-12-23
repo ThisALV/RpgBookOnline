@@ -17,20 +17,12 @@ private:
 
     std::atomic_bool closed_;
     std::atomic_bool error_;
+    std::atomic_bool stop_handler_done_;
 
     void runExecutor();
 
 public:
-    LobbyExecutor(const std::size_t threads, io::io_context& server, Lobby& lobby, spdlog::logger& logger)
-        : threads_ { threads },
-          server_ { server },
-          lobby_ { lobby },
-          logger_ { logger },
-          closed_ { false },
-          error_ { false }
-    {
-        assert(threads >= 2);
-    }
+    LobbyExecutor(const std::size_t threads, io::io_context& server, Lobby& lobby, spdlog::logger& logger);
 
     LobbyExecutor(const LobbyExecutor&) = delete;
     LobbyExecutor& operator=(const LobbyExecutor&) = delete;
