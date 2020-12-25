@@ -168,14 +168,18 @@ std::vector<Game::Error> Game::validity() const {
         errors.push_back(Error::RestAvailables);
 
     const bool valid_death_conditions = std::all_of(deathConditions.cbegin(), deathConditions.cend(), [this](const auto& c) {
-        return Condition::operators.count(c.op) == 1 && hasStat(c.stat);
+        const Condition& condition { c.dieIf };
+
+        return Condition::operators.count(condition.op) == 1 && hasStat(condition.stat);
     });
 
     if (!valid_death_conditions)
         errors.push_back(Error::DeathConditions);
 
     const bool valid_end_conditions = std::all_of(gameEndConditions.cbegin(), gameEndConditions.cend(), [this](const auto& c) {
-        return Condition::operators.count(c.op) == 1 && hasGlobal(c.stat);
+        const Condition& condition { c.stopIf };
+
+        return Condition::operators.count(condition.op) == 1 && hasGlobal(condition.stat);
     });
 
     if (!valid_end_conditions)

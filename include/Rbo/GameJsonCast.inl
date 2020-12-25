@@ -90,6 +90,16 @@ inline void from_json(const json& data, Condition& condition) {
     data.at("value").get_to(condition.value);
 }
 
+inline void from_json(const json& data, DeathCondition& death_condition) {
+    data.at("dieIf").get_to(death_condition.dieIf);
+    data.at("deathMessage").get_to(death_condition.deathMessage);
+}
+
+inline void from_json(const json& data, EndCondition& end_condition) {
+    data.at("stopIf").get_to(end_condition.stopIf);
+    data.at("endMessage").get_to(end_condition.endMessage);
+}
+
 inline void to_json(json& data, const Stat& stat) {
     const auto [value, limits, hidden, main] { stat };
 

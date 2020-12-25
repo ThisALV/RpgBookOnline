@@ -38,6 +38,18 @@ struct Condition {
     bool test(const StatsManager& stats) const;
 };
 
+struct DeathCondition {
+    Condition dieIf;
+    std::string deathMessage;
+};
+
+// Pour l'instant DeathCondition et EndCondition sont traitées de la même manière mais cela pourrait changer.
+// Il est donc préférable de faire une structure différente pour ces deux types d'objets.
+struct EndCondition {
+    Condition stopIf;
+    std::string endMessage;
+};
+
 struct Game {
     enum struct Error {
         InitialInventories, Bonuses, Effects, Groups, RestGivables,
@@ -56,8 +68,8 @@ struct Game {
     std::unordered_map<std::string, EnemyDescriptor> enemies;
     std::unordered_map<std::string, GroupDescriptor> groups;
     RestProperties rest;
-    std::vector<Condition> deathConditions;
-    std::vector<Condition> gameEndConditions;
+    std::vector<DeathCondition> deathConditions;
+    std::vector<EndCondition> gameEndConditions;
     bool voteOnLeaderDeath;
     bool voteLeader;
 

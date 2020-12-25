@@ -326,7 +326,7 @@ BOOST_AUTO_TEST_CASE(RestAvailablesUnknownEffect) {
 
 BOOST_AUTO_TEST_CASE(DeathConditionsUnknownStat) {
     Game game;
-    game.deathConditions.push_back(Condition { "a", "!=", 5 });
+    game.deathConditions.push_back(DeathCondition { Condition { "a", "!=", 5 }, "No message" });
 
     const std::vector<Game::Error> validity { game.validity() };
     BOOST_CHECK_EQUAL(1, validity.size());
@@ -336,7 +336,7 @@ BOOST_AUTO_TEST_CASE(DeathConditionsUnknownStat) {
 BOOST_AUTO_TEST_CASE(DeathConditionsUnknownOperator) {
     Game game;
     game.playerStats.insert({ "a", StatDescriptor {} });
-    game.deathConditions.push_back(Condition { "a", "===", 5 });
+    game.deathConditions.push_back(DeathCondition { Condition { "a", "===", 5  }, "No message" });
 
     const std::vector<Game::Error> validity { game.validity() };
     BOOST_CHECK_EQUAL(1, validity.size());
@@ -345,7 +345,7 @@ BOOST_AUTO_TEST_CASE(DeathConditionsUnknownOperator) {
 
 BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownStat) {
     Game game;
-    game.gameEndConditions.push_back(Condition { "1", ">=", 5 });
+    game.gameEndConditions.push_back(EndCondition { Condition { "1", ">=", 5 }, "No message" });
 
     const std::vector<Game::Error> validity { game.validity() };
     BOOST_CHECK_EQUAL(1, validity.size());
@@ -355,7 +355,7 @@ BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownStat) {
 BOOST_AUTO_TEST_CASE(GameEndConditionsUnknownOperator) {
     Game game;
     game.globalStats.insert({ "1", StatDescriptor {} });
-    game.gameEndConditions.push_back(Condition { "1", "===", 5 });
+    game.gameEndConditions.push_back(EndCondition { Condition {  "1", "===", 5 }, "No message" });
 
     const std::vector<Game::Error> validity { game.validity() };
     BOOST_CHECK_EQUAL(1, validity.size());
@@ -408,11 +408,13 @@ BOOST_AUTO_TEST_CASE(Ok) {
         { itemEntry("inv1", "A"), itemEntry("inv2", "A") },
         { { itemEntry("inv1", "A"), "evt2" } }
     };
-    std::vector<Condition> deathConditions {
-        Condition { "b", "==", 3 }, Condition { "b", "==", 0 }
+    std::vector<DeathCondition> deathConditions {
+        DeathCondition { Condition { "b", "==", 3 }, "No message" },
+        DeathCondition { Condition { "b", "==", 0 }, "No message" }
     };
-    std::vector<Condition> gameEndConditions {
-        Condition { "2", "==", 3 }, Condition { "2", "==", 0 }
+    std::vector<EndCondition> gameEndConditions {
+        EndCondition { Condition { "2", "==", 3 }, "No message" },
+        EndCondition { Condition { "2", "==", 0 }, "No message" }
     };
 
     const Game game {

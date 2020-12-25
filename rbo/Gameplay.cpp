@@ -135,16 +135,18 @@ Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const D
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
     const Player& p { player(id) } ;
 
-    const std::vector<Condition>& conditions { game().deathConditions };
-    const bool alive = std::none_of(conditions.cbegin(), conditions.cend(), [&p](const auto& c) -> bool {
-        return c.test(p.stats());
+    const std::vector<DeathCondition>& conditions { game().deathConditions };
+    const auto death = std::find_if(conditions.cbegin(), conditions.cend(), [&p](const auto& dc) {
+        return dc.dieIf.test(p.stats());
     });
+
+    const bool alive { death == conditions.cend() };
 
     if (alive)
         return { false, false, false };
 
     SessionDataFactory dead;
-    dead.makeDie(id);
+    dead.makeDie(id, death->deathMessage);
 
     ctx_.sendToAll(dead.dataWithLength());
     ctx_.disconnect(id);
@@ -161,15 +163,19 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
 }
 
 bool Gameplay::checkGame() {
-    const std::vector<Condition>& conditions { game().gameEndConditions };
-    const bool g_continue = std::none_of(conditions.cbegin(), conditions.cend(), [this](const auto& c) -> bool {
-        return c.test(global());
+    const std::vector<EndCondition>& conditions { game().gameEndConditions };
+    const auto stop = std::find_if(conditions.cbegin(), conditions.cend(), [this](const auto& ec) {
+        return ec.stopIf.test(global());
     });
 
-    if (!g_continue)
-        ctx_.stop();
+    const bool continue_game { stop == conditions.cend() };
 
-    return g_continue;
+    if (!continue_game) {
+        ctx_.stop();
+        printImportant(stop->endMessage);
+    }
+
+    return continue_game;
 }
 
 void Gameplay::print(const std::string& txt, const byte target) {
