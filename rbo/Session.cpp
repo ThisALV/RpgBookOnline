@@ -75,7 +75,7 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
 
 void Session::begin(Entrants& entrants) {
     for (auto& [id, participant] : entrants) {
-        logger_.trace("Moving socket of participant {}...", id);
+        logger_.trace("Moving socket of entrant [{}]...", id);
 
         Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
 
@@ -98,7 +98,7 @@ void Session::end(Entrants& entrants) {
     std::vector<byte> error_ids;
     for (auto& [id, participant] : entrants) {
         if (connections_.count(id) == 1) {
-            logger_.trace("Moving socket of participant {}...", id);
+            logger_.trace("Moving socket of entrant [{}]...", id);
             participant.socket = std::move(connection(id));
         } else {
             error_ids.push_back(id);
@@ -106,7 +106,7 @@ void Session::end(Entrants& entrants) {
     }
 
     for (const byte id : error_ids) {
-        logger_.debug("Removing participant {}...", id);
+        logger_.trace("Removing entrant [{}]...", id);
         entrants.erase(id);
     }
 
