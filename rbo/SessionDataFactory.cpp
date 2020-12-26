@@ -1,7 +1,7 @@
 ﻿#include <Rbo/SessionDataFactory.hpp>
 
 #include <nlohmann/json.hpp>
-#include <Rbo/GameJsonCast.inl>
+#include <Rbo/GameJsonCast.hpp>
 
 namespace Rbo {
 
