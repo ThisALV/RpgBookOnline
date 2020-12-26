@@ -225,8 +225,8 @@ std::vector<byte> decompose(const NumType value) {
     return bytes;
 }
 
-const byte ALL_PLAYERS { std::numeric_limits<byte>::max() };
-const word INTRO { 0 };
+constexpr byte ALL_PLAYERS { std::numeric_limits<byte>::max() };
+constexpr word INTRO { 0 };
 
 template<typename Output>
 Output& operator<<(Output& out, const std::vector<byte>& ids) {

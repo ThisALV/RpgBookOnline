@@ -68,9 +68,9 @@ private:
     void refreshBonuses(const BonusAction action, const std::string& inv, const std::string& name, const uint qtyModified);
 
 public:
-    inline static const int STAT_MIN { StatsLimits::min() };
-    inline static const int STAT_MAX { StatsLimits::max() };
-    inline static const StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
+    static constexpr int STAT_MIN { StatsLimits::min() };
+    static constexpr int STAT_MAX { StatsLimits::max() };
+    static constexpr StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
 
     Player(const byte id, const std::string& name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonus& bonuses);
 

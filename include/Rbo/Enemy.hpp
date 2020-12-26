@@ -69,7 +69,7 @@ public:
     friend void testNameChecking(const EnemiesGroup& group, const std::string& ctx_name);
     friend void testPosChecking(const EnemiesGroup& group, const byte pos_in_queue);
 
-    static const std::size_t LIMIT { std::numeric_limits<byte>::max() };
+    static constexpr std::size_t LIMIT { std::numeric_limits<byte>::max() };
 
     EnemiesGroup(const GroupDescriptor& descriptor, const Game& ctx);
 

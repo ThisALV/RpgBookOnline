@@ -5,9 +5,8 @@
 
 namespace Rbo {
 
-const std::size_t MAX_LENGTH { 1300 };
-const std::size_t LENGTH_SIZE { sizeof(word) };
-const std::size_t STR_LENGTH_SIZE { 2 };
+// Nécessaire pour définir le type DataBuffer. Or, un membre de Data est un DataBuffer, donc MAX_LENGTH doit être définie ici.
+constexpr std::size_t MAX_LENGTH { 1300 };
 
 using DataBuffer = std::array<byte, MAX_LENGTH>;
 
@@ -34,6 +33,9 @@ private:
     }
 
 public:
+    static constexpr std::size_t LENGTH_SIZE { 2 };
+    static constexpr std::size_t STR_LENGTH_SIZE { 2 };
+
     Data();
     Data(const std::vector<byte>& initialData);
 

@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(Default) {
 
     const Data data;
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(BytesVector) {
 
     const Data data { arg };
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size());
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + arg.size());
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -50,7 +50,7 @@ BOOST_DATA_TEST_CASE(Byte, dataset::xrange(25))
     Data data;
     data.add(value);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + 1);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + 1);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(BoolTrue) {
     Data data;
     data.add(value);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + 1);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + 1);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(BoolFalse) {
     Data data;
     data.add(value);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + 1);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + 1);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(EmptyString) {
     Data data;
     data.put(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + arg.size() + 2);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(String) {
     Data data;
     data.put(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + arg.size() + 2);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(StringUTF8) {
     Data data;
     data.put(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + arg.size() + 2);
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + arg.size() + 2);
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(Int16) {
     Data data;
     data.putNumeric(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + sizeof(short));
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + sizeof(short));
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(UInt32) {
     Data data;
     data.putNumeric(arg);
 
-    BOOST_CHECK_EQUAL(data.count(), LENGTH_SIZE + sizeof(uint));
+    BOOST_CHECK_EQUAL(data.count(), Data::LENGTH_SIZE + sizeof(uint));
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
