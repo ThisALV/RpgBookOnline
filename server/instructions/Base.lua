@@ -84,7 +84,7 @@ function Rbo.EventTo(interface, args)
 
     local targets = ByteVector:new():iterable()
     if target == "all" then
-        targets = interface:players():iterable()
+        targets = interface:activePlayers():iterable()
     else
         targets:add(target == "leader" and interface:leader() or target)
     end

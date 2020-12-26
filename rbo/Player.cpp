@@ -15,6 +15,7 @@ Player::Player(const byte id, std::string name, const std::vector<std::string>& 
     id_ { id },
     name_ { std::move(name) },
     stats_ { stats },
+    alive_ { true },
     bonuses_ { bonuses }
 {
     std::transform(inventories.cbegin(), inventories.cend(), std::inserter(inventories_, inventories_.begin()), [](const auto& inv) {

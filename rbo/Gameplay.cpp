@@ -59,6 +59,10 @@ std::vector<byte> Gameplay::players() const {
     return ctx_.ids();
 }
 
+std::vector<byte> Gameplay::activePlayers() const {
+    return ctx_.aliveIDs();
+}
+
 OptionsList Gameplay::names() const {
     const Players players { ctx_.players() };
 
@@ -133,7 +137,7 @@ Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const D
 }
 
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
-    const Player& p { player(id) } ;
+    Player& p { player(id) } ;
 
     const std::vector<DeathCondition>& conditions { game().deathConditions };
     const auto death = std::find_if(conditions.cbegin(), conditions.cend(), [&p](const auto& dc) {
@@ -149,7 +153,7 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
     dead.makeDie(id, death->deathMessage);
 
     ctx_.sendToAll(dead.dataWithLength());
-    ctx_.disconnect(id);
+    p.kill();
 
     const bool end { !ctx_.playersRemaining() };
     if (end)

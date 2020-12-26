@@ -197,6 +197,7 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["checkpoint"] = &Gameplay::checkpoint;
     gameplay_type["player"] = &Gameplay::player;
     gameplay_type["players"] = &Gameplay::players;
+    gameplay_type["activePlayers"] = &Gameplay::activePlayers;
     gameplay_type["names"] = &Gameplay::names;
     gameplay_type["count"] = &Gameplay::count;
     gameplay_type["leader"] = &Gameplay::leader;

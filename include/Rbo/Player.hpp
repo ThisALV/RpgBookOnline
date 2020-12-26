@@ -54,6 +54,7 @@ private:
     byte id_;
     std::string name_;
     StatsManager stats_;
+    bool alive_;
     PlayerInventories inventories_;
     ItemsBonus bonuses_;
 
@@ -82,6 +83,9 @@ public:
     bool same(const Player& other) const { return id() == other.id(); }
     byte id() const { return id_; }
     const std::string& name() const { return name_; }
+
+    bool alive() const { return alive_; }
+    void kill() { alive_ = false; }
 
     bool add(const std::string& inventory, const std::string& item, const int qty);
     bool consume(const std::string& inventory, const std::string& item, const int qty);

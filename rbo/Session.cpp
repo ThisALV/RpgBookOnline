@@ -495,6 +495,18 @@ std::vector<byte> Session::ids() const {
     return ids;
 }
 
+std::vector<byte> Session::aliveIDs() const {
+    std::vector<byte> alive_ids;
+    alive_ids.reserve(count());
+
+    for (const auto& [id, player] : players_) {
+        if (player.alive())
+            alive_ids.push_back(id);
+    }
+
+    return alive_ids;
+}
+
 Players Session::players() {
     std::map<byte, Player*> ptrs;
     std::transform(players_.begin(), players_.end(), std::inserter(ptrs, ptrs.end()), [](auto& p) -> std::pair<byte, Player*> {
@@ -534,7 +546,12 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
 
     byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
-        const bool targetted { all_players || id == targets_id };
+        const bool alive { player(id).alive() };
+
+        if (id == targets_id && !alive)
+            throw PlayerNotAlive { "request" };
+
+        const bool targetted { (all_players && alive) || id == targets_id };
 
         ctx->players.insert({ id, RequestProfile { &connection, targetted } });
         if (targetted)

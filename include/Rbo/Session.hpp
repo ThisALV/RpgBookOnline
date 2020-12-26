@@ -28,6 +28,10 @@ struct UninitializedLeader : std::logic_error {
     UninitializedLeader() : std::logic_error { "Game's leader isn't initialized yet" } {}
 };
 
+struct PlayerNotAlive : std::logic_error {
+    PlayerNotAlive(const std::string& action) : std::logic_error { "Illegal action when player is dead : " + action } {}
+};
+
 struct CanceledRequest : std::exception {
     const char* what() const noexcept override;
 };
@@ -139,6 +143,8 @@ public:
     const Player& player(const byte id) const;
 
     std::vector<byte> ids() const;
+    std::vector<byte> aliveIDs() const;
+
     Players players();
     ConstPlayers players() const;
     std::size_t count() const { return players_.size(); }

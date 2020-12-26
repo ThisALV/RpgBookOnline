@@ -31,6 +31,7 @@ public:
 
     Player& player(const byte id);
     std::vector<byte> players() const;
+    std::vector<byte> activePlayers() const;
     OptionsList names() const;
     std::size_t count() const;
 
