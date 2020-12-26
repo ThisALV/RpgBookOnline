@@ -33,7 +33,7 @@ struct FromJsonWrapper {
 };
 
 template<typename Serializable>
-inline void from_json(const json& data, FromJsonWrapper<Serializable>& serializable) {
+void from_json(const json& data, FromJsonWrapper<Serializable>& serializable) {
     from_json(data, serializable.value);
 }
 
