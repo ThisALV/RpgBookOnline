@@ -498,19 +498,14 @@ Players Session::players() {
     return ptrs;
 }
 
-template<typename T>
-std::map<byte, const T*> constPtrMap(const std::map<byte, T>& map) {
-    std::map<byte, const T*> const_ptrs;
+ConstPlayers Session::players() const {
+    std::map<byte, const Player*> const_players;
 
-    std::transform(map.cbegin(), map.cend(), std::inserter(const_ptrs, const_ptrs.end()), [](const auto& v) -> std::pair<byte, const T*> {
-        return { v.first, &v.second };
+    std::transform(players_.cbegin(), players_.cend(), std::inserter(const_players, const_players.end()), [](const auto& p) -> std::pair<byte, const Player*> {
+        return { p.first, &p.second };
     });
 
-    return const_ptrs;
-}
-
-ConstPlayers Session::players() const {
-    return constPtrMap(players_);
+    return const_players;
 }
 
 Player& Session::player(const byte id) {
