@@ -24,7 +24,7 @@ private:
 
 public:
     StatsManager() = default;
-    StatsManager(const std::vector<std::string>& stats_name);
+    explicit StatsManager(const std::vector<std::string>& stats_name);
 
     bool operator==(const StatsManager& rhs) const;
 
