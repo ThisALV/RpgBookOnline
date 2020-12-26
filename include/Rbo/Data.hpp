@@ -37,7 +37,7 @@ public:
     static constexpr std::size_t STR_LENGTH_SIZE { 2 };
 
     Data();
-    Data(const std::vector<byte>& initialData);
+    explicit Data(const std::vector<byte>& initialData);
 
     std::size_t count() const { return bytes_; }
     const DataBuffer& buffer() const { return buffer_; };
