@@ -1,4 +1,4 @@
-#include <Rbo/GameJsonCast.hpp>
+#include <Rbo/JsonSerialization.hpp>
 
 namespace Rbo {
 

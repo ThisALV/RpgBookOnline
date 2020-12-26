@@ -1,5 +1,5 @@
-#ifndef GAMEJSONCAST_HPP
-#define GAMEJSONCAST_HPP
+#ifndef JSONSERIALIZATION_HPP
+#define JSONSERIALIZATION_HPP
 
 #include <Rbo/Common.hpp>
 
@@ -59,4 +59,4 @@ void to_json(json& data, const PlayerUpdate& changes);
 
 } // namespace Rbo
 
-#endif // GAMEJSONCAST_HPP
+#endif // JSONSERIALIZATION_HPP
