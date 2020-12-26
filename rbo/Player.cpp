@@ -57,14 +57,18 @@ void Inventory::checkExists(const std::string& item) const {
         throw UnknownItem { item };
 }
 
-void Inventory::checkqQtyForChange(const std::string& item, const int qty) {
+namespace {
+
+void checkqQtyForChange(const std::string& item, const int qty) {
     if (qty < 0)
         throw InvalidQty { item, "Can't be negative" };
 }
 
-void Inventory::checkCapacity(const InventorySize capacity) {
+void checkCapacity(const InventorySize capacity) {
     if (capacity && *capacity < 0)
         throw InvalidCapacity { "Can't be negative" };
+}
+
 }
 
 Inventory::Inventory(const std::vector<std::string>& items, InventorySize size) : capacity_ { size } {

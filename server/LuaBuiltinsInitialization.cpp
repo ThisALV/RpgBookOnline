@@ -7,7 +7,7 @@
 
 namespace Rbo::Server {
 
-namespace AsContainer {
+namespace {
 
 template<typename Container> sol::as_container_t<Container> luaContainer(Container& c) {
     return sol::as_container(c);
@@ -17,9 +17,7 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
     return luaContainer<std::vector<T>>(v);
 }
 
-} // namespace AsContainer
-
-std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
+std::vector<byte> getIDs(const Replies& replies) {
     std::vector<byte> ids;
     ids.resize(replies.size(), 0);
 
@@ -30,7 +28,7 @@ std::vector<byte> InstructionsProvider::getIDs(const Replies& replies) {
     return ids;
 }
 
-std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
+std::tuple<byte, byte> reply(const Replies& replies) {
     if (replies.size() != 1)
         throw std::invalid_argument { "To retrieve an unique reply, there must be one" };
 
@@ -38,12 +36,12 @@ std::tuple<byte, byte> InstructionsProvider::reply(const Replies& replies) {
     return std::make_tuple(reply->first, reply->second);
 }
 
-void InstructionsProvider::assertArgs(const bool assertion) {
+void assertArgs(const bool assertion) {
     if (!assertion)
         throw std::invalid_argument { "Invalid arguments" };
 }
 
-bool InstructionsProvider::toBoolean(const std::string& str) {
+bool toBoolean(const std::string& str) {
     if (str == "true")
         return true;
     else if (str == "false")
@@ -52,7 +50,7 @@ bool InstructionsProvider::toBoolean(const std::string& str) {
     throw std::invalid_argument { "Unable to convert \"" + str + "\" into boolean" };
 }
 
-void InstructionsProvider::applyToGlobal(Gameplay& ctx, const EventEffect& effect) {
+void applyToGlobal(Gameplay& ctx, const EventEffect& effect) {
     if (!effect.itemsChanges.empty())
         throw std::logic_error { "Session doesn't have any items neither inventories" };
 
@@ -64,25 +62,25 @@ void InstructionsProvider::applyToGlobal(Gameplay& ctx, const EventEffect& effec
     }
 }
 
-RandomEngine InstructionsProvider::dices_rd_ { now() };
+RandomEngine dices_rd { now() };
 
-uint InstructionsProvider::dices(const uint dices, const uint max) {
+uint dices(const uint dices, const uint max) {
     std::uniform_int_distribution<uint> dice { 1, max };
 
     uint result { 0 };
     for (uint i { 0 }; i < dices; i++)
-        result += dice(dices_rd_);
+        result += dice(dices_rd);
 
     return result;
 }
 
-byte InstructionsProvider::votePlayer(Gameplay& interface, const std::string& msg, const byte target) {
+byte votePlayer(Gameplay& interface, const std::string& msg, const byte target = ALL_PLAYERS) {
     return vote(interface.askReply(target, msg, interface.names()));
 }
 
-void InstructionsProvider::initBuiltins() {
-    using namespace AsContainer;
+}
 
+void InstructionsProvider::initBuiltins() {
     ctx_.new_usertype<std::vector<std::string>>("StringVector", sol::constructors<std::vector<std::string>()>(), "iterable", luaVector<std::string>);
     ctx_.new_usertype<std::vector<byte>>("ByteVector", sol::constructors<std::vector<byte>()>(), "iterable", luaVector<byte>);
 

@@ -27,10 +27,6 @@ struct RestProperties {
 };
 
 struct Condition {
-    using Operator = std::function<bool(const int statValue, const int conditionThreshold)>;
-
-    static const std::unordered_map<std::string, Operator> operators;
-
     std::string stat;
     std::string op;
     int value;
@@ -90,9 +86,6 @@ struct Game {
     bool hasEffect(const std::string& name) const { return eventEffects.count(name) == 1; }
     bool hasEnemy(const std::string& generic_name) const { return enemies.count(generic_name) == 1; }
     bool hasItem(const std::string& itemEntry) const;
-
-private:
-    static std::vector<std::string> getNames(const StatsDescriptor& stats);
 };
 
 } // namespace Rbo

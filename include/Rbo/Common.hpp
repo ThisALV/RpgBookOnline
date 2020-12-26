@@ -105,10 +105,6 @@ struct DicesRoll {
     RollResult operator()() const;
     int min() const { return dices + bonus; }
     int max() const { return dices * 6 + bonus; };
-
-private:
-    static RandomEngine rd_;
-    static std::uniform_int_distribution<uint> rd_distributor_;
 };
 
 struct ItemBonus {
@@ -225,6 +221,7 @@ std::vector<byte> decompose(const NumType value) {
     return bytes;
 }
 
+constexpr char ITEM_ENTRY_SEP { '/' };
 constexpr byte ALL_PLAYERS { std::numeric_limits<byte>::max() };
 constexpr word INTRO { 0 };
 

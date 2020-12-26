@@ -7,7 +7,7 @@
 
 namespace Rbo::Server {
 
-RandomEngine LocalGameBuilder::chkpt_id_rd_ { now() };
+namespace { RandomEngine chkpt_id_rd { now() }; }
 
 LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts, const fs::path& scenes, const fs::path& scripts_dir)
     : game_ { game },
@@ -116,7 +116,7 @@ GameState LocalGameBuilder::load(const std::string& name) const {
 }
 
 std::string LocalGameBuilder::save(const std::string& name, const GameState& state) const {
-    const std::string final_name { name + '_' + std::to_string(std::uniform_int_distribution { 0, 5000 } (chkpt_id_rd_)) };
+    const std::string final_name { name + '_' + std::to_string(std::uniform_int_distribution { 0, 5000 } (chkpt_id_rd)) };
 
     logger_.info("Opening checkpoints in {} to write \"{}\" under the name of \"{}\"...", chkpts_, name, final_name);
     json data;

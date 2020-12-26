@@ -6,8 +6,12 @@
 
 namespace Rbo::Server {
 
-bool InstructionsProvider::isInstruction(const sol::object& key, const sol::object& value) {
+namespace {
+
+bool isInstruction(const sol::object& key, const sol::object& value) {
     return key.get_type() == sol::type::string && value.get_type() == sol::type::function;
+}
+
 }
 
 Next InstructionsProvider::LuaInstruction::operator()(Gameplay& interface) const {

@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(StatsNames) {
 BOOST_AUTO_TEST_SUITE_END()
 
 struct SetFixture {
-    inline static const StatLimits STAT_LIMITS { -500, 500 };
+    static constexpr StatLimits STAT_LIMITS { -500, 500 };
 
     StatsManager manager { std::vector<std::string> { "a" } };
 

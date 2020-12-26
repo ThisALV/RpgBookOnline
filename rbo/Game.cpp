@@ -4,7 +4,11 @@
 
 namespace Rbo {
 
-const std::unordered_map<std::string, Condition::Operator> Condition::operators {
+namespace  {
+
+using Operator = std::function<bool(const int statValue, const int conditionThreshold)>;
+
+const std::unordered_map<std::string, Operator> operators {
     { "==", std::equal_to {} },
     { "!=", std::not_equal_to {} },
     { "<=", std::less_equal {} },
@@ -14,6 +18,8 @@ const std::unordered_map<std::string, Condition::Operator> Condition::operators 
     { "<", std::less {} },
     { ">", std::greater {} }
 };
+
+}
 
 bool EventEffect::operator==(const EventEffect& rhs) const {
     return statsChanges == rhs.statsChanges && itemsChanges == rhs.itemsChanges;
@@ -170,7 +176,7 @@ std::vector<Game::Error> Game::validity() const {
     const bool valid_death_conditions = std::all_of(deathConditions.cbegin(), deathConditions.cend(), [this](const auto& c) {
         const Condition& condition { c.dieIf };
 
-        return Condition::operators.count(condition.op) == 1 && hasStat(condition.stat);
+        return operators.count(condition.op) == 1 && hasStat(condition.stat);
     });
 
     if (!valid_death_conditions)
@@ -179,7 +185,7 @@ std::vector<Game::Error> Game::validity() const {
     const bool valid_end_conditions = std::all_of(gameEndConditions.cbegin(), gameEndConditions.cend(), [this](const auto& c) {
         const Condition& condition { c.stopIf };
 
-        return Condition::operators.count(condition.op) == 1 && hasGlobal(condition.stat);
+        return operators.count(condition.op) == 1 && hasGlobal(condition.stat);
     });
 
     if (!valid_end_conditions)
@@ -222,7 +228,9 @@ std::string Game::getMessage(const Error Error) {
     throw std::invalid_argument { "This isn't an error" };
 }
 
-std::vector<std::string> Game::getNames(const StatsDescriptor& stats) {
+namespace {
+
+std::vector<std::string> getStatsName(const StatsDescriptor& stats) {
     std::vector<std::string> names { stats.size() };
     std::transform(stats.cbegin(), stats.cend(), names.begin(), [](const auto& stat) -> std::string {
         return stat.first;
@@ -231,8 +239,10 @@ std::vector<std::string> Game::getNames(const StatsDescriptor& stats) {
     return names;
 }
 
-std::vector<std::string> Game::global() const { return getNames(globalStats); }
-std::vector<std::string> Game::player() const { return getNames(playerStats); }
+}
+
+std::vector<std::string> Game::global() const { return getStatsName(globalStats); }
+std::vector<std::string> Game::player() const { return getStatsName(playerStats); }
 
 ItemsList Game::itemsList() const {
     ItemsList items;

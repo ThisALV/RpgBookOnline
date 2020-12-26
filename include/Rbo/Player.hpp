@@ -26,9 +26,6 @@ private:
     InventorySize capacity_;
     InventoryContent content_;
 
-    static void checkqQtyForChange(const std::string& item, const int qty);
-    static void checkCapacity(const InventorySize capacity);
-
     void checkExists(const std::string& item) const;
 public:
     explicit Inventory(const std::vector<std::string>& items_name, const InventorySize capacity = {});

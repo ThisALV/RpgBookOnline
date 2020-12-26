@@ -21,7 +21,9 @@ const char* CanceledRequest::what() const noexcept {
     return "CanceledRequest";
 }
 
-std::string Session::initStatMsg(const DicesRoll& init, const std::string& name, const int value) {
+namespace  {
+
+std::string initStatMsg(const DicesRoll& init, const std::string& name, const int value) {
     std::string msg { name + " = " };
     if (init.dices == 0)
         msg += std::to_string(init.bonus);
@@ -29,6 +31,8 @@ std::string Session::initStatMsg(const DicesRoll& init, const std::string& name,
         msg += std::to_string(init.dices) + " dice(s) 6 + " + std::to_string(init.bonus) + " = " + std::to_string(value);
 
     return msg;
+}
+
 }
 
 tcp::socket& Session::connection(const byte id) {

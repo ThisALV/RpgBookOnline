@@ -17,38 +17,38 @@ ulong now() {
     return std::chrono::system_clock::now().time_since_epoch().count();
 }
 
-namespace Sinks {
+namespace {
 
 auto sink_file { std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/" + std::to_string(now()) + ".log", true) };
 auto sink_console { std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
 
-const std::string log_format { "[%T.%e] %^%-8l%$ - %-11n (#%t) : %v" };
+constexpr std::string_view log_format { "[%T.%e] %^%-8l%$ - %-11n (#%t) : %v" };
 
 void loggerErrorHandler(const std::string& err) {
     std::cerr << "Logger error : " << err << std::endl;
 }
 
-} // namespace Sinks
+}
 
 spdlog::logger& rboLogger(const std::string& name) {
     assert(name.length() <= 11);
-    auto logger { std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { Sinks::sink_file, Sinks::sink_console }) };
+    auto logger { std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { sink_file, sink_console }) };
 
     spdlog::register_logger(logger);
 
     logger->set_level(LOG_LEVEL);
     logger->flush_on(LOG_LEVEL);
-    logger->set_pattern(Sinks::log_format);
-    logger->set_error_handler(Sinks::loggerErrorHandler);
+    logger->set_pattern(std::string { log_format });
+    logger->set_error_handler(loggerErrorHandler);
 
     return *spdlog::get(name);
 }
 
-namespace Vote {
+namespace {
 
-RandomEngine rd { now() };
+RandomEngine vote_rd { now() };
 
-} // namespace Vote
+}
 
 byte vote(const Replies& replies) {
     assert(!replies.empty());
@@ -79,7 +79,7 @@ byte vote(const Replies& replies) {
     if (winners.size() == 1)
         return winners.at(0);
 
-    const std::size_t winner { std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (Vote::rd) };
+    const std::size_t winner { std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (vote_rd) };
 
     return winners.at(winner);
 }
@@ -93,8 +93,12 @@ int RollResult::total() const {
     return std::accumulate(dices.cbegin(), dices.cend(), 0) + bonus;
 }
 
-RandomEngine DicesRoll::rd_ { now() };
-std::uniform_int_distribution<uint> DicesRoll::rd_distributor_ { 1, 6 };
+namespace  {
+
+RandomEngine dices_rd { now() };
+std::uniform_int_distribution<uint> dices_rd_distributor { 1, 6 };
+
+}
 
 RollResult DicesRoll::operator()() const {
     RollResult result;
@@ -102,21 +106,15 @@ RollResult DicesRoll::operator()() const {
     result.bonus = bonus;
 
     for (uint i { 0 }; i < dices; i++) {
-        const uint dice_result { rd_distributor_(rd_) };
+        const uint dice_result { dices_rd_distributor(dices_rd) };
         result.dices.push_back(dice_result);
     }
 
     return result;
 }
 
-namespace ItemEntry {
-
-const char ITEM_SEP { '/' };
-
-} // namespace ItemEntry
-
 std::string itemEntry(const std::string& inv, const std::string& item) {
-    return inv + ItemEntry::ITEM_SEP + item;
+    return inv + ITEM_ENTRY_SEP + item;
 }
 
 std::pair<std::string, std::string> splitItemEntry(const std::string& str) {
@@ -125,7 +123,7 @@ std::pair<std::string, std::string> splitItemEntry(const std::string& str) {
     const auto cb { str.cbegin() };
     const auto ce { str.cend() };
 
-    const auto inv_end { std::find(cb, ce, ItemEntry::ITEM_SEP) };
+    const auto inv_end { std::find(cb, ce, ITEM_ENTRY_SEP) };
 
     assert(inv_end != ce);
 

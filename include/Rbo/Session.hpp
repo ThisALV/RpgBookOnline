@@ -68,8 +68,6 @@ struct DiceRollsDetails {
 
 class Session {
 private:
-    static std::string initStatMsg(const DicesRoll& dice_roll, const std::string& stat_name, const int stat_value);
-
     io::io_context::strand executor_;
     spdlog::logger& logger_;
     DiceRollsDetails rolls_results_;

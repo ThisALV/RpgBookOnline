@@ -5,7 +5,7 @@
 
 namespace Rbo {
 
-namespace Controllers {
+namespace {
 
 void confirmController(const byte reply) {
     if (reply != 0)
@@ -90,7 +90,7 @@ Replies Gameplay::askReply(const byte target, const std::string& msg, const byte
     SessionDataFactory data_factory;
     data_factory.makeRange(target, msg, min, max);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { min, max }, first_reply_only, wait_all_replies);
+    return ctx_.request(target, data_factory.dataWithLength(), RangeController { min, max }, first_reply_only, wait_all_replies);
 }
 
 Replies Gameplay::askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only, const bool wait_all_replies) {
@@ -104,7 +104,7 @@ Replies Gameplay::askReply(const byte target, const std::string& msg, const Opti
         return o.first;
     });
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::PossibilitiesController { ids }, first_reply_only, wait_all_replies);
+    return ctx_.request(target, data_factory.dataWithLength(), PossibilitiesController { ids }, first_reply_only, wait_all_replies);
 }
 
 Replies Gameplay::askConfirm(const byte target, const bool first_reply_only) {
@@ -112,14 +112,14 @@ Replies Gameplay::askConfirm(const byte target, const bool first_reply_only) {
     data_factory.makeRequest(Request::Confirm, target);
 
     // Il n'y a aucun intérêt à ne pas prendre en compte une confirmation reçue car elle serait arrivée trop tard
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, first_reply_only, false);
+    return ctx_.request(target, data_factory.dataWithLength(), confirmController, first_reply_only, false);
 }
 
 Replies Gameplay::askYesNo(const byte target, const std::string& question, const bool first_reply_only, const bool wait_all_replies) {
     SessionDataFactory data_factory;
     data_factory.makeYesNoQuestion(target, question);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::RangeController { 0, 1 }, first_reply_only, wait_all_replies);
+    return ctx_.request(target, data_factory.dataWithLength(), RangeController { 0, 1 }, first_reply_only, wait_all_replies);
 }
 
 Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const DicesRoll& formula, const DiceRollResults& results) {
@@ -129,7 +129,7 @@ Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const D
     SessionDataFactory data_factory;
     data_factory.makeDiceRoll(target, msg, formula.dices, formula.bonus, results);
 
-    return ctx_.request(target, data_factory.dataWithLength(), Controllers::confirmController, false, true);
+    return ctx_.request(target, data_factory.dataWithLength(), confirmController, false, true);
 }
 
 PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
