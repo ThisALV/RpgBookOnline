@@ -52,7 +52,28 @@ struct Game {
         RestAvailables, DeathConditions, GameEndConditions
     };
 
-    static std::string getMessage(const Error errType);
+    static constexpr std::string_view getMessage(const Error err_type) {
+        switch (err_type) {
+        case Error::InitialInventories:
+            return "Invalid initial inventories : No more space or unknown items";
+        case Error::Bonuses:
+            return "Invalid buff : unknown stats or items";
+        case Error::Effects:
+            return "Invalid effects : unknown stats";
+        case Error::Groups:
+            return "Invalid enemies group : unknown enemies";
+        case Error::RestGivables:
+            return "Invalid rest properties : unknown giveable items";
+        case Error::RestAvailables:
+            return "Invalid rest properties : unknown consumable items or effects";
+        case Error::DeathConditions:
+            return "Invalid death conditions : unknown stats or condition operators";
+        case Error::GameEndConditions:
+            return "Invalid game end conditions : unknown stats or condition operators";
+        }
+
+        return "This shouldn't happen";
+    }
 
     std::string name;
     StatsDescriptor globalStats;
