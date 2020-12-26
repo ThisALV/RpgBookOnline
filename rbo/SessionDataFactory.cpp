@@ -5,8 +5,6 @@
 
 namespace Rbo {
 
-using json = nlohmann::json;
-
 bool isInvalid(const ReplyValidity type) {
     return static_cast<byte>(type) > 1;
 }
