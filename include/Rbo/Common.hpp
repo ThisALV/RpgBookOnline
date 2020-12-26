@@ -205,7 +205,7 @@ std::pair<std::string, std::string> splitItemEntry(const std::string& itemEntry)
 bool contains(const std::vector<std::string>& strs, const std::string& element);
 byte vote(const Replies& requestResults);
 
-spdlog::logger& rboLogger(const std::string& name);
+spdlog::logger& rboLogger(std::string name);
 
 template<typename NumType>
 std::vector<byte> decompose(const NumType value) {

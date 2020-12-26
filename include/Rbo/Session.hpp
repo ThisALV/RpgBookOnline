@@ -51,12 +51,12 @@ struct IntroductionCheckpoint : std::logic_error {
     IntroductionCheckpoint() : std::logic_error { "Saving during intro scene " + std::to_string(INTRO) } {}
 };
 
-struct Particpant {
+struct Entrant {
     std::string name;
     tcp::socket socket;
 };
 
-using Entrants = std::map<byte, Particpant>;
+using Entrants = std::map<byte, Entrant>;
 using ConstConnections = std::map<byte, const tcp::socket*>;
 
 // Nécessaire pour conserver les détails des lancés de dés et les envoyés aux joueurs par la suite

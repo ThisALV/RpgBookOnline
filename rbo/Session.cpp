@@ -78,13 +78,13 @@ Session::Session(io::io_context& io, const GameBuilder& g_builder)
       game_builer_ { g_builder } {}
 
 void Session::begin(Entrants& entrants) {
-    for (auto& [id, participant] : entrants) {
+    for (auto& [id, entrant] : entrants) {
         logger_.trace("Moving socket of entrant [{}]...", id);
 
-        Player player { id, participant.name, game().player(), game().itemsList(), game().bonuses };
+        Player player { id, std::move(entrant.name), game().player(), game().itemsList(), game().bonuses };
 
         players_.insert({ id, std::move(player) });
-        connections_.insert({ id, std::move(participant.socket) });
+        connections_.insert({ id, std::move(entrant.socket) });
     }
 
     SessionDataFactory start_msg;
@@ -100,10 +100,12 @@ void Session::end(Entrants& entrants) {
     sendToAll(stop_msg.dataWithLength());
 
     std::vector<byte> error_ids;
-    for (auto& [id, participant] : entrants) {
+    for (auto& [id, entrant] : entrants) {
         if (connections_.count(id) == 1) {
             logger_.trace("Moving socket of entrant [{}]...", id);
-            participant.socket = std::move(connection(id));
+
+            entrant.name = player(id).name();
+            entrant.socket = std::move(connection(id));
         } else {
             error_ids.push_back(id);
         }
@@ -355,7 +357,7 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
     begin(initial_entrants_data);
 
     try {
-        stats_ = { game().global() };
+        stats_ = StatsManager { game().global() };
 
         const bool new_game { checkpoint.empty() };
         const word beginning { checkpoint.empty() ? newGame() : gameFromCheckpoint(checkpoint, missing_entrants) };

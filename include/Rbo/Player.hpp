@@ -69,7 +69,7 @@ public:
     static constexpr int STAT_MAX { StatsLimits::max() };
     static constexpr StatLimits STAT_LIMITS { STAT_MIN, STAT_MAX };
 
-    Player(const byte id, const std::string& name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonus& bonuses);
+    Player(const byte id, std::string name, const std::vector<std::string>& statsNames, const ItemsList& inventoriesItemsName, const ItemsBonus& bonuses);
 
     Player(const Player&) = delete;
     Player& operator=(const Player&) = delete;

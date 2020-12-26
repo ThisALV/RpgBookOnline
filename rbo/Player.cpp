@@ -11,9 +11,9 @@ void Player::refreshBonuses(const BonusAction action, const std::string& inv, co
     }
 }
 
-Player::Player(const byte id, const std::string& name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonus& bonuses) :
+Player::Player(const byte id, std::string name, const std::vector<std::string>& stats, const ItemsList& inventories, const ItemsBonus& bonuses) :
     id_ { id },
-    name_ { name },
+    name_ { std::move(name) },
     stats_ { stats },
     bonuses_ { bonuses }
 {

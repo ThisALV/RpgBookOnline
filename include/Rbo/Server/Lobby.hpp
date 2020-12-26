@@ -73,7 +73,7 @@ private:
     void registerMember(const ErrCode err, tcp::socket connection);
     void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t request_len);
     void launchPreparation();
-    void makeSession(std::optional<std::string> checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
+    void makeSession(const std::optional<std::string>& checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
     Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);
 
     void preparation();

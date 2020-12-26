@@ -30,9 +30,9 @@ void loggerErrorHandler(const std::string& err) {
 
 }
 
-spdlog::logger& rboLogger(const std::string& name) {
+spdlog::logger& rboLogger(std::string name) {
     assert(name.length() <= 11);
-    auto logger { std::make_shared<spdlog::logger>(name, spdlog::sinks_init_list { sink_file, sink_console }) };
+    auto logger { std::make_shared<spdlog::logger>(std::move(name), spdlog::sinks_init_list { sink_file, sink_console }) };
 
     spdlog::register_logger(logger);
 
@@ -41,7 +41,7 @@ spdlog::logger& rboLogger(const std::string& name) {
     logger->set_pattern(std::string { log_format });
     logger->set_error_handler(loggerErrorHandler);
 
-    return *spdlog::get(name);
+    return *logger;
 }
 
 namespace {

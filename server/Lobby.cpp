@@ -452,15 +452,17 @@ void Lobby::launchPreparation() {
         open();
 }
 
-void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<bool> missing_entrants) {
+void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optional<bool> missing_entrants) {
     assert(!(missing_entrants && chkpt_name->empty()));
+
+    std::string requested_chkpt;
     if (!chkpt_name) {
         LobbyDataFactory select_chkpt_data;
         select_chkpt_data.makeState(State::SelectingCheckpoint);
 
         sendToAllMasterHandling(select_chkpt_data.dataWithLength());
 
-        chkpt_name = askCheckpoint();
+        requested_chkpt = askCheckpoint();
     }
 
     if (!missing_entrants) {
@@ -472,7 +474,7 @@ void Lobby::makeSession(std::optional<std::string> chkpt_name, std::optional<boo
         missing_entrants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
 
-    Run run { runSession(*chkpt_name, *missing_entrants) };
+    Run run { runSession(chkpt_name ? *chkpt_name : requested_chkpt, *missing_entrants) };
     session_.reset();
     members_.clear();
     connections_.clear();
@@ -549,7 +551,7 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants
 
     Entrants entrants;
     for (const auto& [id, member] : members())
-        entrants.insert({ id, Particpant { member.name, std::move(connections_.at(id)) } });
+        entrants.insert({ id, Entrant { member.name, std::move(connections_.at(id)) } });
 
     try {
         if (isClosed())
