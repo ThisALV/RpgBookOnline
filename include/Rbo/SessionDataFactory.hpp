@@ -6,8 +6,20 @@
 namespace Rbo {
 
 enum struct DataType : byte {
-    Request, Text, PlayerUpdate, GlobalStat, Die, Switch, Reply, Validation, Battle, Crash,
-    LeaderSwitch, Start, Stop, FinishRequest
+    Request         = 0,
+    Text            = 1,
+    PlayerUpdate    = 2,
+    GlobalStat      = 3,
+    Die             = 4,
+    Switch          = 5,
+    Reply           = 6,
+    Validation      = 7,
+    Battle          = 8,
+    Crash           = 9,
+    LeaderSwitch    = 10,
+    Start           = 11,
+    Stop            = 12,
+    FinishRequest   = 13
 };
 
 enum struct Request : byte {
