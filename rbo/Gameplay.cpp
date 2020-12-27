@@ -161,7 +161,7 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
 
     const bool leader_switch { leader() == id };
     if (leader_switch)
-        switchLeader(*players().cbegin());
+        switchLeader(*activePlayers().cbegin());
 
     return { true, leader_switch, end };
 }
