@@ -456,7 +456,9 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
     assert(!(missing_entrants && chkpt_name->empty()));
 
     std::string requested_chkpt;
-    if (!chkpt_name) {
+    if (chkpt_name) {
+        requested_chkpt = *chkpt_name;
+    } else {
         LobbyDataFactory select_chkpt_data;
         select_chkpt_data.makeState(State::SelectingCheckpoint);
 
@@ -474,7 +476,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         missing_entrants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
 
-    Run run { runSession(chkpt_name ? *chkpt_name : requested_chkpt, *missing_entrants) };
+    Run run { runSession(requested_chkpt, *missing_entrants) };
     session_.reset();
     members_.clear();
     connections_.clear();
@@ -512,7 +514,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         break;
     case SessionResult::LessMembers:
         if (askYesNo(YesNoQuestion::MissingEntrants))
-            makeSession(chkpt_name, true);
+            makeSession(requested_chkpt, true);
         else if (askYesNo(YesNoQuestion::RetryCheckpoint))
             makeSession();
 
@@ -532,7 +534,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
                     disconnect(id);
             }
 
-            makeSession(chkpt_name);
+            makeSession(requested_chkpt);
         } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
             makeSession();
         }
