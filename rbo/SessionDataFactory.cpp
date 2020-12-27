@@ -106,12 +106,6 @@ void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& sta
     data_.putNumeric(stat.value);
 }
 
-void SessionDataFactory::makeDie(const byte id, const std::string& reason) {
-    makeData(DataType::Die);
-    data_.add(id);
-    data_.put(reason);
-}
-
 void SessionDataFactory::makeSwitch(const word id) {
     makeData(DataType::Switch);
     data_.putNumeric(id);

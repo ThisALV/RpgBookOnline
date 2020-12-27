@@ -83,6 +83,7 @@ BOOST_AUTO_TEST_CASE(PlayerUpdates) {
         { "min", StatsValueLimits::min() }, { "max", StatsValueLimits::max() }
     });
     const json update = json::object({
+        { "death", nullptr },
         { "inventories", {
               { "inv1", { { "A", 5 }, { "B", -4 } } },
               { "inv2", { { "A", -1 } } }
@@ -99,6 +100,7 @@ BOOST_AUTO_TEST_CASE(PlayerUpdates) {
 
     const byte player_id { 4 };
     const PlayerUpdate changes {
+        Death {},
         {
             { "a", Stat { 1, StatLimits {}, true, false } },
             { "b", Stat { 2, StatLimits {}, false, true } },

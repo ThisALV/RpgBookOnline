@@ -10,7 +10,6 @@ enum struct DataType : byte {
     Text            = 1,
     PlayerUpdate    = 2,
     GlobalStat      = 3,
-    Die             = 4,
     Switch          = 5,
     Reply           = 6,
     Validation      = 7,
@@ -57,7 +56,6 @@ struct SessionDataFactory : DataFactory {
     void makeNote(const std::string& note);
     void makePlayerUpdate(const byte id, const PlayerUpdate& changes);
     void makeGlobalStat(const std::string& name, const Stat& stat);
-    void makeDie(const byte id, const std::string& reason);
     void makeSwitch(const word scene);
     void makeReply(const byte id, const byte reply);
     void makeValidation(const ReplyValidity validity);

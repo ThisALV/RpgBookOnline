@@ -53,6 +53,25 @@ BOOST_AUTO_TEST_CASE(Informations) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
+BOOST_AUTO_TEST_SUITE(Alive)
+
+BOOST_AUTO_TEST_CASE(IsAlive) {
+    const Player p { 0, "", {}, {}, {} };
+
+    BOOST_CHECK(p.alive());
+    BOOST_CHECK_THROW(p.death(), PlayerNotDead);
+}
+
+BOOST_AUTO_TEST_CASE(IsKilled) {
+    Player p { 0, "", {}, {}, {} };
+    p.kill("Random reason");
+
+    BOOST_CHECK(!p.alive());
+    BOOST_CHECK_EQUAL(p.death(), "Random reason");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE(Items, *boost::unit_test::depends_on { "InventoryTests" })
 
 struct AddFixture {

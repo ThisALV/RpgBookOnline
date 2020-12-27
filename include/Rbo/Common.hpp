@@ -5,6 +5,7 @@
 #include <array>
 #include <cassert>
 #include <functional>
+#include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
@@ -72,6 +73,8 @@ using ItemsBonus = std::unordered_map<std::string, ItemBonus>;
 using StatsValue = std::unordered_map<std::string, int>;
 using StatsValueLimits = std::numeric_limits<int>;
 using Stats = std::unordered_map<std::string, Stat>;
+
+using Death = std::optional<std::string>;
 
 using PlayersState = std::map<byte, PlayerState>;
 using InventoryUpdate = std::unordered_map<std::string, int>;
@@ -154,12 +157,14 @@ struct Stat {
 };
 
 struct PlayerUpdate {
+    Death death;
     Stats stats;
     InventoriesUpdate items;
     InventoriesSize capacities;
 };
 
 struct PlayerState {
+    Death death;
     Stats stats;
     InventoriesContent inventories;
     InventoriesSize capacities;

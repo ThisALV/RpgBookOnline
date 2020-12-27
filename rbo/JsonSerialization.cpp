@@ -90,6 +90,9 @@ void from_json(const json& data, Stat& stat) {
 }
 
 void to_json(json& data, const PlayerState& player) {
+    const ToJsonWrapper<Death> death { player.death };
+
+    data["death"] = death;
     data["stats"] = player.stats;
     data["inventories"] = player.inventories;
 
@@ -103,6 +106,9 @@ void to_json(json& data, const PlayerState& player) {
 }
 
 void from_json(const json& data, PlayerState& player) {
+    FromJsonWrapper<Death> death { player.death };
+
+    data.at("death").get_to(death);
     data.at("stats").get_to(player.stats);
     data.at("inventories").get_to(player.inventories);
 
@@ -115,6 +121,9 @@ void from_json(const json& data, PlayerState& player) {
 }
 
 void to_json(json& data, const PlayerUpdate& changes) {
+    const ToJsonWrapper<Death> death { changes.death };
+
+    data["death"] = death;
     data["stats"] = json::object();
     for (const auto& [name, stat] : changes.stats) {
         if (stat.hidden)

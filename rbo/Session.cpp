@@ -284,6 +284,10 @@ void Session::initPlayer(Player& target) {
 void Session::restorePlayer(const byte id, const PlayerState& state) {
     Player& target { player(id) };
 
+    const Death& death { state.death };
+    if (death)
+        target.kill(*death);
+
     for (const auto& [name, stat] : state.stats) {
         const auto [value, limits, hidden, main] { stat };
         const auto [min, max] { limits };
@@ -478,7 +482,7 @@ std::string Session::checkpoint(const std::string& chkpt_name, const word id) co
             capacities.insert({ name, inventory.capacity() });
         }
 
-        return { id, PlayerState { stats, inventories, capacities } };
+        return { id, PlayerState { player.alive() ? Death {} : Death { player.death() }, stats, inventories, capacities } };
     });
 
     return gameBuilder().save(chkpt_name, { id, stats().raw(), leader(), states });
@@ -540,18 +544,17 @@ const Player& Session::player(const byte id) const {
     return players_.at(id);
 }
 
+bool Session::anyPlayerAlive() const {
+    return std::any_of(players_.cbegin(), players_.cend(), [](const auto& p) -> bool { return p.second.alive(); });
+}
+
 Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies) {
     const RequestCtxPtr ctx { std::make_shared<RequestCtx>() };
     const bool all_players { targets_id == ALL_PLAYERS };
 
     byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
-        const bool alive { player(id).alive() };
-
-        if (id == targets_id && !alive)
-            throw PlayerNotAlive { "request" };
-
-        const bool targetted { (all_players && alive) || id == targets_id };
+        const bool targetted { (all_players && player(id).alive()) || id == targets_id };
 
         ctx->players.insert({ id, RequestProfile { &connection, targetted } });
         if (targetted)

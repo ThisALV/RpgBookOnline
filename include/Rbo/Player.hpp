@@ -21,6 +21,10 @@ struct UnknownItem : std::logic_error {
     UnknownItem(const std::string& item) : std::logic_error { "Unknown item \"" + item + '"' } {}
 };
 
+struct PlayerNotDead : std::logic_error {
+    PlayerNotDead() : std::logic_error { "This player isn't dead" } {}
+};
+
 class Inventory {
 private:
     InventorySize capacity_;
@@ -54,7 +58,7 @@ private:
     byte id_;
     std::string name_;
     StatsManager stats_;
-    bool alive_;
+    Death death_;
     PlayerInventories inventories_;
     ItemsBonus bonuses_;
 
@@ -84,8 +88,9 @@ public:
     byte id() const { return id_; }
     const std::string& name() const { return name_; }
 
-    bool alive() const { return alive_; }
-    void kill() { alive_ = false; }
+    bool alive() const { return !death_.has_value(); }
+    const std::string& death() const;
+    void kill(const std::string& reason) { death_ = reason; }
 
     bool add(const std::string& inventory, const std::string& item, const int qty);
     bool consume(const std::string& inventory, const std::string& item, const int qty);
@@ -102,7 +107,8 @@ public:
 
 template<typename Output>
 Output& operator<<(Output& out, const Player& player) {
-    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name() << "\"; stats=" << player.stats().values() << " inventories=[";
+    out << "[ id=" << std::to_string(player.id()) << "; name=\"" << player.name() << "\"; alive=" << std::boolalpha << player.alive() << std::noboolalpha <<
+           " stats=" << player.stats().values() << " inventories=[";
     for (const auto& [name, inventory] : player.inventories())
         out << " \"" << name << "\"=" << inventory << ';';
 

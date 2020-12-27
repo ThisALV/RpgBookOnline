@@ -149,21 +149,24 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
     if (alive)
         return { false, false, false };
 
-    SessionDataFactory dead;
-    dead.makeDie(id, death->deathMessage);
+    p.kill(death->deathMessage);
+    sendPlayerUpdate(id);
 
-    ctx_.sendToAll(dead.dataWithLength());
-    p.kill();
+    if (!ctx_.anyPlayerAlive()) {
+        const Message& game_over { game().messages.at("all_players_dead") };
 
-    const bool end { !ctx_.playersRemaining() };
-    if (end)
+        printImportant(game_over ? *game_over : "All players are dead !");
+        askConfirm(leader());
         ctx_.stop();
+
+        return { true, false, true };
+    }
 
     const bool leader_switch { leader() == id };
     if (leader_switch)
         switchLeader(*activePlayers().cbegin());
 
-    return { true, leader_switch, end };
+    return { true, leader_switch, false };
 }
 
 bool Gameplay::checkGame() {
@@ -228,7 +231,8 @@ void Gameplay::initCache(const byte player_id) {
         capacities.insert({ name, inv.capacity() });
     }
 
-    players_cache_.insert({ player_id, PlayerCache { false,  PlayerState { target.stats().raw(), std::move(inventories), std::move(capacities) } } });
+    PlayerCache updated_cache { false,  PlayerState { Death {}, target.stats().raw(), std::move(inventories), std::move(capacities) } };
+    players_cache_.insert({ player_id, std::move(updated_cache) });
 }
 
 void Gameplay::sendPlayerUpdate(const byte id) {
@@ -238,6 +242,8 @@ void Gameplay::sendPlayerUpdate(const byte id) {
     bool& cache_initialized { cache.initialized };
 
     PlayerUpdate update;
+    update.death = p_updated.alive() ? Death {} : Death { p_updated.death() };
+
     for (const auto& [name, stat] : p_updated.stats()) {
         Stat& cached_stat { cached_state.stats.at(name) };
 

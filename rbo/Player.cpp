@@ -15,12 +15,18 @@ Player::Player(const byte id, std::string name, const std::vector<std::string>& 
     id_ { id },
     name_ { std::move(name) },
     stats_ { stats },
-    alive_ { true },
     bonuses_ { bonuses }
 {
     std::transform(inventories.cbegin(), inventories.cend(), std::inserter(inventories_, inventories_.begin()), [](const auto& inv) {
         return PlayerInventories::value_type { inv.first, Inventory { inv.second } };
     });
+}
+
+const std::string& Player::death() const {
+    if (alive())
+        throw PlayerNotDead();
+
+    return *death_;
 }
 
 bool Player::add(const std::string& inv, const std::string& item, const int qty) {
