@@ -25,6 +25,17 @@ void from_json(const json& data, Messages& messages);
 
 // Pour pouvoir utiliser from_json avec des using dans Rbo sur des types de la std en utilisant l'ADL
 template<typename Serializable>
+struct ToJsonWrapper {
+    const Serializable& value;
+};
+
+template<typename Serializable>
+void to_json(json& data, const ToJsonWrapper<Serializable>& serializable) {
+    to_json(data, serializable.value);
+}
+
+// Pour pouvoir utiliser from_json avec des using dans Rbo sur des types de la std en utilisant l'ADL
+template<typename Serializable>
 struct FromJsonWrapper {
     Serializable& value;
 };
