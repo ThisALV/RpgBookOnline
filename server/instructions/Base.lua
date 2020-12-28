@@ -47,6 +47,24 @@ function Rbo.Goto(interface, args)
     return args.scene
 end
 
+function Rbo.YesOrNoDecision(interface, args)
+    local all = args.target == "all"
+    local leader = args.target == "leader"
+    assertArgs((all or leader or isNum(args.target)) and isStr(args.question) and isNum(args.yes) and isNum(args.no))
+
+    local target
+    if all then
+        target = ACTIVE_PLAYERS
+    elseif leader then
+        target = interface:leader()
+    else
+        target = args.target
+    end
+
+    local decision = vote(interface:askYesNo(target, args.question))
+    return decision == YES and args.yes or args.no
+end
+
 function Rbo.PathChoice(interface, args)
     assertArgs(type(args.msg) == "string" and type(args.paths) == "table")
 
