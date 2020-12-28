@@ -87,7 +87,7 @@ void Gameplay::switchLeader(const byte id) {
 }
 
 void Gameplay::voteForLeader() {
-    switchLeader(vote(askReply(ALL_PLAYERS, "Qui doit devenir leader ?", names(), true)));
+    switchLeader(vote(askReply(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)));
 }
 
 Replies Gameplay::askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only, const bool wait_all_replies) {
@@ -127,7 +127,7 @@ Replies Gameplay::askYesNo(const byte target, const std::string& question, const
 }
 
 Replies Gameplay::askDiceRoll(const byte target, const std::string& msg, const DicesRoll& formula, const DiceRollResults& results) {
-    if (target != ALL_PLAYERS && results.count(target) == 0)
+    if (target != ALL_PLAYERS && target != ACTIVE_PLAYERS && results.count(target) == 0)
         throw InvalidDiceRollResults { target };
 
     SessionDataFactory data_factory;
@@ -156,7 +156,7 @@ PlayerCheckingResult Gameplay::checkPlayer(const byte id) {
         const Message& game_over { game().messages.at("all_players_dead") };
 
         printImportant(game_over ? *game_over : "All players are dead !");
-        askConfirm(leader());
+        askConfirm(ALL_PLAYERS);
         ctx_.stop();
 
         return { true, false, true };

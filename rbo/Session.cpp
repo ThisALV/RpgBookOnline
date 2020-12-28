@@ -336,7 +336,7 @@ void Session::playersDiceRolls(Gameplay& interface) const {
         for (auto& [id, player_stats] : rolls_results_.playersStats)
             stats_results.insert({ id, player_stats.at(name) });
 
-        interface.askDiceRoll(ALL_PLAYERS, fmt::format(stat_msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stats_results);
+        interface.askDiceRoll(ACTIVE_PLAYERS, fmt::format(stat_msg, fmt::arg("stat", name)), stat_descriptor.initialValue, stats_results);
     }
 
     const Message& capacity_dice_roll_msg { game().messages.at("inventory_capacity_dice_roll") };
@@ -350,7 +350,7 @@ void Session::playersDiceRolls(Gameplay& interface) const {
         for (const auto& [id, player_invs_capacity] : rolls_results_.playersInvsCapacity)
             inv_capacity_results.insert({ id, player_invs_capacity.at(name) });
 
-        interface.askDiceRoll(ALL_PLAYERS, fmt::format(capacity_msg, fmt::arg("inventory", name)), *inv_descriptor.limit, inv_capacity_results);
+        interface.askDiceRoll(ACTIVE_PLAYERS, fmt::format(capacity_msg, fmt::arg("inventory", name)), *inv_descriptor.limit, inv_capacity_results);
     }
 }
 
@@ -551,10 +551,11 @@ bool Session::anyPlayerAlive() const {
 Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies) {
     const RequestCtxPtr ctx { std::make_shared<RequestCtx>() };
     const bool all_players { targets_id == ALL_PLAYERS };
+    const bool alive_players { targets_id == ACTIVE_PLAYERS };
 
     byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
-        const bool targetted { (all_players && player(id).alive()) || id == targets_id };
+        const bool targetted { all_players || (alive_players && player(id).alive()) || id == targets_id };
 
         ctx->players.insert({ id, RequestProfile { &connection, targetted } });
         if (targetted)
@@ -651,6 +652,11 @@ void Session::sendTo(const byte target_id, const Data& data) {
         return;
     }
 
+    if (target_id == ACTIVE_PLAYERS) {
+        sendToAlivePlayers(data);
+        return;
+    }
+
     const ErrCode err { trySend(connection(target_id), trunc(data)) };
 
     if (err) {
@@ -663,6 +669,19 @@ void Session::sendToAll(const Data& data) {
     const io::const_buffer buffer { trunc(data) };
 
     for (const byte id : ids()) {
+        const ErrCode err { trySend(connection(id), buffer) };
+
+        if (err) {
+            logPlayerError(id, err.message());
+            disconnect(id, true);
+        }
+    }
+}
+
+void Session::sendToAlivePlayers(const Data& data) {
+    const io::const_buffer buffer { trunc(data) };
+
+    for (const byte id : aliveIDs()) {
         const ErrCode err { trySend(connection(id), buffer) };
 
         if (err) {

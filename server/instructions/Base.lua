@@ -11,7 +11,7 @@ function Rbo.Text(interface, args)
 
     interface:print(args.text)
     if args.wait then
-        interface:askConfirm(ALL_PLAYERS)
+        interface:askConfirm(ACTIVE_PLAYERS)
     end
 end
 
@@ -20,7 +20,7 @@ function Rbo.Alert(interface, args)
 
     interface:printImportant(args.text)
     if args.wait then
-        interface:askConfirm(ALL_PLAYERS)
+        interface:askConfirm(ACTIVE_PLAYERS)
     end
 end
 
@@ -29,7 +29,7 @@ function Rbo.Title(interface, args)
 
     interface:printTitle(args.text)
     if args.wait then
-        interface:askConfirm(ALL_PLAYERS)
+        interface:askConfirm(ACTIVE_PLAYERS)
     end
 end
 
@@ -38,7 +38,7 @@ function Rbo.Note(interface, args)
 
     interface:printNote(args.text)
     if args.wait then
-        interface:askConfirm(ALL_PLAYERS)
+        interface:askConfirm(ACTIVE_PLAYERS)
     end
 end
 

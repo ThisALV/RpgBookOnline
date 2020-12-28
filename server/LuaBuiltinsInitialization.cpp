@@ -264,6 +264,7 @@ void InstructionsProvider::initBuiltins() {
         votePlayer
     );
     ctx_["ALL_PLAYERS"] = ALL_PLAYERS;
+    ctx_["ACTIVE_PLAYERS"] = ACTIVE_PLAYERS;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
 #ifdef NDEBUG
