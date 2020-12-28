@@ -473,7 +473,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
 
         sendToAllMasterHandling(checking_players_data.dataWithLength());
 
-        missing_entrants = !chkpt_name->empty() && askYesNo(YesNoQuestion::MissingEntrants);
+        missing_entrants = !requested_chkpt.empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
 
     Run run { runSession(requested_chkpt, *missing_entrants) };
