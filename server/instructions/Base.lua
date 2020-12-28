@@ -82,10 +82,11 @@ function Rbo.PathChoice(interface, args)
 end
 
 function Rbo.Checkpoint(interface, args)
-    assertArgs(isStr(args.name) and isNum(args.scene))
+    assertArgs(isStr(args.name) and isNum(args.scene) and (isStr(args.message) or args.message == nil))
 
+    local message = args.message or "Saved checkpoint \"%s\"."
     local name = interface:checkpoint(args.name, args.scene)
-    interface:printNote("Sauvegarde sur \""..name.."\".")
+    interface:printNote(message:format(name))
     interface:askConfirm(interface:leader())
 end
 
