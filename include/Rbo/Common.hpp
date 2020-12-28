@@ -227,8 +227,13 @@ std::vector<byte> decompose(const NumType value) {
 }
 
 constexpr char ITEM_ENTRY_SEP { '/' };
+
 constexpr byte ALL_PLAYERS { std::numeric_limits<byte>::max() };
 constexpr byte ACTIVE_PLAYERS { std::numeric_limits<byte>::max() - 1 };
+
+constexpr byte YES { 0 };
+constexpr byte NO { 1 };
+
 constexpr word INTRO { 0 };
 
 template<typename Output>

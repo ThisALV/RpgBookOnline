@@ -411,7 +411,7 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
     const ReceiveBuffer reply { receiveFromMaster() };
     logger_.info("Master's reply : {}.", reply[0] == 0 ? "Yes" : "No");
 
-    return reply[0] == 0;
+    return reply[0] == YES;
 }
 
 void Lobby::launchPreparation() {

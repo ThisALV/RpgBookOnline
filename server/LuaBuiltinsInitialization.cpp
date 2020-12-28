@@ -265,6 +265,8 @@ void InstructionsProvider::initBuiltins() {
     );
     ctx_["ALL_PLAYERS"] = ALL_PLAYERS;
     ctx_["ACTIVE_PLAYERS"] = ACTIVE_PLAYERS;
+    ctx_["YES"] = YES;
+    ctx_["NO"] = NO;
     ctx_["setmetatable"] = sol::nil;
     ctx_["getmetatable"] = sol::nil;
 #ifdef NDEBUG
