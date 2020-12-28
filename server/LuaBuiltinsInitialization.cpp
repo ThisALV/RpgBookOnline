@@ -84,8 +84,9 @@ void InstructionsProvider::initBuiltins() {
     ctx_.new_usertype<std::vector<std::string>>("StringVector", sol::constructors<std::vector<std::string>()>(), "iterable", luaVector<std::string>);
     ctx_.new_usertype<std::vector<byte>>("ByteVector", sol::constructors<std::vector<byte>()>(), "iterable", luaVector<byte>);
 
-    ctx_.new_usertype<std::map<byte, std::string>>( "ByteWithString", sol::constructors<std::map<byte, std::string>()>(), "iterable", luaContainer<std::map<byte, std::string>>);
-    ctx_.new_usertype<std::unordered_map<std::string, std::string>>( "StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
+    ctx_.new_usertype<std::map<byte, std::string>>("ByteWithString", sol::constructors<std::map<byte, std::string>()>(), "iterable", luaContainer<std::map<byte, std::string>>);
+    ctx_.new_usertype<std::unordered_map<std::string, std::string>>("StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer<std::unordered_map<std::string, std::string>>);
+    ctx_.new_usertype<std::map<byte, byte>>("ByteWithByte", sol::constructors<std::map<byte, byte>()>(), "iterable", luaContainer<std::map<byte, byte>>);
     ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
 
     sol::usertype<RollResult> roll_result_type { ctx_.new_usertype<RollResult>("RollResult") };
