@@ -70,10 +70,8 @@ byte vote(const Replies& replies) {
 
     std::vector<byte> winners;
     for (const auto& [option, count] : votes) {
-        if (count == max_score) {
+        if (count == max_score)
             winners.push_back(option);
-            break;
-        }
     }
 
     if (winners.size() == 1)
