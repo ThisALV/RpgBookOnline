@@ -22,7 +22,7 @@ enum struct DataType : byte {
 };
 
 enum struct Request : byte {
-    Range, Possibilities, Confirm, YesNo, DiceRoll
+    Range, Options, Confirm, YesNo, DiceRoll
 };
 
 enum struct Text : byte {
@@ -39,6 +39,12 @@ enum struct Battle : byte {
     Init, Atk, End
 };
 
+constexpr std::size_t OPTIONS_LIMIT { std::numeric_limits<byte>::max() + 1 };
+
+struct TooManyOptions : std::logic_error {
+    TooManyOptions(const std::size_t options_count) : std::logic_error { "There is " + std::to_string(options_count) + " options but the maximum is " + std::to_string(OPTIONS_LIMIT) } {}
+};
+
 class Data;
 
 struct SessionDataFactory : DataFactory {
@@ -46,7 +52,7 @@ struct SessionDataFactory : DataFactory {
     void makeStart(const std::string& game_name);
     void makeRequest(const Request type, const byte target);
     void makeRange(const byte target, const std::string& msg, const byte min, const byte max);
-    void makePossibilities(const byte target, const std::string& msg, const OptionsList& options);
+    void makeOptions(const byte target, const std::string& msg, const OptionsList& options);
     void makeYesNoQuestion(const byte target, const std::string& question);
     void makeDiceRoll(const byte target, const std::string& msg, const byte dices, const int bonus, const DiceRollResults& results);
     void makeText(const Text txt_type);

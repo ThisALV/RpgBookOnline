@@ -66,19 +66,19 @@ function Rbo.YesOrNoDecision(interface, args)
 end
 
 function Rbo.PathChoice(interface, args)
-    assertArgs(type(args.msg) == "string" and type(args.paths) == "table")
+    assertArgs(type(args.msg) == "string" and type(args.paths) == "table" and (type(args.wait) == "boolean" or args.wait == nil))
 
-    if type(args.wait) ~= "boolean" then
-        args.wait = true
-    end
-
-    local options = ByteWithString:new():iterable()
+    local paths = ByteVector:new():iterable()
+    local options = StringVector:new():iterable()
     for scene, text in pairs(args.paths) do
         assertArgs(isNum(scene) and isStr(text))
-        options:set(scene, text)
+        
+        paths:add(scene)
+        options:add(text)
     end
 
-    return vote(interface:askReply(ALL_PLAYERS, args.msg, options, args.wait))
+    local selected = vote(interface:ask(ACTIVE_PLAYERS, args.msg, options, (args.wait == nil and args.wait) or false))
+    return paths:get(selected)
 end
 
 function Rbo.Checkpoint(interface, args)
@@ -125,7 +125,7 @@ end
 function Rbo.ActionVote(interface, args)
     assertArgs(isStr(args.text) and isStr(args.effect))
 
-    local selected = vote(interface:askReply(ALL_PLAYERS, args.text, interface:names()))
+    local selected = votePlayer(interface, args.text)
     local effect = interface:game():effect(args.effect)
 
     effect:apply(interface:player(selected))

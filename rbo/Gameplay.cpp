@@ -22,17 +22,6 @@ struct RangeController {
     }
 };
 
-struct PossibilitiesController {
-    const std::vector<byte>& possibilities;
-
-    void operator()(const byte reply) const {
-        const auto cend { possibilities.cend() };
-
-        if (std::find(possibilities.cbegin(), cend, reply) == cend)
-            throw InvalidReply { ReplyValidity::OutOfRangeError };
-    }
-};
-
 } // namespace Controllers
 
 StatsManager& Gameplay::global() {
@@ -67,8 +56,8 @@ OptionsList Gameplay::names() const {
     const Players players { ctx_.players() };
 
     OptionsList names;
-    std::transform(players.cbegin(), players.cend(), std::inserter(names, names.begin()), [](const auto p) {
-        return OptionsList::value_type { p.first, p.second->name() };
+    std::transform(players.cbegin(), players.cend(), names.begin(), [](const auto p) -> std::string {
+        return p.second->name();
     });
 
     return names;
@@ -87,28 +76,21 @@ void Gameplay::switchLeader(const byte id) {
 }
 
 void Gameplay::voteForLeader() {
-    switchLeader(vote(askReply(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)));
+    switchLeader(vote(ask(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)));
 }
 
-Replies Gameplay::askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only, const bool wait_all_replies) {
+Replies Gameplay::ask(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only, const bool wait_all_replies) {
+    SessionDataFactory data_factory;
+    data_factory.makeOptions(target, msg, options);
+
+    return ctx_.request(target, data_factory.dataWithLength(), RangeController { 1, static_cast<byte>(options.size()) }, first_reply_only, wait_all_replies);
+}
+
+Replies Gameplay::askNumber(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only, const bool wait_all_replies) {
     SessionDataFactory data_factory;
     data_factory.makeRange(target, msg, min, max);
 
     return ctx_.request(target, data_factory.dataWithLength(), RangeController { min, max }, first_reply_only, wait_all_replies);
-}
-
-Replies Gameplay::askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only, const bool wait_all_replies) {
-    SessionDataFactory data_factory;
-    data_factory.makePossibilities(target, msg, options);
-
-    std::vector<byte> ids;
-    ids.resize(options.size());
-
-    std::transform(options.cbegin(), options.cend(), ids.begin(), [](const auto& o) -> byte {
-        return o.first;
-    });
-
-    return ctx_.request(target, data_factory.dataWithLength(), PossibilitiesController { ids }, first_reply_only, wait_all_replies);
 }
 
 Replies Gameplay::askConfirm(const byte target, const bool first_reply_only) {

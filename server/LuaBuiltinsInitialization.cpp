@@ -74,8 +74,18 @@ uint dices(const uint dices, const uint max) {
     return result;
 }
 
-byte votePlayer(Gameplay& interface, const std::string& msg, const byte target = ALL_PLAYERS) {
-    return vote(interface.askReply(target, msg, interface.names()));
+byte votePlayer(Gameplay& interface, const std::string& msg, const byte target = ACTIVE_PLAYERS) {
+    const OptionsList players_name { interface.names() };
+    const byte player_number { vote(interface.ask(target, msg, players_name)) };
+
+    const std::string& selected_name { players_name.at(player_number) };
+    const std::vector<byte> players_id { interface.players() };
+    const auto selected_player = std::find_if(players_id.cbegin(), players_id.cend(), [&selected_name, &interface](const byte p_id) {
+        return interface.player(p_id).name() == selected_name;
+    });
+
+    assert(selected_player != players_id.cend());
+    return *selected_player;
 }
 
 }
@@ -204,21 +214,23 @@ void InstructionsProvider::initBuiltins() {
     gameplay_type["leader"] = &Gameplay::leader;
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;
     gameplay_type["voteForLeader"] = &Gameplay::voteForLeader;
-    gameplay_type["askReply"] = sol::overload(
-        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max) {
-            return ctx.askReply(target, msg, min, max);
-        },
-        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only) {
-            return ctx.askReply(target, msg, min, max, first_reply_only);
-        },
+    gameplay_type["ask"] = sol::overload(
         [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options) {
-            return ctx.askReply(target, msg, options);
+            return ctx.ask(target, msg, options);
         },
         [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only) {
-            return ctx.askReply(target, msg, options, first_reply_only);
+            return ctx.ask(target, msg, options, first_reply_only);
         },
-        sol::resolve<Replies(const byte, const std::string&, const byte, const byte, const bool, const bool)>(&Gameplay::askReply),
-        sol::resolve<Replies(const byte, const std::string&, const OptionsList&, const bool, const bool)>(&Gameplay::askReply)
+        &Gameplay::ask
+    );
+    gameplay_type["askNumber"] = sol::overload(
+        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max) {
+            return ctx.askNumber(target, msg, min, max);
+        },
+        [](Gameplay& ctx, const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only) {
+            return ctx.askNumber(target, msg, min, max, first_reply_only);
+        },
+        &Gameplay::askNumber
     );
     gameplay_type["askConfirm"] = sol::overload(
         [](Gameplay& ctx, const byte target) { return ctx.askConfirm(target); },

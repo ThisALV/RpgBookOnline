@@ -31,8 +31,11 @@ void SessionDataFactory::makeRange(const byte target, const std::string& msg, co
     data_.add(max);
 }
 
-void SessionDataFactory::makePossibilities(const byte target, const std::string& msg, const OptionsList& options) {
-    makeRequest(Request::Possibilities, target);
+void SessionDataFactory::makeOptions(const byte target, const std::string& msg, const OptionsList& options) {
+    if (options.size() > OPTIONS_LIMIT)
+        throw TooManyOptions { options.size() };
+
+    makeRequest(Request::Options, target);
     data_.put(msg);
     data_.putList(options);
 }

@@ -49,7 +49,7 @@ using RandomEngine = std::mt19937_64;
 
 enum struct ReplyValidity : byte;
 
-using OptionsList = std::map<byte, std::string>;
+using OptionsList = std::vector<std::string>;
 using Replies = std::map<byte, byte>;
 using DiceRollResults = std::map<byte, RollResult>;
 using ReplyController = std::function<void(const byte reply)>;

@@ -42,8 +42,8 @@ public:
     void voteForLeader();
 
     // ask - Throw : NoPlayerRemaining
-    Replies askReply(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only = false, const bool wait_all_replies = false);
-    Replies askReply(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
+    Replies ask(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
+    Replies askNumber(const byte target, const std::string& msg, const byte min, const byte max, const bool first_reply_only = false, const bool wait_all_replies = false);
     Replies askConfirm(const byte target, const bool first_reply_only = false);
     Replies askYesNo(const byte target, const std::string& question, const bool first_reply_only = false, const bool wait_all_replies = false);
     Replies askDiceRoll(const byte target, const std::string& msg, const DicesRoll& formula, const DiceRollResults& results);
@@ -51,7 +51,7 @@ public:
     PlayerCheckingResult checkPlayer(const byte id); // Throw : NoPlayerRemaining
     bool checkGame();
 
-    // print - Throw : NoPlayerRemaining
+    // print* - Throw : NoPlayerRemaining
     void print(const std::string& txt, const byte target = ALL_PLAYERS);
     void printImportant(const std::string& txt, const byte target = ALL_PLAYERS);
     void printNote(const std::string& note, const byte target = ALL_PLAYERS);

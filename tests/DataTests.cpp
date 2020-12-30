@@ -168,13 +168,15 @@ BOOST_AUTO_TEST_CASE(NumericOverflow) {
     BOOST_CHECK_THROW(data.putNumeric<int>(9999999), BufferOverflow);
 }
 
-BOOST_AUTO_TEST_CASE(List) {
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(PutList)
+
+BOOST_AUTO_TEST_CASE(Valid) {
     const DataBuffer expected_buffer {
-        0, 0, 3, 1, 0, 6, 'L', 0xc3, 0xa9, 'l', 'i', 'o', 3, 0, 1, '#', 4, 0, 4, 'T', 'e', 's', 't'
+        0, 0, 3, 0, 6, 'L', 0xc3, 0xa9, 'l', 'i', 'o', 0, 4, 'T', 'e', 's', 't', 0, 1, '#'
     };
-    const OptionsList options {
-        { 1, "Lélio" }, { 4, "Test" }, { 3, "#" }
-    };
+    const OptionsList options { "Lélio", "Test", "#" };
 
     Data data;
     data.putList(options);
@@ -182,12 +184,11 @@ BOOST_AUTO_TEST_CASE(List) {
     BOOST_CHECK_EQUAL(data.buffer(), expected_buffer);
 }
 
-BOOST_AUTO_TEST_CASE(ListDataSizeOverflow) {
+BOOST_AUTO_TEST_CASE(Overflow) {
     const std::string txt(100, ' '); // Syntaxe C++14 pour éviter l'initializer_list constructor
 
     OptionsList options;
-    for (int i { 0 }; i < std::numeric_limits<byte>::max(); i++)
-        options.insert({ i, txt });
+    options.resize(13, txt);
 
     Data data;
     BOOST_CHECK_THROW(data.putList(options), BufferOverflow);
