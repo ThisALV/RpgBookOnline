@@ -6,6 +6,14 @@ local function isNum(var)
     return type(var) == "number"
 end
 
+local function isBool(var)
+    return type(var) == "boolean"
+end
+
+local function isTable(var)
+    return type(var) == "table"
+end
+
 function Rbo.Text(interface, args)
     assertArgs(isStr(args.text))
 
@@ -66,7 +74,11 @@ function Rbo.YesOrNoDecision(interface, args)
 end
 
 function Rbo.PathChoice(interface, args)
-    assertArgs(type(args.msg) == "string" and type(args.paths) == "table" and (type(args.wait) == "boolean" or args.wait == nil))
+    assertArgs(isStr(args.message) and isTable(args.paths) and (isBool(args.wait) or args.wait == nil))
+
+    if type(args.wait) ~= "boolean" then
+        args.wait = true
+    end
 
     local paths = ByteVector:new():iterable()
     local options = StringVector:new():iterable()
@@ -77,7 +89,7 @@ function Rbo.PathChoice(interface, args)
         options:add(text)
     end
 
-    local selected = vote(interface:ask(ACTIVE_PLAYERS, args.msg, options, (args.wait == nil and args.wait) or false))
+    local selected = vote(interface:ask(ACTIVE_PLAYERS, args.message, options, not args.wait))
     return paths:get(selected)
 end
 
@@ -92,7 +104,7 @@ end
 
 function Rbo.EventTo(interface, args)
     local target = args.target
-    assertArgs((target == "global" or target == "all" or target == "leader" or isNum(target)) and type(args.effect) == "string")
+    assertArgs((target == "global" or target == "all" or target == "leader" or isNum(target)) and isStr(args.effect))
     local effect = interface:game():effect(args.effect)
 
     if target == "global" then
