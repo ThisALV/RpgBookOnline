@@ -18,7 +18,7 @@ void to_json(json& data, const std::optional<T>& opt) {
 
 template<typename T>
 void from_json(const json& data, std::optional<T>& opt) {
-    opt = data.is_null() ? std::optional<T> {} : data.get<T>();
+    opt = data.is_null() ? std::optional<T> {} : std::optional<T> { data.get<T>() };
 }
 
 void from_json(const json& data, Messages& messages);
