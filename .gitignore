@@ -1,8 +1,11 @@
 Debug/
 Release/
 CMakeLists.txt.user
+CMakeSettings.json
 /server/game/
 /server/instructions/Custom.lua
 *.log
 .vscode/
-
+out/
+.idea/
+.vs/
