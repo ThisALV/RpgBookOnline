@@ -6,11 +6,16 @@ set(RBO_HEADERS ${LIB_HEADERS_DIR}/AsioCommon.hpp ${LIB_HEADERS_DIR}/Common.hpp 
 add_library(rbo STATIC ${RBO_SRC} ${RBO_HEADERS})
 
 find_package(Boost REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
+find_package(spdlog "${RBO_REQUIRED_SPDLOG}" REQUIRED CONFIG)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 target_include_directories(rbo PUBLIC "${RBO_INCLUDE_DIR}" "${Boost_INCLUDE_DIRS}")
-target_link_libraries(rbo PUBLIC spdlog::spdlog PRIVATE nlohmann_json::nlohmann_json)
+
+if(RBO_LOGGING_HEADER_ONLY)
+    target_link_libraries(rbo PUBLIC spdlog::spdlog_header_only)
+else()
+    target_link_libraries(rbo PUBLIC spdlog::spdlog)
+endif()
 
 if(RBO_STATIC_WINDOWS_LIBRARIES)
     target_link_libraries(rbo PUBLIC ws2_32 wsock32)
