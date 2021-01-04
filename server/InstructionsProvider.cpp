@@ -61,7 +61,10 @@ void InstructionsProvider::load() {
 
         sol::function instruction { value.as<sol::function>() };
         error_handlers[name] = [name](const std::string& err) -> std::string {
-            return err == "CanceledRequest" ? err : name + " : " + err;
+            if (err == "CanceledRequest")
+                return err;
+
+            return name + " : " += err; // += évite la création d'une string temporaire supplémentaire
         };
         instruction.error_handler = error_handlers[name];
 
