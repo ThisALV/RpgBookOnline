@@ -15,11 +15,11 @@ struct ScriptLoadingError : std::runtime_error {
 };
 
 struct GameLoadingError : std::runtime_error {
-    GameLoadingError(const std::string& msg) : std::runtime_error { "Unable to load game : " + msg } {}
+    explicit GameLoadingError(const std::string& msg) : std::runtime_error { "Unable to load game : " + msg } {}
 };
 
 struct GameSavingError : std::runtime_error {
-    GameSavingError(const std::string& msg) : std::runtime_error { "Unable to save game : " + msg } {}
+    explicit  GameSavingError(const std::string& msg) : std::runtime_error { "Unable to save game : " + msg } {}
 };
 
 struct SceneLoadingError : std::runtime_error {
@@ -27,7 +27,7 @@ struct SceneLoadingError : std::runtime_error {
 };
 
 struct CheckpointAlreadyExists : std::logic_error {
-    CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Checkpoint \"" + name + "\" already exists" } {}
+    explicit CheckpointAlreadyExists(const std::string& name) : std::logic_error { "Checkpoint \"" + name + "\" already exists" } {}
 };
 
 class LocalGameBuilder : public GameBuilder {
@@ -42,17 +42,17 @@ private:
 
 public:
     LocalGameBuilder(const fs::path& game_file, const fs::path& checkpts_file, const fs::path& scenes_file, const fs::path& instructions_dir);
-    virtual ~LocalGameBuilder() = default;
+    ~LocalGameBuilder() override = default;
 
     LocalGameBuilder(const LocalGameBuilder&) = delete;
     LocalGameBuilder& operator=(const LocalGameBuilder&) = delete;
 
     bool operator==(const LocalGameBuilder&) const = delete;
 
-    virtual Game operator()() const override;
-    virtual GameState load(const std::string& checkpt_final_name) const override;
-    virtual std::string save(const std::string& checkpt_generic_name, const GameState& state) const override;
-    virtual Scene buildScene(const word scene_id) const override;
+    Game operator()() const override;
+    GameState load(const std::string& checkpt_final_name) const override;
+    std::string save(const std::string& checkpt_generic_name, const GameState& state) const override;
+    Scene buildScene(const word scene_id) const override;
 };
 
 } // namespace Rbo::Server
