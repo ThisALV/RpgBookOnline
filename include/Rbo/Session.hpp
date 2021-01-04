@@ -102,9 +102,6 @@ private:
     void logPlayerError(const byte playerID, const std::string& msg);
 
 public:
-    friend void confirmController(const io::mutable_buffer&);
-    friend struct RangeController;
-
     Session(io::io_context& executionCtx, const GameBuilder& gameBuilder);
 
     Session(const Session&) = delete;
