@@ -73,7 +73,7 @@ void InstructionsProvider::load() {
 }
 
 Instruction InstructionsProvider::get(const std::string& name, const sol::table args) const {
-    if (instructions_.count(name) == 0)
+    if (!has(name))
         throw UnknownInstruction { name };
 
     return LuaInstruction { instructions_.at(name), args };
