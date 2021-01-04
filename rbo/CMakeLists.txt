@@ -6,7 +6,7 @@ set(RBO_HEADERS ${LIB_HEADERS_DIR}/AsioCommon.hpp ${LIB_HEADERS_DIR}/Common.hpp 
 add_library(rbo STATIC ${RBO_SRC} ${RBO_HEADERS})
 
 find_package(Boost REQUIRED)
-find_package(spdlog "${RBO_REQUIRED_SPDLOG}" REQUIRED CONFIG)
+find_package(spdlog ${RBO_REQUIRED_SPDLOG} REQUIRED CONFIG)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 target_include_directories(rbo PUBLIC "${RBO_INCLUDE_DIR}" "${Boost_INCLUDE_DIRS}")
