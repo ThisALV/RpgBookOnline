@@ -44,7 +44,7 @@ enum struct Battle : byte {
 constexpr std::size_t OPTIONS_LIMIT { std::numeric_limits<byte>::max() + 1 };
 
 struct TooManyOptions : std::logic_error {
-    TooManyOptions(const std::size_t options_count) : std::logic_error { "There is " + std::to_string(options_count) + " options but the maximum is " + std::to_string(OPTIONS_LIMIT) } {}
+    explicit TooManyOptions(const std::size_t options_count) : std::logic_error { "There is " + std::to_string(options_count) + " options but the maximum is " + std::to_string(OPTIONS_LIMIT) } {}
 };
 
 class Data;

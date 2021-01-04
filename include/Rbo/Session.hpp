@@ -21,7 +21,7 @@ struct NoPlayerRemaining : std::runtime_error {
 };
 
 struct UnknownPlayer : std::logic_error {
-    UnknownPlayer(const byte id) : std::logic_error { "Unknown player " + std::to_string(id) } {}
+    explicit UnknownPlayer(const byte id) : std::logic_error { "Unknown player " + std::to_string(id) } {}
 };
 
 struct UninitializedLeader : std::logic_error {

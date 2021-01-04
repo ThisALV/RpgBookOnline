@@ -6,7 +6,7 @@
 namespace Rbo {
 
 struct InvalidCapacity : std::logic_error {
-    InvalidCapacity(const std::string& reason) : std::logic_error { "Inventory has invalid capacity : " + reason } {}
+    explicit InvalidCapacity(const std::string& reason) : std::logic_error { "Inventory has invalid capacity : " + reason } {}
 };
 
 struct InvalidQty : std::logic_error {
@@ -14,11 +14,11 @@ struct InvalidQty : std::logic_error {
 };
 
 struct UnknownInventory : std::logic_error {
-    UnknownInventory(const std::string& name) : std::logic_error { "Unknown inventory \"" + name + '"' } {}
+    explicit UnknownInventory(const std::string& name) : std::logic_error { "Unknown inventory \"" + name + '"' } {}
 };
 
 struct UnknownItem : std::logic_error {
-    UnknownItem(const std::string& item) : std::logic_error { "Unknown item \"" + item + '"' } {}
+    explicit UnknownItem(const std::string& item) : std::logic_error { "Unknown item \"" + item + '"' } {}
 };
 
 struct PlayerNotDead : std::logic_error {

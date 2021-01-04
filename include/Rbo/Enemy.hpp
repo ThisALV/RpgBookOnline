@@ -33,11 +33,11 @@ public:
 };
 
 struct NegativeModifier : std::logic_error {
-    NegativeModifier(const std::string& reason) : std::logic_error { reason } {}
+    explicit NegativeModifier(const std::string& reason) : std::logic_error { reason } {}
 };
 
 struct SameEnemiesName : std::logic_error {
-    SameEnemiesName(const std::string& ctx_name) : std::logic_error { "Name \"" + ctx_name + "\" already took" } {}
+    explicit SameEnemiesName(const std::string& ctx_name) : std::logic_error { "Name \"" + ctx_name + "\" already took" } {}
 };
 
 struct TooManyEnemies : std::logic_error {
@@ -45,11 +45,11 @@ struct TooManyEnemies : std::logic_error {
 };
 
 struct EnemyNotFound : std::logic_error {
-    EnemyNotFound(const std::string& name) : std::logic_error { "The enemy \"" + name + "\" isn't in this group" } {}
+    explicit EnemyNotFound(const std::string& name) : std::logic_error { "The enemy \"" + name + "\" isn't in this group" } {}
 };
 
 struct NotEnoughEnemies : std::logic_error {
-    NotEnoughEnemies(const byte pos) : std::logic_error { "There is less than " + std::to_string(pos + 1) + " in the group's queue" } {}
+    explicit NotEnoughEnemies(const byte pos) : std::logic_error { "There is less than " + std::to_string(pos + 1) + " in the group's queue" } {}
 };
 
 struct NoMoreEnemies : std::logic_error {

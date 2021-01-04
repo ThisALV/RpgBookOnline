@@ -6,13 +6,11 @@
 namespace Rbo {
 
 struct UnknownStat : std::logic_error {
-    UnknownStat(const std::string& name)
-        : std::logic_error { "Unknown stat \"" + name + '"' } {}
+    explicit UnknownStat(const std::string& name) : std::logic_error { "Unknown stat \"" + name + '"' } {}
 };
 
 struct InvalidLimit : std::logic_error {
-    InvalidLimit()
-        : std::logic_error { "Limits interval must contain 0 and min <= max" } {}
+    InvalidLimit() : std::logic_error { "Limits interval must contain 0 and min <= max" } {}
 };
 
 class StatsManager {

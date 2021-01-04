@@ -9,7 +9,7 @@ struct RestProperties;
 class Session;
 
 struct InvalidDiceRollResults : std::logic_error {
-    InvalidDiceRollResults(const byte player_id) : std::logic_error { "No dice roll result for player [" + std::to_string(player_id) + "]" } {}
+    explicit InvalidDiceRollResults(const byte player_id) : std::logic_error { "No dice roll result for player [" + std::to_string(player_id) + "]" } {}
 };
 
 class Gameplay {
@@ -18,7 +18,7 @@ private:
     std::map<byte, PlayerCache> players_cache_;
 
 public:
-    Gameplay(Session& ctx) : ctx_ { ctx } {}
+    explicit Gameplay(Session& ctx) : ctx_ { ctx } {}
 
     void initCache(const byte player_id);
 

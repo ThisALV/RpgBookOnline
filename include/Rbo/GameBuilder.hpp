@@ -8,7 +8,7 @@ namespace Rbo {
 struct CheckpointLoadingError : std::exception {
     std::string msg;
 
-    CheckpointLoadingError(const std::string& err) : msg { err } {}
+    explicit CheckpointLoadingError(const std::string& err) : msg { err } {}
 
     virtual const char* what() const noexcept override { return msg.c_str(); };
 };

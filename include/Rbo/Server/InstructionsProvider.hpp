@@ -10,7 +10,7 @@ namespace Rbo::Server {
 struct UnknownInstruction : std::logic_error {
     std::string instruction;
 
-    UnknownInstruction(const std::string& name) : std::logic_error { "Unknown instruction \"" + name + '"' }, instruction { name } {}
+    explicit UnknownInstruction(const std::string& name) : std::logic_error { "Unknown instruction \"" + name + '"' }, instruction { name } {}
 };
 
 class InstructionsProvider {

@@ -129,7 +129,7 @@ struct EnemyDescriptorBinding {
 struct InvalidReply : std::logic_error {
     ReplyValidity type;
 
-    InvalidReply(const ReplyValidity errorType);
+    explicit InvalidReply(const ReplyValidity errorType);
 };
 
 struct PlayerCheckingResult {
