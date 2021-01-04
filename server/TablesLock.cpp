@@ -12,7 +12,7 @@ void TablesLock::initMetatable() {
         return index_[target][key];
     };
 
-    metatable_[meta_function::new_index] = [](const sol::table, const sol::object, const sol::object) {
+    metatable_[meta_function::new_index] = [](const sol::table&, const sol::object&, const sol::object&) {
         throw IllegalChange {};
     };
 }
@@ -25,7 +25,7 @@ void TablesLock::operator()(sol::table target) {
         throw AlreadyConstTable {};
 
     index_[target] = ctx_.create_table();
-    for (const auto [key, value] : target) {
+    for (const auto& [key, value] : target) {
         index_[target][key] = value;
         target[key] = sol::nil;
     }

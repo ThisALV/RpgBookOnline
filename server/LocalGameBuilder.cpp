@@ -162,7 +162,7 @@ Scene LocalGameBuilder::buildScene(const word id) const {
     if (scene_obj.get_type() != sol::type::table)
         throw SceneLoadingError { id, "Unknown scene ID" };
 
-    for (const auto instruction_entry : scene_obj.as<sol::table>()) {
+    for (const auto& instruction_entry : scene_obj.as<sol::table>()) {
         if (instruction_entry.second.get_type() != sol::type::table)
             throw SceneLoadingError { id, "One of this scene instructions isn't a Lua table" };
 

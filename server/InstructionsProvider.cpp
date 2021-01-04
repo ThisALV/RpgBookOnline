@@ -33,7 +33,7 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
     ctx_.open_libraries(sol::lib::base, sol::lib::package, sol::lib::coroutine, sol::lib::string, sol::lib::math, sol::lib::table);
 
     sol::table global { ctx_.globals() };
-    for (const auto [key, value] : global) {
+    for (const auto& [key, value] : global) {
         if (value.get_type() == sol::type::table && value != global && value != ctx_[sol::env_key])
             resources_lock_(global[key]);
     }
@@ -52,7 +52,7 @@ void InstructionsProvider::load() {
     sol::table global { resources_lock_.get(ctx_.globals()).as<sol::table>() };
     sol::table error_handlers { global["ErrorHandlers"].get<sol::table>() };
     sol::table rbo { global["Rbo"].get<sol::table>() };
-    for (const auto [key, value] : rbo) {
+    for (const auto& [key, value] : rbo) {
         if (!isInstruction(key, value))
             continue;
 
@@ -72,7 +72,7 @@ void InstructionsProvider::load() {
     resources_lock_(rbo);
 }
 
-Instruction InstructionsProvider::get(const std::string& name, const sol::table args) const {
+Instruction InstructionsProvider::get(const std::string& name, const sol::table& args) const {
     if (!has(name))
         throw UnknownInstruction { name };
 
