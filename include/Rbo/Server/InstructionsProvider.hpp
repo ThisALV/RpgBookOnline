@@ -40,7 +40,9 @@ private:
     spdlog::logger& logger_;
     TablesLock resources_lock_;
 
-    void initBuiltins();
+    void initContainersAPI();
+    void initGameAPI();
+    void initGameplayAPI();
 
 public:
     InstructionsProvider(sol::state& lua, spdlog::logger& logger);

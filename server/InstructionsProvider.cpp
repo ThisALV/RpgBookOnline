@@ -38,7 +38,9 @@ InstructionsProvider::InstructionsProvider(sol::state& ctx, spdlog::logger& logg
             resources_lock_(global[key]);
     }
 
-    initBuiltins();
+    initContainersAPI();
+    initGameAPI();
+    initGameplayAPI();
 
     ctx_.create_named_table("Rbo");
     ctx_.create_named_table("ErrorHandlers");
