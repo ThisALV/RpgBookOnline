@@ -13,16 +13,6 @@ struct UnknownInstruction : std::logic_error {
     UnknownInstruction(const std::string& name) : std::logic_error { "Unknown instruction \"" + name + '"' }, instruction { name } {}
 };
 
-struct InstructionFailed : std::runtime_error {
-    std::string instruction;
-
-    InstructionFailed(const std::string& name, const std::string& msg) : std::runtime_error { name + " : " + msg }, instruction { name } {}
-};
-
-struct IllegalLuaModifications : std::runtime_error {
-    IllegalLuaModifications() : std::runtime_error { "Builtins Lua objects illegally changed" } {}
-};
-
 class InstructionsProvider {
 private:
     using LuaFunc = sol::function;

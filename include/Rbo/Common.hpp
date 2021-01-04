@@ -42,7 +42,6 @@ struct EnemyDescriptorBinding;
 struct RollResult;
 
 using byte = std::uint8_t;
-using s_byte = std::int8_t;
 using word = std::uint16_t;
 
 using RandomEngine = std::mt19937_64;
@@ -207,7 +206,6 @@ Output& operator<<(Output& out, const OutputableWrapper<Outputable>& wrapper) {
 ulong now();
 std::string itemEntry(const std::string& inventory, const std::string& item);
 std::pair<std::string, std::string> splitItemEntry(const std::string& itemEntry);
-bool contains(const std::vector<std::string>& strs, const std::string& element);
 byte vote(const Replies& requestResults);
 
 spdlog::logger& rboLogger(std::string name);

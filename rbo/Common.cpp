@@ -128,10 +128,6 @@ std::pair<std::string, std::string> splitItemEntry(const std::string& str) {
     return { { cb, inv_end }, { inv_end + 1, ce } };
 }
 
-bool contains(const std::vector<std::string>& strs, const std::string& str) {
-    return std::find(strs.cbegin(), strs.cend(), str) != strs.cend();
-}
-
 bool ItemBonus::operator==(const ItemBonus& rhs) const {
     return stat == rhs.stat && bonus == rhs.bonus;
 }
