@@ -187,6 +187,36 @@ struct InventoryDescriptor {
     InventoryContent initialStuff;
 };
 
+template<typename Output>
+Output& operator<<(Output& out, const std::vector<byte>& ids) {
+    out << '[';
+    for (const byte id : ids)
+        out << ' ' << std::to_string(id) << ';';
+
+    out << " ]";
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
+}
+
+template<typename Output>
+Output& operator<<(Output& out, const StatsValue& stats) {
+    out << '[';
+    for (const auto&[name, value] : stats)
+        out << " \"" << name << "\"=" << value << ';';
+
+    out << " ]";
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
+}
+
+template<typename Output>
+Output& operator<<(Output& out, const Replies& replies) {
+    out << '[';
+    for (const auto [id, reply] : replies)
+        out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
+
+    out << " ]";
+    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
+}
+
 // Pour pouvoir utiliser operator<< avec des using dans Rbo sur des types de la std en utilisant l'ADL
 template<typename Outputable>
 struct OutputableWrapper {
@@ -198,7 +228,7 @@ struct OutputableWrapper {
 
 template<typename Output, typename Outputable>
 Output& operator<<(Output& out, const OutputableWrapper<Outputable>& wrapper) {
-    Rbo::operator<<(out, wrapper); // Préciser le ns Rbo permet de rechercher les operator<< définis par la lib rbo
+    Rbo::operator<<(out, wrapper.value); // Préciser le ns Rbo permet de rechercher les operator<< définis par la lib rbo
     return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
@@ -232,16 +262,6 @@ constexpr byte YES { 0 };
 constexpr byte NO { 1 };
 
 constexpr word INTRO { 0 };
-
-template<typename Output>
-Output& operator<<(Output& out, const std::vector<byte>& ids) {
-    out << '[';
-    for (const byte id : ids)
-        out << ' ' << std::to_string(id) << ';';
-
-    out << " ]";
-    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
-}
 
 } // namespace Rbo
 

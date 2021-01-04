@@ -145,16 +145,6 @@ public:
     bool anyPlayerAlive() const;
 };
 
-template<typename Output>
-Output& operator<<(Output& out, const Replies& replies) {
-    out << '[';
-    for (const auto [id, reply] : replies)
-        out << ' ' << std::to_string(id) << "->" << std::to_string(reply);
-
-    out << " ]";
-    return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
-}
-
 } // namespace Rbo
 
 #endif // SESSION_HPP
