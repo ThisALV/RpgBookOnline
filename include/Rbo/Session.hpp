@@ -44,7 +44,7 @@ struct InvalidIDs : std::logic_error {
 
     InvalidIDs(const std::vector<byte>& expectedIDs, const EntrantsValidity errType);
 
-    virtual const char* what() const noexcept override { return msg.data(); }
+    const char* what() const noexcept override { return msg.data(); }
 };
 
 struct IntroductionCheckpoint : std::logic_error {

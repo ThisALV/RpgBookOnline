@@ -10,7 +10,7 @@ struct CheckpointLoadingError : std::exception {
 
     explicit CheckpointLoadingError(const std::string& err) : msg { err } {}
 
-    virtual const char* what() const noexcept override { return msg.c_str(); };
+    const char* what() const noexcept override { return msg.c_str(); };
 };
 
 struct GameState {
