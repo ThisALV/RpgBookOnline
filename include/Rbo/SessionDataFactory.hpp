@@ -33,7 +33,9 @@ enum struct ReplyValidity : byte {
     Ok, TooLate, OutOfRangeError, InavlidLengthError, NotConfirmError
 };
 
-bool isInvalid(const ReplyValidity validity);
+constexpr bool isInvalid(const ReplyValidity validity) {
+    return static_cast<byte>(validity) > 1;
+}
 
 enum struct Battle : byte {
     Init, Atk, End

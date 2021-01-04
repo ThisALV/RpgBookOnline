@@ -5,10 +5,6 @@
 
 namespace Rbo {
 
-bool isInvalid(const ReplyValidity type) {
-    return static_cast<byte>(type) > 1;
-}
-
 void SessionDataFactory::makeData(const DataType type) {
     data_.add(type);
 }
