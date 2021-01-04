@@ -198,7 +198,7 @@ struct OutputableWrapper {
 
 template<typename Output, typename Outputable>
 Output& operator<<(Output& out, const OutputableWrapper<Outputable>& wrapper) {
-    out << wrapper.value;
+    Rbo::operator<<(out, wrapper); // Préciser le ns Rbo permet de rechercher les operator<< définis par la lib rbo
     return out; // operator<< retourne osteam& (ref sur classe mère) et non pas Output&
 }
 
