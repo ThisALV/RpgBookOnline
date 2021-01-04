@@ -30,8 +30,8 @@ class StatsManager;
 class Player;
 class Inventory;
 class Gameplay;
-class EventEffect;
 
+struct EventEffect;
 struct Game;
 struct ItemBonus;
 struct Stat;

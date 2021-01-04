@@ -20,7 +20,8 @@ struct GameState {
     PlayersState players;
 };
 
-struct GameBuilder {
+class GameBuilder {
+public:
     virtual ~GameBuilder() = default;
 
     virtual Game operator()() const = 0;
