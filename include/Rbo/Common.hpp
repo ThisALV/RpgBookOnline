@@ -56,7 +56,6 @@ using ReplyController = std::function<void(const byte reply)>;
 using Next = std::optional<word>;
 using Instruction = std::function<Next(Gameplay& interface)>;
 using Scene = std::vector<Instruction>;
-using SceneBuilder = std::function<Scene(const Game& currentGame, const word scene)>;
 
 using Players = std::map<byte, Player*>;
 using ConstPlayers = std::map<byte, const Player*>;
@@ -82,7 +81,7 @@ using InventoriesUpdate = std::unordered_map<std::string, InventoryUpdate>;
 using StatsDescriptor = std::unordered_map<std::string, StatDescriptor>;
 using InventoriesDescriptor = std::unordered_map<std::string, InventoryDescriptor>;
 
-using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<byte>>;
+using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<>>;
 
 using Message = std::optional<std::string>;
 using Messages = std::unordered_map<std::string, Message>;

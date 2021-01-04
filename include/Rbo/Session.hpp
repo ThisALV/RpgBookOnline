@@ -57,7 +57,6 @@ struct Entrant {
 };
 
 using Entrants = std::map<byte, Entrant>;
-using ConstConnections = std::map<byte, const tcp::socket*>;
 
 // Nécessaire pour conserver les détails des lancés de dés et les envoyés aux joueurs par la suite
 struct DiceRollsDetails {
