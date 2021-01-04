@@ -19,13 +19,13 @@ std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) c
 Lobby::Lobby(io::io_context& lobby_io, const tcp::endpoint& acceptor_endpt, const GameBuilder& game_builder, const ulong prepare_delay_ms)
     : logger_ { rboLogger("Lobby") },
       lobby_io_ { lobby_io },
-      member_handling_ { lobby_io },
-      new_players_acceptor_ { lobby_io },
+      member_handling_ { lobby_io_ },
+      new_players_acceptor_ { lobby_io_ },
       acceptor_endpt_ { acceptor_endpt },
       prepare_delay_ { prepare_delay_ms },
       state_ { Closed },
-      prepare_timer_ { lobby_io },
-      session_ { lobby_io, game_builder } {}
+      prepare_timer_ { lobby_io_ },
+      session_ { lobby_io_, game_builder } {}
 
 void Lobby::logMemberError(const byte id, const ErrCode& err) {
     logger_.error("Member {} : {}", id, err.message());
