@@ -12,3 +12,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 target_include_directories(rbo PUBLIC "${RBO_INCLUDE_DIR}" "${Boost_INCLUDE_DIRS}")
 target_link_libraries(rbo PUBLIC spdlog::spdlog PRIVATE nlohmann_json::nlohmann_json)
 
+if(RBO_STATIC_WINDOWS_LIBRARIES)
+    target_link_libraries(rbo PUBLIC ws2_32 wsock32)
+endif()
+
+target_link_libraries(rbo PRIVATE nlohmann_json::nlohmann_json)
