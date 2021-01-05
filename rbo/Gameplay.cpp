@@ -84,7 +84,7 @@ std::optional<byte> Gameplay::votePlayer(const std::string& msg, const byte targ
     if (!player_number)
         return {};
 
-    const std::string& selected_name { players_name.at(*player_number) };
+    const std::string& selected_name { players_name.at(*player_number - 1) };
     const std::vector<byte> players_id { players() };
     const auto selected_player = std::find_if(players_id.cbegin(), players_id.cend(), [this, &selected_name](const byte p_id) {
         return player(p_id).name() == selected_name;
