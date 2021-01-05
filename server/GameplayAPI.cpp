@@ -65,11 +65,14 @@ uint dices(const uint dices, const uint max) {
     return result;
 }
 
-byte votePlayer(Gameplay& interface, const std::string& msg, const byte target = ACTIVE_PLAYERS) {
+std::optional<byte> votePlayer(Gameplay& interface, const std::string& msg, const byte target = ACTIVE_PLAYERS) {
     const OptionsList players_name { interface.names() };
-    const byte player_number { vote(interface.ask(target, msg, players_name)) };
+    const std::optional<byte> player_number { vote(interface.ask(target, msg, players_name)) };
 
-    const std::string& selected_name { players_name.at(player_number) };
+    if (!player_number)
+        return {};
+
+    const std::string& selected_name { players_name.at(*player_number) };
     const std::vector<byte> players_id { interface.players() };
     const auto selected_player = std::find_if(players_id.cbegin(), players_id.cend(), [&selected_name, &interface](const byte p_id) {
         return interface.player(p_id).name() == selected_name;

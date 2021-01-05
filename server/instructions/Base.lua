@@ -90,7 +90,10 @@ function Rbo.PathChoice(interface, args)
     end
 
     local selected = vote(interface:ask(ACTIVE_PLAYERS, args.message, options, not args.wait))
-    return paths:get(selected)
+
+    if selected ~= nil then -- S'il n'y a aucune réponse, alors il n'y a plus de aucun joueur vivant, inutile de continuer la partie
+        return paths:get(selected)
+    end
 end
 
 function Rbo.Checkpoint(interface, args)

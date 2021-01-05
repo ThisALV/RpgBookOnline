@@ -50,8 +50,9 @@ RandomEngine vote_rd { now() };
 
 }
 
-byte vote(const Replies& replies) {
-    assert(!replies.empty());
+std::optional<byte> vote(const Replies& replies) {
+    if (replies.empty())
+        return {};
 
     std::map<byte, byte> votes_map;
     for (const auto& reply : replies)

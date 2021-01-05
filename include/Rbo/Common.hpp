@@ -235,7 +235,7 @@ Output& operator<<(Output& out, const OutputableWrapper<Outputable>& wrapper) {
 ulong now();
 std::string itemEntry(const std::string& inventory, const std::string& item);
 std::pair<std::string, std::string> splitItemEntry(const std::string& itemEntry);
-byte vote(const Replies& requestResults);
+std::optional<byte> vote(const Replies& requestResults);
 
 spdlog::logger& rboLogger(std::string name);
 

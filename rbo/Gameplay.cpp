@@ -76,7 +76,11 @@ void Gameplay::switchLeader(const byte id) {
 }
 
 void Gameplay::voteForLeader() {
-    switchLeader(vote(ask(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)));
+    const std::optional<byte> new_leader { vote(ask(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)) };
+
+    // S'il n'y a pas de nouveau leader, alors c'est qu'il ne reste plus aucun joueur vivant, donc inutile et impossible de changer de leader.
+    if (new_leader)
+        switchLeader(*new_leader);
 }
 
 Replies Gameplay::ask(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only, const bool wait_all_replies) {
