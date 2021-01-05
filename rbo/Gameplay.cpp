@@ -56,6 +56,8 @@ OptionsList Gameplay::names() const {
     const Players players { ctx_.players() };
 
     OptionsList names;
+    names.resize(players.size());
+
     std::transform(players.cbegin(), players.cend(), names.begin(), [](const auto p) -> std::string {
         return p.second->name();
     });
