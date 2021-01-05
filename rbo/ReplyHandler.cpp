@@ -26,7 +26,7 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
     byte reply;
     try {
         if (length != 1)
-            throw InvalidReply { ReplyValidity::InavlidLengthError };
+            throw InvalidReply { ReplyValidity::InvalidLengthError };
 
         reply = replyBuffer_[0];
 

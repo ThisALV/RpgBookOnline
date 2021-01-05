@@ -30,7 +30,7 @@ enum struct Text : byte {
 };
 
 enum struct ReplyValidity : byte {
-    Ok, TooLate, OutOfRangeError, InavlidLengthError, NotConfirmError
+    Ok, TooLate, OutOfRangeError, InvalidLengthError, NotConfirmError
 };
 
 constexpr bool isInvalid(const ReplyValidity validity) {
