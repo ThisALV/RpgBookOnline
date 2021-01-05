@@ -65,23 +65,6 @@ uint dices(const uint dices, const uint max) {
     return result;
 }
 
-std::optional<byte> votePlayer(Gameplay& interface, const std::string& msg, const byte target = ACTIVE_PLAYERS) {
-    const OptionsList players_name { interface.names() };
-    const std::optional<byte> player_number { vote(interface.ask(target, msg, players_name)) };
-
-    if (!player_number)
-        return {};
-
-    const std::string& selected_name { players_name.at(*player_number) };
-    const std::vector<byte> players_id { interface.players() };
-    const auto selected_player = std::find_if(players_id.cbegin(), players_id.cend(), [&selected_name, &interface](const byte p_id) {
-        return interface.player(p_id).name() == selected_name;
-    });
-
-    assert(selected_player != players_id.cend());
-    return *selected_player;
-}
-
 }
 
 void InstructionsProvider::initGameplayAPI() {
@@ -97,6 +80,10 @@ void InstructionsProvider::initGameplayAPI() {
     gameplay_type["count"] = &Gameplay::count;
     gameplay_type["leader"] = &Gameplay::leader;
     gameplay_type["switchLeader"] = &Gameplay::switchLeader;
+    gameplay_type["votePlayer"] = sol::overload(
+            [](Gameplay& ctx, const std::string& msg) { return ctx.votePlayer(msg); },
+            &Gameplay::votePlayer
+    );
     gameplay_type["voteForLeader"] = &Gameplay::voteForLeader;
     gameplay_type["ask"] = sol::overload(
             [](Gameplay& ctx, const byte target, const std::string& msg, const OptionsList& options) {
@@ -155,10 +142,6 @@ void InstructionsProvider::initGameplayAPI() {
     ctx_["toBoolean"] = toBoolean;
     ctx_["applyToGlobal"] = applyToGlobal;
     ctx_["dices"] = dices;
-    ctx_["votePlayer"] = sol::overload(
-        [](Gameplay& interface, const std::string& msg) { return votePlayer(interface, msg); },
-        votePlayer
-    );
     ctx_["ALL_PLAYERS"] = ALL_PLAYERS;
     ctx_["ACTIVE_PLAYERS"] = ACTIVE_PLAYERS;
     ctx_["YES"] = YES;

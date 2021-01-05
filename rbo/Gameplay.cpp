@@ -75,6 +75,23 @@ void Gameplay::switchLeader(const byte id) {
     ctx_.switchLeader(id);
 }
 
+std::optional<byte> Gameplay::votePlayer(const std::string& msg, const byte target) {
+    const OptionsList players_name { names() };
+    const std::optional<byte> player_number { vote(ask(target, msg, players_name)) };
+
+    if (!player_number)
+        return {};
+
+    const std::string& selected_name { players_name.at(*player_number) };
+    const std::vector<byte> players_id { players() };
+    const auto selected_player = std::find_if(players_id.cbegin(), players_id.cend(), [this, &selected_name](const byte p_id) {
+        return player(p_id).name() == selected_name;
+    });
+
+    assert(selected_player != players_id.cend());
+    return *selected_player;
+}
+
 void Gameplay::voteForLeader() {
     const std::optional<byte> new_leader { vote(ask(ACTIVE_PLAYERS, "Qui doit devenir leader ?", names(), true)) };
 

@@ -38,8 +38,9 @@ public:
     // Throw : UninitializedLeader
     byte leader() const;
     // Throw : NoPlayerRemaining
-    void switchLeader(const byte leader);
+    std::optional<byte> votePlayer(const std::string& message, const byte target = ACTIVE_PLAYERS);
     void voteForLeader();
+    void switchLeader(const byte leader);
 
     // ask - Throw : NoPlayerRemaining
     Replies ask(const byte target, const std::string& msg, const OptionsList& options, const bool first_reply_only = false, const bool wait_all_replies = false);
