@@ -27,6 +27,7 @@ void LobbyExecutor::runExecutor() {
 
             logger_.critical(err.what());
             error_ = true;
+            stop_handler_done_ = true;
         }
     }
 }
