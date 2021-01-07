@@ -35,7 +35,7 @@ BOOL WINAPI StopHandler(DWORD event) {
 
 
 int main(const int argc, const char* argv[]) {
-    const std::string usage { "Usage : <ip> <port> <threads> <prepare_delay (ms)>" };
+    constexpr std::string_view usage { "Usage : <ip> <port> <threads> <prepare_delay (ms)>" };
 
     if (argc != 5) {
         std::cerr << usage << std::endl;
