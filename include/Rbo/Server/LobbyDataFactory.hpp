@@ -19,7 +19,7 @@ enum struct YesNoQuestion : byte {
 };
 
 enum struct SessionResult : byte {
-    Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer
+    Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer, NoPlayerAlive
 };
 
 constexpr bool isInvalidIDs(const SessionResult result) {
@@ -27,7 +27,7 @@ constexpr bool isInvalidIDs(const SessionResult result) {
 }
 
 constexpr bool isParametersError(const SessionResult result) {
-    return result == SessionResult::CheckpointLoadingError || isInvalidIDs(result);
+    return result == SessionResult::CheckpointLoadingError || result == SessionResult::NoPlayerAlive || isInvalidIDs(result);
 }
 
 struct LobbyDataFactory : DataFactory {

@@ -32,6 +32,10 @@ struct CanceledRequest : std::exception {
     const char* what() const noexcept override;
 };
 
+struct NoEntrantAlive : std::logic_error {
+    NoEntrantAlive() : std::logic_error { "None of the current entrants is saved as alive in this checkpoint" } {}
+};
+
 enum struct EntrantsValidity {
     Ok, UnknownPlayer, LessMembers
 };

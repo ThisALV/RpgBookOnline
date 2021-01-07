@@ -174,6 +174,7 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
     }
 
     const EntrantsValidity entrants_validity { checkEntrants(checkpoint, missing_entrants) };
+
     if (entrants_validity != EntrantsValidity::Ok) {
         std::vector<byte> expected_players;
         expected_players.resize(checkpoint.players.size(), 0);
@@ -192,6 +193,9 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
             assert(missing_entrants);
     }
 
+    if (std::none_of(players_.cbegin(), players_.cend(), [](const auto& p) { return p.second.alive(); }))
+        throw NoEntrantAlive {};
+
     if (players_.count(checkpoint.leader))
         switchLeader(checkpoint.leader);
 
@@ -199,24 +203,17 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
 }
 
 EntrantsValidity Session::checkEntrants(const GameState& checkpoint, const bool missing_entrants) const {
-    EntrantsValidity entrants_validity { EntrantsValidity::Ok };
     for (const auto& player : players_) {
-        if (checkpoint.players.count(player.first) == 0) {
-            entrants_validity = EntrantsValidity::UnknownPlayer;
-            break;
-        }
+        if (checkpoint.players.count(player.first) == 0)
+            return EntrantsValidity::UnknownPlayer;
     }
 
-    if (entrants_validity == EntrantsValidity::Ok) {
-        for (const auto& [id, p_state] : checkpoint.players) {
-            if (players_.count(id) == 0 && !missing_entrants) {
-                entrants_validity = EntrantsValidity::LessMembers;
-                break;
-            }
-        }
+    for (const auto& [id, p_state] : checkpoint.players) {
+        if (players_.count(id) == 0 && !missing_entrants)
+            return EntrantsValidity::LessMembers;
     }
 
-    return entrants_validity;
+    return EntrantsValidity::Ok;
 }
 
 void Session::initPlayer(Player& target) {

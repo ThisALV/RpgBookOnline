@@ -540,6 +540,11 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         }
 
         break;
+    case SessionResult::NoPlayerAlive:
+        if (askYesNo(YesNoQuestion::RetryCheckpoint))
+            makeSession();
+
+        break;
     }
 }
 
@@ -563,7 +568,10 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants
         logger_.info("Session end.");
     } catch (const CheckpointLoadingError& err) {
         logger_.error("Unable to load checkpoint \"{}\" : {}", chkpt_name, err.what());
-        return { SessionResult::CheckpointLoadingError, std::move(entrants) };
+        return {SessionResult::CheckpointLoadingError, std::move(entrants)};
+    } catch (const NoEntrantAlive& err) {
+        logger_.error("For \"{}\" : {}", chkpt_name, err.what());
+        return { SessionResult::NoPlayerAlive, std::move(entrants) };
     } catch (const InvalidIDs& err) {
         Run run;
         run.expectedIDs = err.expectedIDs;
