@@ -41,7 +41,7 @@ private:
     InstructionsProvider provider_;
 
 public:
-    LocalGameBuilder(const fs::path& game_file, const fs::path& checkpts_file, const fs::path& scenes_file, const fs::path& instructions_dir);
+    LocalGameBuilder(fs::path game_file, fs::path checkpts_file, fs::path scenes_file, const fs::path& instructions_dir);
     ~LocalGameBuilder() override = default;
 
     LocalGameBuilder(const LocalGameBuilder&) = delete;

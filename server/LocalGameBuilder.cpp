@@ -4,15 +4,16 @@
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
 #include <Rbo/JsonSerialization.hpp>
+#include <utility>
 
 namespace Rbo::Server {
 
 namespace { RandomEngine chkpt_id_rd { now() }; }
 
-LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts, const fs::path& scenes, const fs::path& scripts_dir)
-    : game_ { game },
-      chkpts_ { chkpts },
-      scenes_ { scenes },
+LocalGameBuilder::LocalGameBuilder(fs::path game_file, fs::path checkpts_file, fs::path scenes_file, const fs::path& instructions_dir)
+    : game_ { std::move(game_file) },
+      chkpts_ { std::move(checkpts_file) },
+      scenes_ { std::move(scenes_file) },
       logger_ { rboLogger("GameBuilder") },
       exec_ctx_ {},
       provider_ { exec_ctx_, logger_ }
@@ -26,10 +27,10 @@ LocalGameBuilder::LocalGameBuilder(const fs::path& game, const fs::path& chkpts,
     logger_.info("Scenes loaded.");
 
     logger_.info("Reading instructions...");
-    if (!fs::is_directory(scripts_dir))
+    if (!fs::is_directory(instructions_dir))
         throw std::invalid_argument { "Given script directory isn't a directory" };
 
-    const fs::directory_iterator scripts { scripts_dir, fs::directory_options::skip_permission_denied };
+    const fs::directory_iterator scripts {instructions_dir, fs::directory_options::skip_permission_denied };
 
     for (const fs::directory_entry& entry : scripts) {
         if (!fs::is_regular_file(entry) || entry.path().extension() != ".lua") {
