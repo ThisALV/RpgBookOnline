@@ -22,8 +22,13 @@ enum struct SessionResult : byte {
     Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer
 };
 
-bool isParametersError(const SessionResult result);
-bool isInvalidIDs(const SessionResult result);
+constexpr bool isInvalidIDs(const SessionResult result) {
+    return result == SessionResult::LessMembers || result == SessionResult::UnknownPlayer;
+}
+
+constexpr bool isParametersError(const SessionResult result) {
+    return result == SessionResult::CheckpointLoadingError || isInvalidIDs(result);
+}
 
 struct LobbyDataFactory : DataFactory {
     void makeRegistration(const RegistrationResult result);

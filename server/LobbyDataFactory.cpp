@@ -2,14 +2,6 @@
 
 namespace Rbo::Server {
 
-bool isParametersError(const SessionResult result) {
-    return static_cast<byte>(result) > 1;
-}
-
-bool isInvalidIDs(const SessionResult result) {
-    return static_cast<byte>(result) > 2;
-}
-
 void LobbyDataFactory::makeRegistration(const RegistrationResult result) {
     data_.add(result);
 }
