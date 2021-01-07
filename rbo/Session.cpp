@@ -188,10 +188,8 @@ word Session::gameFromCheckpoint(const std::string& final_name, const bool missi
     for (const auto& [player_id, state] : checkpoint.players) {
         if (players_.count(player_id) == 1)
             restorePlayer(player_id, state);
-#ifndef NDEBUG // Pour éviter d'avoir un bloc else vide
         else
             assert(missing_entrants);
-#endif
     }
 
     if (players_.count(checkpoint.leader))
