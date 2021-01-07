@@ -9,7 +9,7 @@
 
 namespace Rbo {
 
-InvalidIDs::InvalidIDs(const std::vector<byte>& expected_ids, const EntrantsValidity type) : std::logic_error { "Invalid IDs" }, expectedIDs { expected_ids }, errType { type } {
+InvalidIDs::InvalidIDs(std::vector<byte> expected_ids, const EntrantsValidity type) : std::logic_error { "Invalid IDs" }, expectedIDs { std::move(expected_ids) }, errType { type } {
     assert(type != EntrantsValidity::Ok);
 
     msg = "Expected IDs :";
@@ -117,7 +117,7 @@ void Session::end(Entrants& entrants) {
     }
 
     stop();
-};
+}
 
 word Session::newGame() {
     logger_.info("New game on \"{}\".", game().name);

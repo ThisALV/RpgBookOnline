@@ -42,7 +42,7 @@ struct InvalidIDs : std::logic_error {
 
     std::string msg;
 
-    InvalidIDs(const std::vector<byte>& expectedIDs, const EntrantsValidity errType);
+    InvalidIDs(std::vector<byte> expectedIDs, const EntrantsValidity errType);
 
     const char* what() const noexcept override { return msg.data(); }
 };

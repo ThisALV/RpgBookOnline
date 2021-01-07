@@ -4,7 +4,6 @@
 #include <spdlog/logger.h>
 #include <spdlog/fmt/ostr.h>
 #include <Rbo/JsonSerialization.hpp>
-#include <utility>
 
 namespace Rbo::Server {
 
