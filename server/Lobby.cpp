@@ -218,7 +218,7 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
     registering_buffers_.insert({ client_endpt, ReceiveBuffer {} });
     registering_buffers_.at(client_endpt).fill(0);
 
-    registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) mutable {
+    registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) {
         if (name_err) {
             logRegisteringError(client_endpt, name_err);
             return;
