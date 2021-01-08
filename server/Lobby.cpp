@@ -49,9 +49,13 @@ void Lobby::disconnect(const byte id, const bool crash) {
     members_.erase(id);
     connections_.erase(id);
 
-    if (members().empty() && isStarting())
+    if (!isClosed())
+        updateMaster();
+
+    const bool empty_lobby { members().empty() };
+    if (empty_lobby && isStarting())
         cancelPreparation();
-    else if (!members().empty() && isOpen() && allMembersReady())
+    else if (!empty_lobby && isOpen() && allMembersReady())
         preparation();
 
     LobbyDataFactory disconnect_data;
@@ -148,6 +152,10 @@ void Lobby::open() {
     open_data.makeState(State::Open);
 
     sendToAll(open_data.dataWithLength());
+
+    master_.emptyLobby();
+    updateMaster();
+
     acceptMember();
     logger_.info("Opened.");
 
@@ -269,6 +277,8 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
         registering_.erase(client_endpt);
         registering_buffers_.erase(client_endpt);
 
+        updateMaster();
+
         listenMember(id);
     }));
 }
@@ -339,12 +349,13 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 }
 
 void Lobby::sendToAllMasterHandling(const Data& data) {
-    const bool was_here { registered(master_) };
+    const bool was_here { master_.exists() };
+    const std::optional<byte> prev_master { master_.get() };
 
     sendToAll(data);
 
-    if (was_here && !registered(master_))
-        throw MasterDisconnected { master_ };
+    if (was_here && (!master_.exists() || *prev_master != master_ ))
+        throw MasterDisconnected { *prev_master };
 }
 
 ReceiveBuffer Lobby::receiveFromMaster() {
@@ -366,20 +377,51 @@ ReceiveBuffer Lobby::receiveFromMaster() {
     if (isClosed())
         connections_.at(master_).cancel();
 
-    if (receive_err) {
-        disconnect(master_, true);
-        throw MasterDisconnected { master_ };
-    }
+    if (receive_err)
+        disconnectMaster();
 
     return buffer;
 }
 
 void Lobby::sendToMaster(const Data& data) {
     const ErrCode send_err { trySend(connections_.at(master_), trunc(data)) };
-    if (send_err) {
-        disconnect(master_, true);
-        throw MasterDisconnected { master_ };
+
+    if (send_err)
+        disconnectMaster();
+}
+
+void Lobby::updateMaster() {
+    bool updated;
+    if (members().empty()) {
+        updated = master_.exists();
+        master_.emptyLobby();
+
+        if (updated)
+            logger_.info("Not any master member, lobby is empty.");
+    } else {
+        const std::optional<byte> prev_master { master_.get() };
+        master_ = members().cbegin()->first;
+
+        updated = !prev_master || *prev_master != master_;
+        if (updated)
+            logger_.info("New master member is [{}].", master_);
     }
+
+    if (updated) {
+        LobbyDataFactory master_data;
+        master_data.makeMasterSwitch(master_);
+
+        sendToAll(master_data.dataWithLength());
+    }
+}
+
+void Lobby::disconnectMaster() {
+    assert(master_.exists());
+
+    const byte master { master_ };
+    disconnect(master, true);
+
+    throw MasterDisconnected { master };
 }
 
 std::string Lobby::askCheckpoint() {
@@ -424,8 +466,6 @@ void Lobby::launchPreparation() {
     cancelling_lock.unlock();
 
     try {
-        master_ = members().cbegin()->first;
-
         LobbyDataFactory prepare_data;
         prepare_data.makePrepare(master_);
 

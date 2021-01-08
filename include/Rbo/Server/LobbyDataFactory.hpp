@@ -1,6 +1,7 @@
 #include <Rbo/Server/ServerCommon.hpp>
 
 #include <Rbo/Data.hpp>
+#include "ServerCommon.hpp"
 
 namespace Rbo::Server {
 
@@ -11,7 +12,7 @@ enum struct RegistrationResult : byte {
 enum struct State : byte {
     MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
     AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing,
-    SelectingCheckpoint, CheckingPlayers, RevisingParameters
+    SelectingCheckpoint, CheckingPlayers, RevisingParameters, MasterSwitch
 };
 
 enum struct YesNoQuestion : byte {
@@ -20,6 +21,10 @@ enum struct YesNoQuestion : byte {
 
 enum struct SessionResult : byte {
     Ok, Crashed, CheckpointLoadingError, LessMembers, UnknownPlayer, NoPlayerAlive
+};
+
+enum struct MasterSwitch : byte {
+    NewMaster, NotAnyMaster
 };
 
 constexpr bool isInvalidIDs(const SessionResult result) {
@@ -43,6 +48,7 @@ struct LobbyDataFactory : DataFactory {
     void makeResult(const SessionResult result);
     void makeRegistered(const MembersStates& members);
     void makeInvalidIDs(const SessionResult result, const std::vector<byte>& expected);
+    void makeMasterSwitch(const Master& new_master);
 };
 
 } // namespace Rbo::Server

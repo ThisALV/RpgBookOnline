@@ -72,4 +72,15 @@ void LobbyDataFactory::makeInvalidIDs(const SessionResult result, const std::vec
         data_.add(id);
 }
 
+void LobbyDataFactory::makeMasterSwitch(const Master& new_master) {
+    makeState(State::MasterSwitch);
+
+    if (new_master.exists()) {
+        data_.add(MasterSwitch::NewMaster);
+        data_.add(new_master.load());
+    } else {
+        data_.add(MasterSwitch::NotAnyMaster);
+    }
+}
+
 } // namespace Rbo::Server

@@ -56,18 +56,20 @@ private:
     std::atomic<LobbyState> state_;
     io::steady_timer prepare_timer_;
     Session session_;
-    byte master_;
+    Master master_;
 
     void disconnect(const byte member_id, const bool is_crash = false);
     void sendToAll(const Data& data);
     void sendToAllMasterHandling(const Data& data);
     ReceiveBuffer receiveFromMaster();
     void sendToMaster(const Data& data);
-
     void acceptMember();
+
     void listenMember(const byte id);
     void registerMember(const ErrCode err, tcp::socket connection);
     void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t request_len);
+    void updateMaster();
+    void disconnectMaster();
     void launchPreparation();
     void makeSession(const std::optional<std::string>& checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
     Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);
