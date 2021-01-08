@@ -80,7 +80,7 @@ private:
     void logMemberError(const byte member_id, const ErrCode& err);
     void logRegisteringError(const tcp::endpoint& client, const ErrCode& err);
 public:
-    Lobby(io::io_context& execution_ctx, const tcp::endpoint& server, const GameBuilder& game_builder, const ulong prepare_delay_ms = 5000);
+    Lobby(io::io_context& lobby_io, tcp::endpoint acceptor_endpt, const GameBuilder& game_builder, const ulong prepare_delay_ms = 5000);
 
     Lobby(const Lobby&) = delete;
     Lobby& operator=(const Lobby&) = delete;
