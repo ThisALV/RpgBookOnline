@@ -38,19 +38,20 @@ private:
         Open, Starting, Preparing, Running, Closed
     };
 
+    const std::chrono::milliseconds prepare_delay_;
+    const tcp::endpoint acceptor_endpt_;
+
     spdlog::logger& logger_;
     io::io_context& lobby_io_;
     io::io_context::strand member_handling_;
     tcp::acceptor new_players_acceptor_;
-    tcp::endpoint acceptor_endpt_;
 
     MembersStates members_;
     MembersConnection connections_;
     RemoteEndptHashmap<tcp::socket> registering_;
     RemoteEndptHashmap<ReceiveBuffer> registering_buffers_;
-    std::map<byte, ReceiveBuffer> request_buffers_;
 
-    std::chrono::milliseconds prepare_delay_;
+    std::map<byte, ReceiveBuffer> request_buffers_;
     std::mutex close_;
     std::mutex request_cancelling_;
     std::atomic<LobbyState> state_;
