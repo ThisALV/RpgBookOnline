@@ -31,7 +31,7 @@ void Lobby::logMemberError(const byte id, const ErrCode& err) {
     logger_.error("Member {} : {}", id, err.message());
 }
 
-void Lobby::logRegisteringError(const tcp::endpoint client, const ErrCode& err) {
+void Lobby::logRegisteringError(const tcp::endpoint& client, const ErrCode& err) {
     logger_.error("Registration of {} : {}", client, err.message());
 }
 
