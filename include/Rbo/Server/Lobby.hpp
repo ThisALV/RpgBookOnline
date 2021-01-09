@@ -68,6 +68,7 @@ private:
 
     void listenMember(const byte id);
     void registerMember(const ErrCode err, tcp::socket connection);
+    void handleRegistrationRequest(const tcp::endpoint& client_endpt, const ErrCode& name_err);
     void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t request_len);
     void updateMaster();
     void disconnectMaster();

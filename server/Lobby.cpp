@@ -219,68 +219,72 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
     registering_buffers_.at(client_endpt).fill(0);
 
     registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) {
-        if (name_err) {
-            logRegisteringError(client_endpt, name_err);
-            return;
-        }
-
-        const ReceiveBuffer& id_name_buffer { registering_buffers_.at(client_endpt) };
-        const byte id { id_name_buffer.at(0) };
-
-        std::string name;
-        for (std::size_t pos { 1 }; id_name_buffer[pos] != 0; pos++)
-            name += id_name_buffer[pos];
-
-        RegistrationResult registration { RegistrationResult::Ok };
-        if (isStarting())
-            registration = RegistrationResult::UnavailableSession;
-        else if (name.empty())
-            registration = RegistrationResult::InvalidRequest;
-        else if (registered(id))
-            registration = RegistrationResult::UnavailableID;
-        else if (registered(name))
-            registration = RegistrationResult::UnavailableName;
-
-        LobbyDataFactory registration_data;
-        if (registration == RegistrationResult::Ok)
-            registration_data.makeRegistered(members());
-        else
-            registration_data.makeRegistration(registration);
-
-        const ErrCode send_register_err { trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength())) };
-
-        if (send_register_err) {
-            logRegisteringError(client_endpt, send_register_err);
-            return;
-        }
-
-        if (registration != RegistrationResult::Ok) {
-            logger_.warn("Unable to register [{}] : {}", client_endpt, static_cast<int>(registration));
-            registering_.at(client_endpt).shutdown(tcp::socket::shutdown_both);
-            registering_.erase(client_endpt);
-
-            return;
-        }
-
-        logger_.info("Successful registration for \"{}\" [{}] ({}).", name, id, client_endpt);
-        LobbyDataFactory new_player_data;
-        new_player_data.makeNewMember(id, name);
-
-        sendToAll(new_player_data.dataWithLength());
-
-        members_.insert({ id, Member { name, false } });
-        connections_.insert({ id, std::move(registering_.at(client_endpt)) });
-
-        request_buffers_.insert({ id, ReceiveBuffer {} });
-        request_buffers_.at(id).fill(0);
-
-        registering_.erase(client_endpt);
-        registering_buffers_.erase(client_endpt);
-
-        updateMaster();
-
-        listenMember(id);
+        handleRegistrationRequest(client_endpt, name_err);
     }));
+}
+
+void Lobby::handleRegistrationRequest(const tcp::endpoint& client_endpt, const ErrCode& name_err) {
+    if (name_err) {
+        logRegisteringError(client_endpt, name_err);
+        return;
+    }
+
+    const ReceiveBuffer& id_name_buffer {registering_buffers_.at(client_endpt) };
+    const byte id { id_name_buffer.at(0) };
+
+    std::string name;
+    for (std::size_t pos { 1 }; id_name_buffer[pos] != 0; pos++)
+        name += id_name_buffer[pos];
+
+    RegistrationResult registration { RegistrationResult::Ok };
+    if (isStarting())
+        registration = RegistrationResult::UnavailableSession;
+    else if (name.empty())
+        registration = RegistrationResult::InvalidRequest;
+    else if (registered(id))
+        registration = RegistrationResult::UnavailableID;
+    else if (registered(name))
+        registration = RegistrationResult::UnavailableName;
+
+    LobbyDataFactory registration_data;
+    if (registration == RegistrationResult::Ok)
+        registration_data.makeRegistered(members());
+    else
+        registration_data.makeRegistration(registration);
+
+    const ErrCode send_register_err { trySend(registering_.at(client_endpt), trunc(registration_data.dataWithLength())) };
+
+    if (send_register_err) {
+        logRegisteringError(client_endpt, send_register_err);
+        return;
+    }
+
+    if (registration != RegistrationResult::Ok) {
+        logger_.warn("Unable to register [{}] : {}", client_endpt, static_cast<int>(registration));
+        registering_.at(client_endpt).shutdown(tcp::socket::shutdown_both);
+        registering_.erase(client_endpt);
+
+        return;
+    }
+
+    logger_.info("Successful registration for \"{}\" [{}] ({}).", name, id, client_endpt);
+    LobbyDataFactory new_player_data;
+    new_player_data.makeNewMember(id, name);
+
+    sendToAll(new_player_data.dataWithLength());
+
+    members_.insert({id, Member {name, false } });
+    connections_.insert({id, std::move(registering_.at(client_endpt)) });
+
+    request_buffers_.insert({id, ReceiveBuffer {} });
+    request_buffers_.at(id).fill(0);
+
+    registering_.erase(client_endpt);
+    registering_buffers_.erase(client_endpt);
+
+    updateMaster();
+
+    listenMember(id);
 }
 
 enum struct MemberRequest : byte {
