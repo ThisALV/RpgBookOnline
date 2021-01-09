@@ -76,8 +76,8 @@ private:
     void makeSession(const std::optional<std::string>& checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
     Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);
 
-    void preparation();
-    void cancelPreparation(const bool is_crash = false);
+    void beginCountdown();
+    void cancelCountdown(const bool is_crash = false);
     std::string askCheckpoint();
     bool askYesNo(const YesNoQuestion question);
 

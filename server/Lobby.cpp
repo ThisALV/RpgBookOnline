@@ -54,9 +54,9 @@ void Lobby::disconnect(const byte id, const bool crash) {
 
     const bool empty_lobby { members().empty() };
     if (empty_lobby && isStarting())
-        cancelPreparation();
+        cancelCountdown();
     else if (!empty_lobby && isOpen() && allMembersReady())
-        preparation();
+        beginCountdown();
 
     LobbyDataFactory disconnect_data;
     if (crash)
@@ -102,16 +102,16 @@ bool Lobby::ready(const byte id) const {
     return members().at(id).ready;
 }
 
-void Lobby::preparation() {
-    logger_.info("Session preparation into {} ms...", prepare_delay_.count());
+void Lobby::beginCountdown() {
+    logger_.info("Session beginCountdown into {} ms...", prepare_delay_.count());
 
     state_ = Starting;
     prepare_timer_.expires_after(prepare_delay_);
     prepare_timer_.async_wait([this](const ErrCode err) {
         if (err) {
             if (!(err == io::error::basic_errors::operation_aborted && isOpen())) {
-                cancelPreparation(true);
-                logger_.error("Unexpected preparation cancellation : {}", err.message());
+                cancelCountdown(true);
+                logger_.error("Unexpected beginCountdown cancellation : {}", err.message());
             }
 
             return;
@@ -126,9 +126,9 @@ void Lobby::preparation() {
     sendToAll(preparation_data.dataWithLength());
 }
 
-void Lobby::cancelPreparation(const bool crash) {
+void Lobby::cancelCountdown(const bool is_crash) {
     state_ = Open;
-    if (!crash)
+    if (!is_crash)
         prepare_timer_.cancel();
 
     logger_.info("Preparation cancelled !");
@@ -338,9 +338,9 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
         sendToAll(ready_data.dataWithLength());
 
         if (!isStarting() && allMembersReady() && !members().empty())
-            preparation();
+            beginCountdown();
         else if (isStarting() && !allMembersReady())
-            cancelPreparation();
+            cancelCountdown();
 
         break;
     } case MemberRequest::Disconnect:
