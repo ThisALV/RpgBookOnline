@@ -352,7 +352,7 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
     listenMember(id);
 }
 
-void Lobby::sendToAllMasterHandling(const Data& data) {
+void Lobby::safeSendToAll(const Data& data) {
     const bool was_here { master_.exists() };
     const std::optional<byte> prev_master { master_.get() };
 
@@ -474,7 +474,7 @@ void Lobby::launchPreparation() {
         prepare_data.makePrepare(master_);
 
         logger_.info("Preparing session, master member is {}.", master_);
-        sendToAllMasterHandling(prepare_data.dataWithLength());
+        safeSendToAll(prepare_data.dataWithLength());
 
         const std::lock_guard close_guard { close_ };
         makeSession();
@@ -506,7 +506,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         LobbyDataFactory select_chkpt_data;
         select_chkpt_data.makeState(State::SelectingCheckpoint);
 
-        sendToAllMasterHandling(select_chkpt_data.dataWithLength());
+        safeSendToAll(select_chkpt_data.dataWithLength());
 
         requested_chkpt = askCheckpoint();
     }
@@ -515,7 +515,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         LobbyDataFactory checking_players_data;
         checking_players_data.makeState(State::CheckingPlayers);
 
-        sendToAllMasterHandling(checking_players_data.dataWithLength());
+        safeSendToAll(checking_players_data.dataWithLength());
 
         missing_entrants = !requested_chkpt.empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
@@ -538,13 +538,13 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
     else
         run_data.makeResult(run.result);
 
-    sendToAllMasterHandling(run_data.dataWithLength());
+    safeSendToAll(run_data.dataWithLength());
 
     if (isParametersError(run.result)) {
         LobbyDataFactory revising_session_data;
         revising_session_data.makeState(State::RevisingParameters);
 
-        sendToAllMasterHandling(revising_session_data.dataWithLength());
+        safeSendToAll(revising_session_data.dataWithLength());
     }
 
     switch (run.result) {
@@ -598,7 +598,7 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants
 
     logger_.info("Starting session...");
     logger_.trace("Checkpoint=\"{}\" ; Missing entrants ? {}", chkpt_name, missing_entrants);
-    sendToAllMasterHandling(start_data.dataWithLength());
+    safeSendToAll(start_data.dataWithLength());
 
     Entrants entrants;
     for (const auto& [id, member] : members())

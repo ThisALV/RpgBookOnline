@@ -61,7 +61,7 @@ private:
 
     void disconnect(const byte member_id, const bool is_crash = false);
     void sendToAll(const Data& data);
-    void sendToAllMasterHandling(const Data& data);
+    void safeSendToAll(const Data& data);
     ReceiveBuffer receiveFromMaster();
     void sendToMaster(const Data& data);
     void acceptMember();
