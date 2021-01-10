@@ -1,6 +1,5 @@
 #include <spdlog/logger.h>
-#include <Rbo/Server/Lobby.hpp>
-#include <Rbo/Server/LobbyExecutor.hpp>
+#include <Rbo/Server/Executor.hpp>
 #include <Rbo/Server/LocalGameBuilder.hpp>
 
 #if defined(WIN32) || defined(_WIN32)
@@ -35,16 +34,15 @@ BOOL WINAPI StopHandler(DWORD event) {
 
 
 int main(const int argc, const char* argv[]) {
-    constexpr std::string_view usage { "Usage : <ip> <port> <threads> <prepare_delay (ms)>" };
+    constexpr std::string_view usage { "Usage : <ip> <port> <prepare_delay (ms)>" };
 
-    if (argc != 5) {
+    if (argc != 4) {
         std::cerr << usage << std::endl;
         return 1;
     }
 
     const std::string ip { argv[1] };
     ushort port;
-    ulong threads;
     ulong prepare_delay;
 
     try {
@@ -52,8 +50,7 @@ int main(const int argc, const char* argv[]) {
             throw std::logic_error { "Unknown IP protocol" };
 
         port = std::stoi(std::string { argv[2] });
-        threads = std::stoul(std::string { argv[3] });
-        prepare_delay = std::stoul(std::string { argv[4] });
+        prepare_delay = std::stoul(std::string { argv[3] });
     } catch (const std::logic_error&) {
         std::cerr << usage << std::endl;
         return 1;
@@ -65,26 +62,24 @@ int main(const int argc, const char* argv[]) {
     try {
         logger.info("Starting server...");
 
-        const Rbo::Server::LocalGameBuilder game_builder {
-            "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
+        const Rbo::Server::LocalGameBuilder game_builder{
+                "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
         };
 
         Rbo::io::io_context server;
-        Rbo::Server::Lobby lobby {
-            server,
-            Rbo::tcp::endpoint { ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port },
-            game_builder,
-            prepare_delay
+        Rbo::Server::Lobby lobby{
+                server,
+                Rbo::tcp::endpoint{ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port},
+                prepare_delay
         };
 
-        Rbo::Server::LobbyExecutor executor { threads, server, lobby, logger };
+        Rbo::Server::Executor executor{server, lobby, logger};
 
         const auto stop_handler = [&executor, &logger](const Rbo::ErrCode err, const int sig) {
             std::cout << "\b\b";
 
-            if (err) {
-                throw std::runtime_error { "Impossible shutdown " + std::to_string(sig) + " : " + err.message() };
-            }
+            if (err)
+                throw std::runtime_error{"Impossible shutdown " + std::to_string(sig) + " : " + err.message()};
 
             logger.debug("Shutdown signal : {}", sig);
             executor.stop();
@@ -96,20 +91,20 @@ int main(const int argc, const char* argv[]) {
         if (!SetConsoleCtrlHandler(StopHandler, TRUE))
             logger.warn("Stop handler initialization failed");
 #else
-        Rbo::io::signal_set stop_sigs_handler { server, STOP_SIGS };
+        Rbo::io::signal_set stop_sigs_handler {server, STOP_SIGS};
         stop_sigs_handler.async_wait(stop_handler);
 #endif
 
-        done = executor.start();
-    } catch (const boost::system::system_error& err) {
-        logger.critical(err.what());
-        return 3;
+        done = executor.start(game_builder);
     } catch (const Rbo::Server::ScriptLoadingError& err) {
         logger.critical(err.what());
         return 2;
     } catch (const Rbo::Server::GameLoadingError& err) {
         logger.critical(err.what());
         return 2;
+    } catch (const std::exception& err) {
+        logger.critical(err.what());
+        return 3;
     }
 
     if (!done)

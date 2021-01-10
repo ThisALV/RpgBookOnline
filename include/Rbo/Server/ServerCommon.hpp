@@ -2,6 +2,8 @@
 #define SERVER_COMMONS
 
 #include <Rbo/Common.hpp>
+
+#include <atomic>
 #include <Rbo/Server/ServerCommon.hpp>
 #include <Rbo/Session.hpp>
 

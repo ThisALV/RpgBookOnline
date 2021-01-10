@@ -5,9 +5,8 @@
 
 namespace Rbo {
 
-ReplyHandler::ReplyHandler(io::io_context::strand& exectuor, spdlog::logger& logger, const RequestCtxPtr ctx, const ReplyController controller, const byte p_id)
-    : executor_ { &exectuor },
-      logger_ { &logger },
+ReplyHandler::ReplyHandler(spdlog::logger& logger, const RequestCtxPtr ctx, const ReplyController controller, const byte p_id)
+    : logger_ { &logger },
       ctx_ { ctx },
       controlValidity { controller },
       playerID_ { p_id } {}
@@ -97,9 +96,9 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 
 void ReplyHandler::listenReply() {
     logger_->debug("Listening reply for [{}]...", playerID_);
-    ctx_->players.at(playerID_).connection->async_receive(io::buffer(replyBuffer_), io::bind_executor(*executor_, [this](const ErrCode err, const std::size_t len) {
+    ctx_->players.at(playerID_).connection->async_receive(io::buffer(replyBuffer_), [this](const ErrCode err, const std::size_t len) {
         handleReply(err, len);
-    }));
+    });
 }
 
 void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {

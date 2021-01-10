@@ -38,7 +38,7 @@ public:
         NetworkError(const std::string& operation, const ErrCode& err) : std::runtime_error { operation + " : " + err.category().name() + (" - " + err.message()) } {}
     };
 
-    ReplyHandler(io::io_context::strand& handlersExecutor, spdlog::logger& sessionlogger, const RequestCtxPtr ctx, const ReplyController controller, const byte player);
+    ReplyHandler(spdlog::logger& logger, const RequestCtxPtr ctx, const ReplyController controller, const byte p_id);
 
     ReplyHandler(const ReplyHandler&) = delete;
     ReplyHandler& operator=(const ReplyHandler&) = delete;
@@ -51,7 +51,6 @@ public:
     void handle(const ErrCode error, const std::size_t);
 
 private:
-    io::io_context::strand* executor_;
     spdlog::logger* logger_;
     RequestCtxPtr ctx_;
     ReplyController controlValidity;

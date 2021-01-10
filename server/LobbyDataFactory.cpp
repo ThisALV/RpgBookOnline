@@ -6,48 +6,48 @@ void LobbyDataFactory::makeRegistration(const RegistrationResult result) {
     data_.add(result);
 }
 
-void LobbyDataFactory::makeState(const State state) {
-    data_.add(state);
+void LobbyDataFactory::makeEvent(const Event event) {
+    data_.add(event);
 }
 
 void LobbyDataFactory::makePreparing(const ulong delay) {
-    makeState(State::Preparing);
+    makeEvent(Event::Preparing);
     data_.putNumeric(delay);
 }
 
 void LobbyDataFactory::makeNewMember(const byte id, const std::string& name) {
-    makeState(State::MemberRegistered);
+    makeEvent(Event::MemberRegistered);
     data_.add(id);
     data_.put(name);
 }
 
 void LobbyDataFactory::makeReady(const byte id) {
-    makeState(State::MemberReady);
+    makeEvent(Event::MemberReady);
     data_.add(id);
 }
 
 void LobbyDataFactory::makeDisconnect(const byte id) {
-    makeState(State::MemberDisconnected);
+    makeEvent(Event::MemberDisconnected);
     data_.add(id);
 }
 
 void LobbyDataFactory::makePrepare(const byte id) {
-    makeState(State::Prepare);
+    makeEvent(Event::Prepare);
     data_.add(id);
 }
 
 void LobbyDataFactory::makeCrash(const byte id) {
-    makeState(State::MemberCrashed);
+    makeEvent(Event::MemberCrashed);
     data_.add(id);
 }
 
 void LobbyDataFactory::makeResult(const SessionResult result) {
-    makeState(State::RunResult);
+    makeEvent(Event::RunResult);
     data_.add(result);
 }
 
 void LobbyDataFactory::makeYesNo(const YesNoQuestion request) {
-    makeState(State::AskYesNo);
+    makeEvent(Event::AskYesNo);
     data_.add(request);
 }
 
@@ -73,7 +73,7 @@ void LobbyDataFactory::makeInvalidIDs(const SessionResult result, const std::vec
 }
 
 void LobbyDataFactory::makeMasterSwitch(const Master& new_master) {
-    makeState(State::MasterSwitch);
+    makeEvent(Event::MasterSwitch);
 
     if (new_master.exists()) {
         data_.add(MasterSwitch::NewMaster);

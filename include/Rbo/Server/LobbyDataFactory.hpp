@@ -9,7 +9,7 @@ enum struct RegistrationResult : byte {
     Ok, InvalidRequest, UnavailableID, UnavailableName, UnavailableSession
 };
 
-enum struct State : byte {
+enum struct Event : byte {
     MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
     AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing,
     SelectingCheckpoint, CheckingPlayers, RevisingParameters, MasterSwitch
@@ -37,7 +37,7 @@ constexpr bool isParametersError(const SessionResult result) {
 
 struct LobbyDataFactory : DataFactory {
     void makeRegistration(const RegistrationResult result);
-    void makeState(const State state);
+    void makeEvent(const Event event);
     void makePreparing(const ulong delay);
     void makeNewMember(const byte id, const std::string& name);
     void makeReady(const byte id);

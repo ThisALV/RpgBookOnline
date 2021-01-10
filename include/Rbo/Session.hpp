@@ -3,6 +3,7 @@
 
 #include <Rbo/AsioCommon.hpp>
 
+#include <atomic>
 #include <Rbo/Game.hpp>
 #include <Rbo/Player.hpp>
 
@@ -71,18 +72,21 @@ struct DiceRollsDetails {
 
 class Session {
 private:
-    io::io_context::strand executor_;
+    static std::size_t counter_;
+
+    // Variables membres suivant la durée de vie de la Session
     spdlog::logger& logger_;
+    const GameBuilder& game_builder_;
+    const Game game_;
+    std::atomic_bool running_;
+
+    // Variables membres suivant la durée de vie d'une partie ( start() )
     DiceRollsDetails rolls_results_;
     StatsManager stats_;
     std::map<byte, Player> players_;
     std::map<byte, tcp::socket> connections_;
-    Game game_;
     std::optional<byte> leader_;
     word current_scene_;
-    std::atomic_bool running_;
-
-    const GameBuilder& game_builer_;
 
     void begin(Entrants& initial_entrants_data);
     void end(Entrants& initial_entrants_data);
@@ -105,7 +109,7 @@ private:
     void logPlayerError(const byte playerID, const std::string& msg);
 
 public:
-    Session(io::io_context& executionCtx, const GameBuilder& gameBuilder);
+    explicit Session(const GameBuilder& g_builder);
 
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
@@ -124,7 +128,7 @@ public:
     StatsManager& stats() { return stats_; }
     const StatsManager& stats() const { return stats_; }
 
-    const GameBuilder& gameBuilder() const { return game_builer_; }
+    const GameBuilder& gameBuilder() const { return game_builder_; }
 
     Replies request(const byte targets_id, const Data& request_data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies);
     void sendTo(const byte target, const Data& data);

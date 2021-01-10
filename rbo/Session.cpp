@@ -70,12 +70,14 @@ void Session::removePlayer(const byte id) {
     connections_.erase(id);
 }
 
-Session::Session(io::io_context& io, const GameBuilder& g_builder)
-    : executor_ { io },
-      logger_ { rboLogger("Session") },
-      game_ { g_builder() },
-      running_ { false },
-      game_builer_ { g_builder } {}
+std::size_t Session::counter_ { 0 };
+
+Session::Session(const GameBuilder& g_builder)
+        : logger_ { rboLogger("Session-" + std::to_string(counter_++)) },
+          game_builder_ { g_builder },
+          game_ { g_builder() },
+          running_ { false },
+          current_scene_ { 0 } {}
 
 void Session::begin(Entrants& entrants) {
     for (auto& [id, entrant] : entrants) {
@@ -398,10 +400,21 @@ void Session::start(Entrants& initial_entrants_data, const std::string& checkpoi
         for (Next next { beginning }; next && running(); next = playScene(interface, *next));
     } catch (const std::exception& err) {
         end(initial_entrants_data);
+        running_ = false;
+
         throw;
     }
 
     end(initial_entrants_data);
+}
+
+void Session::reset() {
+    rolls_results_ = {};
+    stats_ = {};
+    players_.clear();
+    connections_.clear();
+    leader_.reset();
+    current_scene_ = 0;
 }
 
 Next Session::playScene(Gameplay& interface, const word id) {
@@ -432,16 +445,6 @@ Next Session::playScene(Gameplay& interface, const word id) {
         logger_.info("Game end.");
 
     return {};
-}
-
-void Session::reset() {
-    stats_ = {};
-    rolls_results_ = {};
-    players_.clear();
-    connections_.clear();
-    leader_ = 0;
-    current_scene_ = 0;
-    running_ = false;
 }
 
 byte Session::leader() const {
@@ -570,12 +573,12 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
     std::map<byte, ReplyHandler> handlers;
     for (auto [id, player] : ctx->players) {
         if (player.targetted) {
-            handlers.insert({ id, ReplyHandler { executor_, logger_, ctx, controller, id } });
+            handlers.insert({ id, ReplyHandler { logger_, ctx, controller, id } });
 
             const byte player_id { id }; // Nécessaire pour pouvoir être capturé par la lambda
-            player.connection->async_send(buffer, io::bind_executor(executor_, [&handlers, player_id](const ErrCode err, const std::size_t len) {
+            player.connection->async_send(buffer, [&handlers, player_id](const ErrCode err, const std::size_t len) {
                 handlers.at(player_id).handle(err, len);
-            }));
+            });
         } else {
             const ErrCode send_err { trySend(*player.connection, buffer) };
 

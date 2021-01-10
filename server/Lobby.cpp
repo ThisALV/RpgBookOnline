@@ -16,16 +16,14 @@ std::size_t Lobby::RemoteEndpointHash::operator()(const tcp::endpoint& client) c
     return std::hash<std::string> {} (str.str());
 }
 
-Lobby::Lobby(io::io_context& lobby_io, tcp::endpoint acceptor_endpt, const GameBuilder& game_builder, const ulong prepare_delay_ms)
-    : prepare_delay_ { prepare_delay_ms },
+Lobby::Lobby(io::io_context& lobby_io, tcp::endpoint acceptor_endpt, const ulong preparation_countdown_ms)
+    : prepare_delay_ {preparation_countdown_ms },
       acceptor_endpt_ { std::move(acceptor_endpt) },
       logger_ { rboLogger("Lobby") },
-      lobby_io_ { lobby_io },
-      member_handling_ { lobby_io_ },
-      new_players_acceptor_ { lobby_io_ },
-      state_ { Closed },
-      prepare_timer_ { lobby_io_ },
-      session_ { lobby_io_, game_builder } {}
+      new_players_acceptor_ { lobby_io },
+      closure_requested_ { false },
+      state_ { Idle },
+      prepare_timer_ { lobby_io } {}
 
 void Lobby::logMemberError(const byte id, const ErrCode& err) {
     logger_.error("Member {} : {}", id, err.message());
@@ -103,7 +101,7 @@ bool Lobby::ready(const byte id) const {
 }
 
 void Lobby::beginCountdown() {
-    logger_.info("Session beginCountdown into {} ms...", prepare_delay_.count());
+    logger_.info("Session preparation into {} ms...", prepare_delay_.count());
 
     state_ = Starting;
     prepare_timer_.expires_after(prepare_delay_);
@@ -111,13 +109,17 @@ void Lobby::beginCountdown() {
         if (err) {
             if (!(err == io::error::basic_errors::operation_aborted && isOpen())) {
                 cancelCountdown(true);
-                logger_.error("Unexpected beginCountdown cancellation : {}", err.message());
+                logger_.error("Unexpected preparation cancellation : {}", err.message());
             }
 
             return;
         }
 
-        launchPreparation();
+        state_ = Preparing;
+
+        new_players_acceptor_.close();
+        for (auto& connection : connections_)
+            connection.second.cancel();
     });
 
     LobbyDataFactory preparation_data;
@@ -134,7 +136,7 @@ void Lobby::cancelCountdown(const bool is_crash) {
     logger_.info("Preparation cancelled !");
 
     LobbyDataFactory preparation_data;
-    preparation_data.makeState(State::CancelPreparing);
+    preparation_data.makeEvent(Event::CancelPreparing);
 
     sendToAll(preparation_data.dataWithLength());
 }
@@ -149,7 +151,7 @@ void Lobby::open() {
     new_players_acceptor_.listen();
 
     LobbyDataFactory open_data;
-    open_data.makeState(State::Open);
+    open_data.makeEvent(Event::Open);
 
     sendToAll(open_data.dataWithLength());
 
@@ -165,34 +167,28 @@ void Lobby::open() {
 
 void Lobby::close(const bool crash) {
     logger_.info("Closing...");
-    session_.stop();
-
     state_ = Closed;
-    const std::lock_guard close_guard { close_ };
-    logger_.info("Closed.");
 
     if (!crash) {
         for (const byte id : ids())
             disconnect(id);
     }
+
+    logger_.info("Closed.");
 }
 
 void Lobby::acceptMember() {
     logger_.debug("Waiting for connection on port {}...", port());
-    new_players_acceptor_.async_accept(io::bind_executor(member_handling_, [this](const ErrCode err, tcp::socket client_connection) {
+    new_players_acceptor_.async_accept([this](const ErrCode err, tcp::socket client_connection) {
         registerMember(err, std::move(client_connection));
-    }));
+    });
 }
 
 void Lobby::listenMember(const byte id) {
-    const std::lock_guard cancelling_lock { request_cancelling_ };
-    if (isPreparing())
-        return;
-
     logger_.debug("Listening requests of [{}]...", id);
-    connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)), io::bind_executor(member_handling_, [this, id](const ErrCode err, const std::size_t len) {
+    connections_.at(id).async_receive(io::buffer(request_buffers_.at(id)), [this, id](const ErrCode err, const std::size_t len) {
         handleMemberRequest(id, err, len);
-    }));
+    });
 }
 
 void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
@@ -200,10 +196,6 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
         logger_.debug("Registration cancelled.");
         return;
     }
-
-    const std::lock_guard close_guard { close_ };
-    if (isClosed())
-        return;
 
     acceptMember();
 
@@ -218,9 +210,9 @@ void Lobby::registerMember(const ErrCode accept_err, tcp::socket connection) {
     registering_buffers_.insert({ client_endpt, ReceiveBuffer {} });
     registering_buffers_.at(client_endpt).fill(0);
 
-    registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), io::bind_executor(member_handling_, [this, client_endpt](const ErrCode name_err, const std::size_t) {
+    registering_.at(client_endpt).async_receive(io::buffer(registering_buffers_.at(client_endpt)), [this, client_endpt](const ErrCode name_err, const std::size_t) {
         handleRegistrationRequest(client_endpt, name_err);
-    }));
+    });
 }
 
 void Lobby::handleRegistrationRequest(const tcp::endpoint& client_endpt, const ErrCode& name_err) {
@@ -282,7 +274,8 @@ void Lobby::handleRegistrationRequest(const tcp::endpoint& client_endpt, const E
     registering_.erase(client_endpt);
     registering_buffers_.erase(client_endpt);
 
-    updateMaster();
+    if (!updateMaster())
+        sendMaster();
 
     listenMember(id);
 }
@@ -296,10 +289,6 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
         logger_.debug("Listening to requests canceled for [{}].", id);
         return;
     }
-
-    const std::lock_guard close_guard { close_ };
-    if (isClosed())
-        return;
 
     if (request_err) {
         disconnect(id, true);
@@ -369,17 +358,15 @@ ReceiveBuffer Lobby::receiveFromMaster() {
     std::atomic_bool received { false };
     bool receive_err { false };
 
-    connections_.at(master_).async_receive(io::buffer(buffer), [this, &received, &receive_err](const ErrCode err, const std::size_t) {
+    connections_.at(master_).async_receive(io::buffer(buffer), [&received, &receive_err](const ErrCode err, const std::size_t) {
         received = true;
-        if (err && (err != io::error::basic_errors::operation_aborted || !isClosed()))
+
+        if (err)
             receive_err = true;
     });
 
-    while (!received && !isClosed())
+    while (!received && !closure_requested_)
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
-
-    if (isClosed())
-        connections_.at(master_).cancel();
 
     if (receive_err)
         disconnectMaster();
@@ -394,7 +381,7 @@ void Lobby::sendToMaster(const Data& data) {
         disconnectMaster();
 }
 
-void Lobby::updateMaster() {
+bool Lobby::updateMaster() {
     bool updated;
     if (members().empty()) {
         updated = master_.exists();
@@ -411,12 +398,17 @@ void Lobby::updateMaster() {
             logger_.info("New master member is [{}].", master_);
     }
 
-    if (updated) {
-        LobbyDataFactory master_data;
-        master_data.makeMasterSwitch(master_);
+    if (updated)
+        sendMaster();
 
-        sendToAll(master_data.dataWithLength());
-    }
+    return updated;
+}
+
+void Lobby::sendMaster() {
+    LobbyDataFactory master_data;
+    master_data.makeMasterSwitch(master_);
+
+    sendToAll(master_data.dataWithLength());
 }
 
 void Lobby::disconnectMaster() {
@@ -430,20 +422,23 @@ void Lobby::disconnectMaster() {
 
 std::string Lobby::askCheckpoint() {
     LobbyDataFactory ask_data;
-    ask_data.makeState(State::AskCheckpoint);
+    ask_data.makeEvent(Event::AskCheckpoint);
 
     logger_.info("Asking master [{}] for checkpoint...", master_);
     sendToMaster(ask_data.dataWithLength());
 
     const ReceiveBuffer chkpt_buffer { receiveFromMaster() };
-    std::string chkpt_name;
 
-    if (chkpt_buffer[0] != 0) {
+    std::string chkpt_name;
+    if (closure_requested_) {
+        logger_.info("Closure requested, master's reply ignored.");
+    } else if (chkpt_buffer[0] != 0) {
         for (std::size_t pos { 0 }; chkpt_buffer[pos] != 0; pos++)
             chkpt_name += chkpt_buffer[pos];
+
+        logger_.info("Checkpoint : \"{}\"", chkpt_name);
     }
 
-    logger_.info("Checkpoint : \"{}\"", chkpt_name);
     return chkpt_name;
 }
 
@@ -455,20 +450,16 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
     sendToMaster(ask_data.dataWithLength());
 
     const ReceiveBuffer reply { receiveFromMaster() };
-    logger_.info("Master's reply : {}.", reply[0] == 0 ? "Yes" : "No");
+
+    if (closure_requested_)
+        logger_.info("Closure requested, master's reply ignored.");
+    else
+        logger_.info("Master's reply : {}.", reply[0] == 0 ? "Yes" : "No");
 
     return reply[0] == YES;
 }
 
-void Lobby::launchPreparation() {
-    state_ = Preparing;
-    new_players_acceptor_.close();
-
-    std::unique_lock cancelling_lock { request_cancelling_ };
-    for (auto& connection : connections_)
-        connection.second.cancel();
-    cancelling_lock.unlock();
-
+void Lobby::prepareSession(const SessionPtr& session) {
     try {
         LobbyDataFactory prepare_data;
         prepare_data.makePrepare(master_);
@@ -476,13 +467,12 @@ void Lobby::launchPreparation() {
         logger_.info("Preparing session, master member is {}.", master_);
         safeSendToAll(prepare_data.dataWithLength());
 
-        const std::lock_guard close_guard { close_ };
-        makeSession();
+        configureSession(session);
     } catch (const MasterDisconnected& err) {
         logger_.error(err.what());
 
         LobbyDataFactory master_dc_data;
-        master_dc_data.makeState(State::MasterDisconnected);
+        master_dc_data.makeEvent(Event::MasterDisconnected);
 
         sendToAll(master_dc_data.dataWithLength());
 
@@ -492,11 +482,10 @@ void Lobby::launchPreparation() {
         logger_.error(err.what());
     }
 
-    if (!isClosed())
-        open();
+    state_ = Idle;
 }
 
-void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optional<bool> missing_entrants) {
+void Lobby::configureSession(const SessionPtr& session, const std::optional<std::string>& chkpt_name, std::optional<bool> missing_entrants) {
     assert(!(missing_entrants && chkpt_name->empty()));
 
     std::string requested_chkpt;
@@ -504,7 +493,7 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
         requested_chkpt = *chkpt_name;
     } else {
         LobbyDataFactory select_chkpt_data;
-        select_chkpt_data.makeState(State::SelectingCheckpoint);
+        select_chkpt_data.makeEvent(Event::SelectingCheckpoint);
 
         safeSendToAll(select_chkpt_data.dataWithLength());
 
@@ -513,23 +502,27 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
 
     if (!missing_entrants) {
         LobbyDataFactory checking_players_data;
-        checking_players_data.makeState(State::CheckingPlayers);
+        checking_players_data.makeEvent(Event::CheckingPlayers);
 
         safeSendToAll(checking_players_data.dataWithLength());
 
         missing_entrants = !requested_chkpt.empty() && askYesNo(YesNoQuestion::MissingEntrants);
     }
 
-    Run run { runSession(requested_chkpt, *missing_entrants) };
-    session_.reset();
+    if (closure_requested_) {
+        logger_.info("Closure requested, session canceled.");
+        return;
+    }
+
+    Run run { runSession(session, requested_chkpt, *missing_entrants) };
     members_.clear();
     connections_.clear();
 
     logger_.trace("Sending session's result to entrants...");
 
-    for (auto& [id, participant] : run.entrants) {
-        members_.insert({ id, Member { participant.name, false } });
-        connections_.insert({ id, std::move(participant.socket) });
+    for (auto& [id, entrant] : run.entrants) {
+        members_.insert({ id, Member {entrant.name, false } });
+        connections_.insert({ id, std::move(entrant.socket) });
     }
 
     LobbyDataFactory run_data;
@@ -541,8 +534,10 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
     safeSendToAll(run_data.dataWithLength());
 
     if (isParametersError(run.result)) {
+        sendMaster();
+
         LobbyDataFactory revising_session_data;
-        revising_session_data.makeState(State::RevisingParameters);
+        revising_session_data.makeEvent(Event::RevisingParameters);
 
         safeSendToAll(revising_session_data.dataWithLength());
     }
@@ -552,15 +547,20 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
     case SessionResult::Crashed:
         return;
     case SessionResult::CheckpointLoadingError:
-        if (askYesNo(YesNoQuestion::RetryCheckpoint))
-            makeSession();
+        if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
+            session->reset();
+            configureSession(session);
+        }
 
         break;
     case SessionResult::LessMembers:
-        if (askYesNo(YesNoQuestion::MissingEntrants))
-            makeSession(requested_chkpt, true);
-        else if (askYesNo(YesNoQuestion::RetryCheckpoint))
-            makeSession();
+        if (askYesNo(YesNoQuestion::MissingEntrants)) {
+            session->reset();
+            configureSession(session, chkpt_name, true);
+        } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
+            session->reset();
+            configureSession(session);
+        }
 
         break;
     case SessionResult::UnknownPlayer:
@@ -569,8 +569,10 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
             const auto& e { run.expectedIDs.cend() };
 
             if (std::find(b, e, master_) == e) {
-                disconnect(master_);
-                throw MasterDisconnected { master_ };
+                const byte master { master_ };
+
+                disconnect(master);
+                throw MasterDisconnected { master };
             }
 
             for (const byte id : ids()) {
@@ -578,23 +580,27 @@ void Lobby::makeSession(const std::optional<std::string>& chkpt_name, std::optio
                     disconnect(id);
             }
 
-            makeSession(requested_chkpt);
+            session->reset();
+            configureSession(session, chkpt_name);
         } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
-            makeSession();
+            session->reset();
+            configureSession(session);
         }
 
         break;
     case SessionResult::NoPlayerAlive:
-        if (askYesNo(YesNoQuestion::RetryCheckpoint))
-            makeSession();
+        if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
+            session->reset();
+            configureSession(session);
+        }
 
         break;
     }
 }
 
-Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants) {
+Run Lobby::runSession(const SessionPtr& session, const std::string& chkpt_name, const bool missing_entrants) {
     LobbyDataFactory start_data;
-    start_data.makeState(State::Start);
+    start_data.makeEvent(Event::Start);
 
     logger_.info("Starting session...");
     logger_.trace("Checkpoint=\"{}\" ; Missing entrants ? {}", chkpt_name, missing_entrants);
@@ -605,10 +611,7 @@ Run Lobby::runSession(const std::string& chkpt_name, const bool missing_entrants
         entrants.insert({ id, Entrant { member.name, std::move(connections_.at(id)) } });
 
     try {
-        if (isClosed())
-            return { SessionResult::Ok, std::move(entrants) };
-
-        session_.start(entrants, chkpt_name, missing_entrants);
+        session->start(entrants, chkpt_name, missing_entrants);
         logger_.info("Session end.");
     } catch (const CheckpointLoadingError& err) {
         logger_.error("Unable to load checkpoint \"{}\" : {}", chkpt_name, err.what());

@@ -3,6 +3,7 @@
 
 #include <Rbo/Server/ServerCommon.hpp>
 
+#include <memory>
 #include <Rbo/Session.hpp>
 
 namespace Rbo::Server {
@@ -11,6 +12,7 @@ enum struct YesNoQuestion : byte;
 enum struct SessionResult : byte;
 
 using MembersConnection = std::map<byte, tcp::socket>;
+using SessionPtr = std::unique_ptr<Session>;
 
 struct MasterDisconnected : std::runtime_error {
     explicit MasterDisconnected(const byte id) : std::runtime_error { "Master [" + std::to_string(id) + "] disconnected" } {}
@@ -34,29 +36,25 @@ private:
     template<typename ValueT>
     using RemoteEndptHashmap = std::unordered_map<tcp::endpoint, ValueT, RemoteEndpointHash>;
 
-    enum LobbyState {
-        Open, Starting, Preparing, Running, Closed
+    enum State {
+        Idle, Open, Starting, Preparing, Running, Closed
     };
 
     const std::chrono::milliseconds prepare_delay_;
     const tcp::endpoint acceptor_endpt_;
 
     spdlog::logger& logger_;
-    io::io_context& lobby_io_;
-    io::io_context::strand member_handling_;
     tcp::acceptor new_players_acceptor_;
 
     MembersStates members_;
     MembersConnection connections_;
     RemoteEndptHashmap<tcp::socket> registering_;
     RemoteEndptHashmap<ReceiveBuffer> registering_buffers_;
-
     std::map<byte, ReceiveBuffer> request_buffers_;
-    std::mutex close_;
-    std::mutex request_cancelling_;
-    std::atomic<LobbyState> state_;
+
+    std::atomic_bool closure_requested_;
+    std::atomic<State> state_;
     io::steady_timer prepare_timer_;
-    Session session_;
     Master master_;
 
     void disconnect(const byte member_id, const bool is_crash = false);
@@ -64,17 +62,17 @@ private:
     void safeSendToAll(const Data& data);
     ReceiveBuffer receiveFromMaster();
     void sendToMaster(const Data& data);
-    void acceptMember();
+    void sendMaster();
 
+    void acceptMember();
     void listenMember(const byte id);
     void registerMember(const ErrCode err, tcp::socket connection);
     void handleRegistrationRequest(const tcp::endpoint& client_endpt, const ErrCode& name_err);
     void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t request_len);
-    void updateMaster();
+    bool updateMaster();
     void disconnectMaster();
-    void launchPreparation();
-    void makeSession(const std::optional<std::string>& checkpt_final_name = {}, std::optional<bool> missing_entrants = {});
-    Run runSession(const std::string& checkpt_final_name, const bool missing_entrants = false);
+    void configureSession(const SessionPtr& session, const std::optional<std::string>& chkpt_name = {}, std::optional<bool> missing_entrants = {});
+    Run runSession(const SessionPtr& session, const std::string& chkpt_name, const bool missing_entrants);
 
     void beginCountdown();
     void cancelCountdown(const bool is_crash = false);
@@ -83,8 +81,9 @@ private:
 
     void logMemberError(const byte member_id, const ErrCode& err);
     void logRegisteringError(const tcp::endpoint& client, const ErrCode& err);
+
 public:
-    Lobby(io::io_context& lobby_io, tcp::endpoint acceptor_endpt, const GameBuilder& game_builder, const ulong prepare_delay_ms = 5000);
+    Lobby(io::io_context& lobby_io, tcp::endpoint acceptor_endpt, const ulong preparation_countdown_ms = 5000);
 
     Lobby(const Lobby&) = delete;
     Lobby& operator=(const Lobby&) = delete;
@@ -92,7 +91,9 @@ public:
     bool operator==(const Lobby&) const = delete;
 
     void open();
+    void prepareSession(const SessionPtr& session);
     void close(const bool is_crash = false);
+    void requestClosure() { closure_requested_ = true; }
 
     ushort port() const { return acceptor_endpt_.port(); }
     bool registered(const byte id) const { return members().count(id) == 1; }
@@ -107,6 +108,7 @@ public:
     const std::string& name(const byte id) const;
     bool ready(const byte id) const;
 
+    bool isIdle() const { return state_ == Idle; }
     bool isOpen() const { return state_ == Open; }
     bool isStarting() const { return state_ == Starting; }
     bool isPreparing() const { return state_ == Preparing; }
