@@ -100,7 +100,7 @@ GameState LocalGameBuilder::load(const std::string& name) const {
         in >> data;
 
         if (in.fail())
-            throw GameLoadingError { "Error on input stream" };
+            throw std::runtime_error { "Error on input stream" };
 
         const json& chkpt { data.at(name) };
         chkpt.at("scene").get_to(state.scene);
@@ -108,7 +108,7 @@ GameState LocalGameBuilder::load(const std::string& name) const {
         chkpt.at("leader").get_to(state.leader);
         chkpt.at("players").get_to(state.players);
     } catch (const json::exception& err) {
-        throw GameLoadingError { err.what() };
+        throw std::runtime_error { err.what() };
     }
 
     logger_.info("Searched checkpoint read.");
