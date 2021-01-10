@@ -459,6 +459,16 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
     return reply[0] == YES;
 }
 
+void Lobby::reset() {
+    logger_.info("Resetting state to idle...");
+    state_ = Idle;
+
+    for (auto& member : members_)
+        member.second.ready = false;
+
+    logger_.info("Reset.");
+}
+
 void Lobby::prepareSession(const SessionPtr& session) {
     try {
         LobbyDataFactory prepare_data;

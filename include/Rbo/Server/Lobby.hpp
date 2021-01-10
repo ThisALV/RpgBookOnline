@@ -91,6 +91,7 @@ public:
     bool operator==(const Lobby&) const = delete;
 
     void open();
+    void reset();
     void prepareSession(const SessionPtr& session);
     void close(const bool is_crash = false);
     void requestClosure() { closure_requested_ = true; }
