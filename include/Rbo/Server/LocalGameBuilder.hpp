@@ -9,13 +9,17 @@ namespace Rbo::Server {
 
 namespace fs = std::filesystem;
 
-struct ScriptLoadingError : std::runtime_error {
-    ScriptLoadingError(const fs::path& script, const std::string& msg)
-        : std::runtime_error { "Unable to load instructions \"" + script.string() + "\" : " + msg } {}
+struct GameBuildingError : std::runtime_error {
+    explicit GameBuildingError(const std::string& msg) : std::runtime_error {msg } {}
 };
 
-struct GameLoadingError : std::runtime_error {
-    explicit GameLoadingError(const std::string& msg) : std::runtime_error { "Unable to load game : " + msg } {}
+struct ScriptLoadingError : GameBuildingError {
+    ScriptLoadingError(const fs::path& script, const std::string& msg)
+        : GameBuildingError { "Unable to load instructions \"" + script.string() + "\" : " + msg } {}
+};
+
+struct GameLoadingError : GameBuildingError {
+    explicit GameLoadingError(const std::string& msg) : GameBuildingError { "Unable to load game : " + msg } {}
 };
 
 struct GameSavingError : std::runtime_error {
