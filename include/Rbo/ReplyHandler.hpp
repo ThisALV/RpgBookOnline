@@ -17,8 +17,8 @@ struct RequestProfile {
 struct RequestCtx {
     std::map<byte, RequestProfile> players;
     Replies replies;
-    std::atomic<ulong> repliesHandled;
-    std::atomic<ulong> repliesToAccept;
+    std::atomic<byte> repliesHandled;
+    std::atomic<byte> repliesToAccept;
     std::atomic_bool requestDone;
     std::vector<byte> errorIDs;
 

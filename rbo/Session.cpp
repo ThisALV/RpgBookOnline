@@ -560,7 +560,7 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
             targets_count++;
     }
 
-    ulong replies_to_receive;
+    byte replies_to_receive;
     if (first_reply_only) {
         ctx->repliesToAccept = 1;
         replies_to_receive = wait_all_replies ? targets_count : 1;
