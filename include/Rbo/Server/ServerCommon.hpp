@@ -4,13 +4,15 @@
 #include <Rbo/Common.hpp>
 
 #include <atomic>
-#include <Rbo/Server/ServerCommon.hpp>
-#include <Rbo/Session.hpp>
 
 namespace Rbo::Server {
 
 struct NotAnyMaster : std::logic_error {
-    NotAnyMaster() : logic_error { "There isn't any master member" } {}
+    NotAnyMaster() : std::logic_error { "There isn't any master member" } {}
+};
+
+struct GameBuildingError : std::runtime_error {
+    explicit GameBuildingError(const std::string& msg) : std::runtime_error { msg } {}
 };
 
 class Master {

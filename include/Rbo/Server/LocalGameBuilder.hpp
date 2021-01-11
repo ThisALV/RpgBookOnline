@@ -1,6 +1,8 @@
 #ifndef LOCALGAMEBUILDER_HPP
 #define LOCALGAMEBUILDER_HPP
 
+#include <Rbo/Server/ServerCommon.hpp>
+
 #include <filesystem>
 #include <Rbo/GameBuilder.hpp>
 #include <Rbo/Server/InstructionsProvider.hpp>
@@ -8,10 +10,6 @@
 namespace Rbo::Server {
 
 namespace fs = std::filesystem;
-
-struct GameBuildingError : std::runtime_error {
-    explicit GameBuildingError(const std::string& msg) : std::runtime_error {msg } {}
-};
 
 struct ScriptLoadingError : GameBuildingError {
     ScriptLoadingError(const fs::path& script, const std::string& msg)
