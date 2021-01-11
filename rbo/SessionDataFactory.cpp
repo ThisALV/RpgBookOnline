@@ -5,17 +5,17 @@
 
 namespace Rbo {
 
-void SessionDataFactory::makeData(const DataType type) {
-    data_.add(type);
+void SessionDataFactory::makeEvent(const Event event_type) {
+    data_.add(event_type);
 }
 
 void SessionDataFactory::makeStart(const std::string& game_name) {
-    makeData(DataType::Start);
+    makeEvent(Event::Start);
     data_.put(game_name);
 }
 
 void SessionDataFactory::makeRequest(const Request type, const byte target) {
-    makeData(DataType::Request);
+    makeEvent(Event::Request);
     data_.add(type);
     data_.add(target);
 }
@@ -57,7 +57,7 @@ void SessionDataFactory::makeDiceRoll(const byte target, const std::string &msg,
 }
 
 void SessionDataFactory::makeText(const Text txt_type) {
-    makeData(DataType::Text);
+    makeEvent(Event::Text);
     data_.add(txt_type);
 }
 
@@ -85,14 +85,14 @@ void SessionDataFactory::makePlayerUpdate(const byte id, const PlayerUpdate& cha
     // Ce type de constructeur est utilisé car {} ferait appelle à une initializer_list et = à une convertion implicite, ce qui n'est pas souhaitable.
     const json changes_data(changes);
 
-    makeData(DataType::PlayerUpdate);
+    makeEvent(Event::PlayerUpdate);
     data_.add(id);
 
     data_.put(changes_data.dump());
 }
 
 void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& stat) {
-    makeData(DataType::GlobalStat);
+    makeEvent(Event::GlobalStat);
     data_.put(name);
     data_.add(stat.hidden);
     data_.add(stat.main);
@@ -106,23 +106,23 @@ void SessionDataFactory::makeGlobalStat(const std::string& name, const Stat& sta
 }
 
 void SessionDataFactory::makeSwitch(const word id) {
-    makeData(DataType::Switch);
+    makeEvent(Event::Switch);
     data_.putNumeric(id);
 }
 
 void SessionDataFactory::makeReply(const byte id, const byte reply) {
-    makeData(DataType::Reply);
+    makeEvent(Event::Reply);
     data_.add(id);
     data_.add(reply);
 }
 
 void SessionDataFactory::makeValidation(const ReplyValidity reply) {
-    makeData(DataType::Validation);
+    makeEvent(Event::Validation);
     data_.add(reply);
 }
 
 void SessionDataFactory::makeBattle(const Battle type) {
-    makeData(DataType::Battle);
+    makeEvent(Event::Battle);
     data_.add(type);
 }
 
@@ -151,12 +151,12 @@ void SessionDataFactory::makeBattleAtk(const byte player, const std::string& ene
 }
 
 void SessionDataFactory::makeCrash(const byte player) {
-    makeData(DataType::Crash);
+    makeEvent(Event::Crash);
     data_.add(player);
 }
 
 void SessionDataFactory::makeLeaderSwitch(const byte player) {
-    makeData(DataType::LeaderSwitch);
+    makeEvent(Event::LeaderSwitch);
     data_.add(player);
 }
 

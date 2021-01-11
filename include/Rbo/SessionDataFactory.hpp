@@ -5,7 +5,7 @@
 
 namespace Rbo {
 
-enum struct DataType : byte {
+enum struct Event : byte {
     Request         = 0,
     Text            = 1,
     PlayerUpdate    = 2,
@@ -50,7 +50,7 @@ struct TooManyOptions : std::logic_error {
 class Data;
 
 struct SessionDataFactory : DataFactory {
-    void makeData(const DataType type);
+    void makeEvent(const Event event_type);
     void makeStart(const std::string& game_name);
     void makeRequest(const Request type, const byte target);
     void makeRange(const byte target, const std::string& msg, const byte min, const byte max);

@@ -97,7 +97,7 @@ void Session::begin(Entrants& entrants) {
 
 void Session::end(Entrants& entrants) {
     SessionDataFactory stop_msg;
-    stop_msg.makeData(DataType::Stop);
+    stop_msg.makeEvent(Event::Stop);
 
     sendToAll(stop_msg.dataWithLength());
 
@@ -599,7 +599,7 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
         player.second.connection->cancel();
 
     SessionDataFactory end;
-    end.makeData(DataType::FinishRequest);
+    end.makeEvent(Event::FinishRequest);
     const io::const_buffer ending_buffer { trunc(end.dataWithLength()) };
 
     for (const auto [id, player] : ctx->players) {
