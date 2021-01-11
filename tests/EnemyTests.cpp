@@ -1,11 +1,10 @@
 #define BOOST_TEST_MODULE Enemy
 
-#include <Rbo/Tests/TestsCommon.hpp>
-
 #include <boost/test/unit_test.hpp>
 #include <Rbo/Enemy.hpp>
 #include <Rbo/Game.hpp>
-#include <Rbo/Player.hpp>
+
+BOOST_TEST_DONT_PRINT_LOG_VALUE(typename std::vector<std::string>)
 
 namespace Rbo {
 
@@ -186,7 +185,7 @@ BOOST_AUTO_TEST_CASE(Normal) {
     const EnemiesGroup group { descriptor, ctx };
     const std::vector<std::string> expected_queue { "3", "2", "1" };
 
-    BOOST_CHECK_EQUAL(StrVecWrapper { group.queue() }, StrVecWrapper { expected_queue });
+    BOOST_CHECK_EQUAL(group.queue(), expected_queue);
     BOOST_CHECK_EQUAL(group.currentPos(), 0);
 }
 

@@ -1,11 +1,12 @@
 ﻿#define BOOST_TEST_MODULE Game
 
-#include <Rbo/Tests/TestsCommon.hpp>
-
 #include <boost/test/unit_test.hpp>
 #include <Rbo/Game.hpp>
+#include <Rbo/Player.hpp>
 
 using namespace Rbo;
+
+BOOST_TEST_DONT_PRINT_LOG_VALUE(PlayerInventories)
 
 namespace Rbo {
 
@@ -47,8 +48,7 @@ BOOST_AUTO_TEST_CASE(Apply) {
     expected_inventories.at("inv2").add("A", 1);
 
     BOOST_CHECK_EQUAL(StatsValueWrapper { expected_stats }, StatsValueWrapper { target.stats().values() });
-    BOOST_CHECK_EQUAL(InventoriesWrapper { expected_inventories },
-                      InventoriesWrapper { target.inventories() });
+    BOOST_CHECK_EQUAL(expected_inventories, target.inventories());
 }
 
 BOOST_AUTO_TEST_CASE(ApplyLimitExceeded) {

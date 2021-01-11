@@ -1,7 +1,5 @@
 #define BOOST_TEST_MODULE StatsManager
 
-#include <Rbo/Tests/TestsCommon.hpp>
-
 #include <boost/test/unit_test.hpp>
 #include <Rbo/StatsManager.hpp>
 
