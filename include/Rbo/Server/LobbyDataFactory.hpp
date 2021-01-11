@@ -9,9 +9,23 @@ enum struct RegistrationResult : byte {
 };
 
 enum struct Event : byte {
-    MemberRegistered, MemberReady, MemberDisconnected, MemberCrashed, Preparing, Prepare,
-    AskCheckpoint, AskYesNo, Start, RunResult, MasterDisconnected, Open, CancelPreparing,
-    SelectingCheckpoint, CheckingPlayers, RevisingParameters, MasterSwitch
+    MemberRegistered    = 0,
+    MemberReady         = 1,
+    MemberDisconnected  = 2,
+    MemberCrashed       = 3,
+    BeginCountdown      = 4,
+    SessionPreparation  = 5,
+    AskCheckpoint       = 6,
+    AskYesNo            = 7,
+    Start               = 8,
+    RunResult           = 9,
+    MasterDisconnected  = 10,
+    Open                = 11,
+    CancelCountdown     = 12,
+    SelectingCheckpoint = 13,
+    CheckingPlayers     = 14,
+    RevisingParameters  = 15,
+    MasterSwitch        = 16
 };
 
 enum struct YesNoQuestion : byte {

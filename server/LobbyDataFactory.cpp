@@ -11,7 +11,7 @@ void LobbyDataFactory::makeEvent(const Event event) {
 }
 
 void LobbyDataFactory::makePreparing(const ulong delay) {
-    makeEvent(Event::Preparing);
+    makeEvent(Event::BeginCountdown);
     data_.putNumeric(delay);
 }
 
@@ -32,7 +32,7 @@ void LobbyDataFactory::makeDisconnect(const byte id) {
 }
 
 void LobbyDataFactory::makePrepare(const byte id) {
-    makeEvent(Event::Prepare);
+    makeEvent(Event::SessionPreparation);
     data_.add(id);
 }
 
