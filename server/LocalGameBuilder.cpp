@@ -9,11 +9,13 @@ namespace Rbo::Server {
 
 namespace { RandomEngine chkpt_id_rd { now() }; }
 
+std::size_t LocalGameBuilder::counter_ { 0 };
+
 LocalGameBuilder::LocalGameBuilder(fs::path game_file, fs::path checkpts_file, fs::path scenes_file, const fs::path& instructions_dir)
     : game_ { std::move(game_file) },
       chkpts_ { std::move(checkpts_file) },
       scenes_ { std::move(scenes_file) },
-      logger_ { rboLogger("GameBuilder") },
+      logger_ { rboLogger("GBuilder-" + std::to_string(counter_++)) },
       exec_ctx_ {},
       provider_ { exec_ctx_, logger_ }
 {

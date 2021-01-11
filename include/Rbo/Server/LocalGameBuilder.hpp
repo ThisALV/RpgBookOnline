@@ -23,7 +23,7 @@ struct GameLoadingError : GameBuildingError {
 };
 
 struct GameSavingError : std::runtime_error {
-    explicit  GameSavingError(const std::string& msg) : std::runtime_error { "Unable to save game : " + msg } {}
+    explicit GameSavingError(const std::string& msg) : std::runtime_error { "Unable to save game : " + msg } {}
 };
 
 struct SceneLoadingError : std::runtime_error {
@@ -36,9 +36,12 @@ struct CheckpointAlreadyExists : std::logic_error {
 
 class LocalGameBuilder : public GameBuilder {
 private:
-    fs::path game_;
-    fs::path chkpts_;
-    fs::path scenes_;
+    static std::size_t counter_;
+
+    const fs::path game_;
+    const fs::path chkpts_;
+    const fs::path scenes_;
+
     spdlog::logger& logger_;
     sol::state exec_ctx_;
     sol::table scenes_table_;
