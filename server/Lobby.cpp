@@ -474,7 +474,7 @@ void Lobby::prepareSession(Session& session) {
         LobbyDataFactory prepare_data;
         prepare_data.makePrepare(master_);
 
-        logger_.info("BeginCountdown session, master member is {}.", master_);
+        logger_.info("Preparing session, master member is {}.", master_);
         safeSendToAll(prepare_data.dataWithLength());
 
         configureSession(session);
