@@ -1,4 +1,3 @@
-#include <spdlog/logger.h>
 #include <Rbo/Server/Executor.hpp>
 #include <Rbo/Server/LocalGameBuilder.hpp>
 
@@ -32,12 +31,6 @@ BOOL WINAPI StopHandler(DWORD event) {
 
 #endif
 
-Rbo::Server::GameBuilderPtr localGameBuilderGenerator() {
-    return std::make_unique<Rbo::Server::LocalGameBuilder>(
-            "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
-    );
-};
-
 int main(const int argc, const char* argv[]) {
     constexpr std::string_view usage { "Usage : <ip> <port> <prepare_delay (ms)>" };
 
@@ -70,17 +63,17 @@ int main(const int argc, const char* argv[]) {
         Rbo::io::io_context server;
         Rbo::Server::Lobby lobby {
                 server,
-                Rbo::tcp::endpoint{ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port},
+                Rbo::tcp::endpoint{ ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port },
                 prepare_delay
         };
 
-        Rbo::Server::Executor executor {server, lobby, logger};
+        Rbo::Server::Executor executor { server, lobby, logger };
 
         const auto stop_handler = [&executor, &logger](const Rbo::ErrCode err, const int sig) {
             std::cout << "\b\b";
 
             if (err)
-                throw std::runtime_error{"Impossible shutdown " + std::to_string(sig) + " : " + err.message()};
+                throw std::runtime_error{ "Impossible shutdown " + std::to_string(sig) + " : " + err.message() };
 
             logger.debug("Shutdown signal : {}", sig);
             executor.stop();
@@ -92,11 +85,13 @@ int main(const int argc, const char* argv[]) {
         if (!SetConsoleCtrlHandler(StopHandler, TRUE))
             logger.warn("Stop handler initialization failed");
 #else
-        Rbo::io::signal_set stop_sigs_handler {server, STOP_SIGS};
+        Rbo::io::signal_set stop_sigs_handler { server, STOP_SIGS };
         stop_sigs_handler.async_wait(stop_handler);
 #endif
 
-        done_successfully = executor.start(localGameBuilderGenerator);
+        done_successfully = executor.start<Rbo::Server::LocalGameBuilder>(
+                "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
+        );
     } catch (const std::exception& err) {
         logger.critical(err.what());
         return 2;
