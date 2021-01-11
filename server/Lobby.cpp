@@ -469,7 +469,7 @@ void Lobby::reset() {
     logger_.info("Reset.");
 }
 
-void Lobby::prepareSession(const SessionPtr& session) {
+void Lobby::prepareSession(Session& session) {
     try {
         LobbyDataFactory prepare_data;
         prepare_data.makePrepare(master_);
@@ -495,7 +495,7 @@ void Lobby::prepareSession(const SessionPtr& session) {
     state_ = Idle;
 }
 
-void Lobby::configureSession(const SessionPtr& session, const std::optional<std::string>& chkpt_name, std::optional<bool> missing_entrants) {
+void Lobby::configureSession(Session& session, const std::optional<std::string>& chkpt_name, std::optional<bool> missing_entrants) {
     assert(!(missing_entrants && chkpt_name->empty()));
 
     std::string requested_chkpt;
@@ -558,17 +558,17 @@ void Lobby::configureSession(const SessionPtr& session, const std::optional<std:
         return;
     case SessionResult::CheckpointLoadingError:
         if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
-            session->reset();
+            session.reset();
             configureSession(session);
         }
 
         break;
     case SessionResult::LessMembers:
         if (askYesNo(YesNoQuestion::MissingEntrants)) {
-            session->reset();
+            session.reset();
             configureSession(session, chkpt_name, true);
         } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
-            session->reset();
+            session.reset();
             configureSession(session);
         }
 
@@ -590,17 +590,17 @@ void Lobby::configureSession(const SessionPtr& session, const std::optional<std:
                     disconnect(id);
             }
 
-            session->reset();
+            session.reset();
             configureSession(session, chkpt_name);
         } else if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
-            session->reset();
+            session.reset();
             configureSession(session);
         }
 
         break;
     case SessionResult::NoPlayerAlive:
         if (askYesNo(YesNoQuestion::RetryCheckpoint)) {
-            session->reset();
+            session.reset();
             configureSession(session);
         }
 
@@ -608,7 +608,7 @@ void Lobby::configureSession(const SessionPtr& session, const std::optional<std:
     }
 }
 
-Run Lobby::runSession(const SessionPtr& session, const std::string& chkpt_name, const bool missing_entrants) {
+Run Lobby::runSession(Session& session, const std::string& chkpt_name, const bool missing_entrants) {
     LobbyDataFactory start_data;
     start_data.makeEvent(Event::Start);
 
@@ -621,7 +621,7 @@ Run Lobby::runSession(const SessionPtr& session, const std::string& chkpt_name, 
         entrants.insert({ id, Entrant { member.name, std::move(connections_.at(id)) } });
 
     try {
-        session->start(entrants, chkpt_name, missing_entrants);
+        session.start(entrants, chkpt_name, missing_entrants);
         logger_.info("Session end.");
     } catch (const CheckpointLoadingError& err) {
         logger_.error("Unable to load checkpoint \"{}\" : {}", chkpt_name, err.what());

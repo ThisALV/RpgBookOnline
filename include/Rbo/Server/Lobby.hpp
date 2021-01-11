@@ -3,7 +3,6 @@
 
 #include <Rbo/Server/ServerCommon.hpp>
 
-#include <memory>
 #include <Rbo/Session.hpp>
 
 namespace Rbo::Server {
@@ -12,7 +11,6 @@ enum struct YesNoQuestion : byte;
 enum struct SessionResult : byte;
 
 using MembersConnection = std::map<byte, tcp::socket>;
-using SessionPtr = std::unique_ptr<Session>;
 
 struct MasterDisconnected : std::runtime_error {
     explicit MasterDisconnected(const byte id) : std::runtime_error { "Master [" + std::to_string(id) + "] disconnected" } {}
@@ -71,8 +69,8 @@ private:
     void handleMemberRequest(const byte member_id, const ErrCode err, const std::size_t request_len);
     bool updateMaster();
     void disconnectMaster();
-    void configureSession(const SessionPtr& session, const std::optional<std::string>& chkpt_name = {}, std::optional<bool> missing_entrants = {});
-    Run runSession(const SessionPtr& session, const std::string& chkpt_name, const bool missing_entrants);
+    void configureSession(Session& session, const std::optional<std::string>& chkpt_name = {}, std::optional<bool> missing_entrants = {});
+    Run runSession(Session& session, const std::string& chkpt_name, const bool missing_entrants);
 
     void beginCountdown();
     void cancelCountdown(const bool is_crash = false);
@@ -92,7 +90,7 @@ public:
 
     void open();
     void reset();
-    void prepareSession(const SessionPtr& session);
+    void prepareSession(Session& session);
     void close(const bool is_crash = false);
     void requestClosure() { closure_requested_ = true; }
 

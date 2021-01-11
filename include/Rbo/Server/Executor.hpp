@@ -23,7 +23,7 @@ private:
     Lobby& lobby_;
 
     std::mutex session_mtx_;
-    SessionPtr session_;
+    std::optional<Session> session_;
 
     std::atomic<State> state_;
     std::atomic_bool stop_handler_done_;
@@ -65,13 +65,13 @@ public:
                     if (lobby_.isPreparing()) {
                         const std::lock_guard session_lock { session_mtx_ };
 
-                        game_builder.template emplace(std::forward<BuilderArgs>(game_builder_args)...);
-                        session_ = std::make_unique<Session>(*game_builder);
+                        game_builder.emplace(std::forward<BuilderArgs>(game_builder_args)...);
+                        session_.emplace(*game_builder);
                     }
 
                     lobby_lock.lock();
                     if (lobby_.isPreparing())
-                        lobby_.prepareSession(session_);
+                        lobby_.prepareSession(*session_);
                     lobby_lock.unlock();
 
                     const std::lock_guard session_lock { session_mtx_ };
