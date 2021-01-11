@@ -4,6 +4,7 @@
 #include <Rbo/AsioCommon.hpp>
 
 #include <memory>
+#include <mutex>
 
 namespace Rbo {
 
@@ -15,14 +16,16 @@ struct RequestProfile {
 };
 
 struct RequestCtx {
+    std::mutex requestMtx;
     std::map<byte, RequestProfile> players;
+    byte repliesToAccept;
+
     Replies replies;
     std::atomic<byte> repliesHandled;
-    std::atomic<byte> repliesToAccept;
-    std::atomic_bool requestDone;
+    bool requestDone;
     std::vector<byte> errorIDs;
 
-    RequestCtx() : repliesHandled { 0 }, repliesToAccept { 0 }, requestDone { false } {}
+    RequestCtx() : repliesToAccept { 0 }, repliesHandled { 0 }, requestDone { false } {}
 
     RequestCtx(const RequestCtx&) = delete;
     RequestCtx& operator=(const RequestCtx&) = delete;

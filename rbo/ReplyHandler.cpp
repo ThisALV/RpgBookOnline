@@ -12,7 +12,7 @@ ReplyHandler::ReplyHandler(spdlog::logger& logger, const RequestCtxPtr ctx, cons
       playerID_ { p_id } {}
 
 void ReplyHandler::reportError(const byte player_id, const NetworkError& error) const {
-    logger_->error("[ReplyHandler {}] {}", playerID_, error.what());
+    logger_->error("Failed to handle reply of [{}] : {}", playerID_, error.what());
     ctx_->errorIDs.push_back(player_id);
 }
 
@@ -61,6 +61,12 @@ ReplyValidity ReplyHandler::treatReply(const std::size_t length) {
 }
 
 void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
+    const std::lock_guard request_lock { ctx_->requestMtx };
+    if (ctx_->requestDone) {
+        logger_->debug("Request handling for [{}] canceled, request is done.", playerID_);
+        return;
+    }
+
     logger_->debug("Handling reply for [{}].", playerID_);
     try {
         if (r_err) {
@@ -96,12 +102,19 @@ void ReplyHandler::handleReply(const ErrCode r_err, const std::size_t length) {
 
 void ReplyHandler::listenReply() {
     logger_->debug("Listening reply for [{}]...", playerID_);
+
     ctx_->players.at(playerID_).connection->async_receive(io::buffer(replyBuffer_), [this](const ErrCode err, const std::size_t len) {
         handleReply(err, len);
     });
 }
 
 void ReplyHandler::handle(const ErrCode send_err, const std::size_t) {
+    const std::lock_guard request_lock { ctx_->requestMtx };
+    if (ctx_->requestDone) {
+        logger_->debug("Request handling for [{}] canceled, request is done.", playerID_);
+        return;
+    }
+
     if (send_err) {
         handleError({ "send_request", send_err });
         return;

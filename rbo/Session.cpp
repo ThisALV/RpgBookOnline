@@ -594,9 +594,13 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
     logger_.info("{} replies received.", ctx->repliesHandled.load());
 
+    std::unique_lock request_lock { ctx->requestMtx };
+
     ctx->requestDone = true;
     for (auto& player : ctx->players)
         player.second.connection->cancel();
+
+    request_lock.unlock();
 
     SessionDataFactory end;
     end.makeEvent(Event::FinishRequest);
