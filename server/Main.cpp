@@ -32,6 +32,11 @@ BOOL WINAPI StopHandler(DWORD event) {
 
 #endif
 
+Rbo::Server::GameBuilderPtr localGameBuilderGenerator() {
+    return std::make_unique<Rbo::Server::LocalGameBuilder>(
+            "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
+    );
+};
 
 int main(const int argc, const char* argv[]) {
     constexpr std::string_view usage { "Usage : <ip> <port> <prepare_delay (ms)>" };
@@ -58,22 +63,18 @@ int main(const int argc, const char* argv[]) {
 
     spdlog::logger& logger { Rbo::rboLogger("Main") };
 
-    bool done;
+    bool done_successfully;
     try {
         logger.info("Starting server...");
 
-        const Rbo::Server::LocalGameBuilder game_builder{
-                "game/game.json", "game/chkpts.json", "game/scenes.lua", "instructions"
-        };
-
         Rbo::io::io_context server;
-        Rbo::Server::Lobby lobby{
+        Rbo::Server::Lobby lobby {
                 server,
                 Rbo::tcp::endpoint{ip == "ipv4" ? Rbo::tcp::v4() : Rbo::tcp::v6(), port},
                 prepare_delay
         };
 
-        Rbo::Server::Executor executor{server, lobby, logger};
+        Rbo::Server::Executor executor {server, lobby, logger};
 
         const auto stop_handler = [&executor, &logger](const Rbo::ErrCode err, const int sig) {
             std::cout << "\b\b";
@@ -95,20 +96,14 @@ int main(const int argc, const char* argv[]) {
         stop_sigs_handler.async_wait(stop_handler);
 #endif
 
-        done = executor.start(game_builder);
-    } catch (const Rbo::Server::ScriptLoadingError& err) {
-        logger.critical(err.what());
-        return 2;
-    } catch (const Rbo::Server::GameLoadingError& err) {
-        logger.critical(err.what());
-        return 2;
+        done_successfully = executor.start(localGameBuilderGenerator);
     } catch (const std::exception& err) {
         logger.critical(err.what());
-        return 3;
+        return 2;
     }
 
-    if (!done)
-        return 3;
+    if (!done_successfully)
+        return 2;
 
     logger.info("Server stopped.");
     return 0;

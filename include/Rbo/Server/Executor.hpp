@@ -9,18 +9,22 @@
 
 namespace Rbo::Server {
 
+using GameBuilderPtr = std::unique_ptr<GameBuilder>;
+using GameBuilderGenerator = std::function<GameBuilderPtr()>;
+
 class Executor {
 private:
     enum State {
         Running, Stopped, EventsLoopError, ServerError
     };
 
+    spdlog::logger& logger_;
     io::io_context& server_;
     std::mutex lobby_mtx_;
     Lobby& lobby_;
+
     std::mutex session_mtx_;
     SessionPtr session_;
-    spdlog::logger& logger_;
 
     std::atomic<State> state_;
     std::atomic_bool stop_handler_done_;
@@ -39,7 +43,7 @@ public:
 
     bool operator==(const Executor&) const = delete;
 
-    bool start(const GameBuilder& game_builder);
+    bool start(const GameBuilderGenerator& game_builder_generator);
     void stop() { stop(Stopped); }
 };
 

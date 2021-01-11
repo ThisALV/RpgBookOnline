@@ -3,13 +3,14 @@
 #include <thread>
 #include <spdlog/logger.h>
 #include <Rbo/Server/Lobby.hpp>
+#include <Rbo/Server/LocalGameBuilder.hpp>
 
 namespace Rbo::Server {
 
 Executor::Executor(io::io_context& server, Lobby& lobby, spdlog::logger& logger)
-    : server_ { server },
+    : logger_ { logger },
+      server_ { server },
       lobby_ { lobby },
-      logger_ { logger },
       state_ { Stopped },
       stop_handler_done_ { false } {}
 
@@ -50,17 +51,14 @@ void Executor::runEventsLoop() {
     }
 }
 
-bool Executor::start(const GameBuilder& game_builder) {
+bool Executor::start(const GameBuilderGenerator& game_builder_generator) {
     state_ = Running;
     std::thread events_loop { [this]() { runEventsLoop(); } };
 
+    GameBuilderPtr game_builder;
     try {
         logger_.debug("<-- Running server on this thread.");
         while (isRunning()) {
-            std::unique_lock session_lock { session_mtx_ };
-            session_ = std::make_unique<Session>(game_builder);
-            session_lock.unlock();
-
             std::unique_lock lobby_lock { lobby_mtx_, std::defer_lock };
 
             lobby_lock.lock();
@@ -71,10 +69,29 @@ bool Executor::start(const GameBuilder& game_builder) {
             while (lobby_.isOpen() || lobby_.isStarting())
                 std::this_thread::sleep_for( std::chrono::milliseconds { 1 } );
 
-            lobby_lock.lock();
-            if (lobby_.isPreparing())
-                lobby_.prepareSession(session_);
-            lobby_lock.unlock();
+            try {
+                if (lobby_.isPreparing()) {
+                    const std::lock_guard session_lock{session_mtx_};
+
+                    session_.reset(); // Le GameBuilder sur lequel session_ a une référence s'apprête à être détruit
+                    game_builder = game_builder_generator();
+                    session_ = std::make_unique<Session>(*game_builder);
+                }
+
+                lobby_lock.lock();
+                if (lobby_.isPreparing())
+                    lobby_.prepareSession(session_);
+                lobby_lock.unlock();
+            } catch (const GameBuildingError& err) {
+                logger_.error(err.what());
+
+                lobby_lock.lock();
+                if (lobby_.isPreparing()) {
+                    logger_.warn("Game building has failed, reopening lobby...");
+                    lobby_.reset();
+                }
+                lobby_lock.unlock();
+            }
         }
 
         while (!stop_handler_done_)
