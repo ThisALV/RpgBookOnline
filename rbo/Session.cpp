@@ -547,58 +547,59 @@ bool Session::anyPlayerAlive() const {
 }
 
 Replies Session::request(const byte targets_id, const Data& data, ReplyController controller, const bool first_reply_only, const bool wait_all_replies) {
-    const RequestCtxPtr ctx { std::make_shared<RequestCtx>() };
+    RequestCtx ctx;
+
     const bool all_players { targets_id == ALL_PLAYERS };
     const bool alive_players { targets_id == ACTIVE_PLAYERS };
 
     byte targets_count { 0 };
     for (auto& [id, connection] : connections_) {
-        const bool targetted { all_players || (alive_players && player(id).alive()) || id == targets_id };
+        const bool is_target { all_players || (alive_players && player(id).alive()) || id == targets_id };
 
-        ctx->players.insert({ id, RequestProfile { &connection, targetted } });
-        if (targetted)
+        ctx.players.try_emplace(id, connection, is_target);
+        if (is_target)
             targets_count++;
     }
 
     byte replies_to_receive;
     if (first_reply_only) {
-        ctx->repliesToAccept = 1;
+        ctx.repliesToAccept = 1;
         replies_to_receive = wait_all_replies ? targets_count : 1;
     } else {
-        ctx->repliesToAccept = targets_count;
+        ctx.repliesToAccept = targets_count;
         replies_to_receive = targets_count;
     }
 
     const io::const_buffer buffer { trunc(data) };
     std::map<byte, ReplyHandler> handlers;
-    for (auto [id, player] : ctx->players) {
-        if (player.targetted) {
-            handlers.insert({ id, ReplyHandler { logger_, ctx, controller, id } });
+    for (auto [id, player] : ctx.players) {
+        if (player.isTarget) {
+            handlers.try_emplace(id, logger_, ctx, controller, id);
 
             const byte player_id { id }; // Nécessaire pour pouvoir être capturé par la lambda
-            player.connection->async_send(buffer, [&handlers, player_id](const ErrCode err, const std::size_t len) {
+            player.connection.async_send(buffer, [&handlers, player_id](const ErrCode err, const std::size_t len) {
                 handlers.at(player_id).handle(err, len);
             });
         } else {
-            const ErrCode send_err { trySend(*player.connection, buffer) };
+            const ErrCode send_err { trySend(player.connection, buffer) };
 
             if (send_err) {
-                ctx->players.erase(ctx->players.find(id));
-                ctx->errorIDs.push_back(id);
+                ctx.players.erase(ctx.players.find(id));
+                ctx.errorIDs.push_back(id);
             }
         }
     }
 
     logger_.info("Waiting for {} replies in total...", replies_to_receive);
-    while (ctx->repliesHandled < replies_to_receive && running())
+    while (ctx.repliesHandled < replies_to_receive && running())
         std::this_thread::sleep_for(std::chrono::milliseconds { 1 });
-    logger_.info("{} replies received.", ctx->repliesHandled.load());
+    logger_.info("{} replies received.", ctx.repliesHandled.load());
 
-    std::unique_lock request_lock { ctx->requestMtx };
+    std::unique_lock request_lock { ctx.requestMtx };
 
-    ctx->requestDone = true;
-    for (auto& player : ctx->players)
-        player.second.connection->cancel();
+    ctx.requestDone = true;
+    for (auto& player : ctx.players)
+        player.second.connection.cancel();
 
     request_lock.unlock();
 
@@ -606,23 +607,23 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
     end.makeEvent(Event::FinishRequest);
     const io::const_buffer ending_buffer { trunc(end.dataWithLength()) };
 
-    for (const auto [id, player] : ctx->players) {
-        const auto b { ctx->errorIDs.cbegin() };
-        const auto e { ctx->errorIDs.cend() };
+    for (const auto [id, player] : ctx.players) {
+        const auto b { ctx.errorIDs.cbegin() };
+        const auto e { ctx.errorIDs.cend() };
 
         if (std::find(b, e, id) == e) {
-            const ErrCode end_err { trySend(*player.connection, ending_buffer) };
+            const ErrCode end_err { trySend(player.connection, ending_buffer) };
 
             if (end_err) {
                 logPlayerError(id, end_err.message());
-                ctx->errorIDs.push_back(id);
+                ctx.errorIDs.push_back(id);
             }
         }
     }
 
     // Méthode de déconnexion différente pour éviter d'essayer d'envoyer des paquets
     // d'informations aux joueurs ayant crash
-    for (const byte player : ctx->errorIDs)
+    for (const byte player : ctx.errorIDs)
         removePlayer(player);
 
     if (!playersRemaining())
@@ -631,21 +632,21 @@ Replies Session::request(const byte targets_id, const Data& data, ReplyControlle
     if (players_.count(leader()) == 0)
         switchLeader(players_.cbegin()->first);
 
-    for (const byte player : ctx->errorIDs) {
+    for (const byte player : ctx.errorIDs) {
         SessionDataFactory crash_data;
         crash_data.makeCrash(player);
 
         sendToAll(crash_data.dataWithLength());
     }
 
-    logger_.info("Replies : {}", RepliesWrapper { ctx->replies });
-    if (!ctx->errorIDs.empty())
-        logger_.warn("Crashed players : {}", ByteVecWrapper { ctx->errorIDs });
+    logger_.info("Replies : {}", RepliesWrapper { ctx.replies });
+    if (!ctx.errorIDs.empty())
+        logger_.warn("Crashed players : {}", ByteVecWrapper { ctx.errorIDs });
 
     if (!running())
         throw CanceledRequest {};
 
-    return ctx->replies;
+    return ctx.replies;
 }
 
 void Session::sendTo(const byte target_id, const Data& data) {

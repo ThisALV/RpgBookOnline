@@ -3,7 +3,6 @@
 
 #include <Rbo/AsioCommon.hpp>
 
-#include <memory>
 #include <mutex>
 
 namespace Rbo {
@@ -11,8 +10,10 @@ namespace Rbo {
 struct InvalidReply;
 
 struct RequestProfile {
-    tcp::socket* connection;
-    bool targetted;
+    tcp::socket& connection;
+    bool isTarget;
+
+    RequestProfile(tcp::socket& c, const bool is_target) : connection { c }, isTarget { is_target } {}
 };
 
 struct RequestCtx {
@@ -33,29 +34,24 @@ struct RequestCtx {
     bool operator==(const RequestCtx&) = delete;
 };
 
-using RequestCtxPtr = std::shared_ptr<RequestCtx>;
-
 class ReplyHandler {
 public:
     struct NetworkError : std::runtime_error {
         NetworkError(const std::string& operation, const ErrCode& err) : std::runtime_error { operation + " : " + err.category().name() + (" - " + err.message()) } {}
     };
 
-    ReplyHandler(spdlog::logger& logger, const RequestCtxPtr ctx, const ReplyController controller, const byte p_id);
+    ReplyHandler(spdlog::logger& logger, RequestCtx& ctx, const ReplyController controller, const byte p_id);
 
     ReplyHandler(const ReplyHandler&) = delete;
     ReplyHandler& operator=(const ReplyHandler&) = delete;
 
     bool operator==(const ReplyHandler&) const = delete;
 
-    ReplyHandler(ReplyHandler&& other) = default;
-    ReplyHandler& operator=(ReplyHandler&& rhs) = default;
-
     void handle(const ErrCode error, const std::size_t);
 
 private:
-    spdlog::logger* logger_;
-    RequestCtxPtr ctx_;
+    spdlog::logger& logger_;
+    RequestCtx& ctx_;
     ReplyController controlValidity;
     byte playerID_;
 
