@@ -1,7 +1,7 @@
 #ifndef LOCALGAMEBUILDER_HPP
 #define LOCALGAMEBUILDER_HPP
 
-#include <Rbo/Server/ServerCommon.hpp>
+#include <Rbo/Server/Common.hpp>
 
 #include <filesystem>
 #include <Rbo/GameBuilder.hpp>

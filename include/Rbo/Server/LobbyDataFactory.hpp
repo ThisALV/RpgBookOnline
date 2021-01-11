@@ -1,7 +1,6 @@
-#include <Rbo/Server/ServerCommon.hpp>
+#include <Rbo/Server/Common.hpp>
 
 #include <Rbo/Data.hpp>
-#include "ServerCommon.hpp"
 
 namespace Rbo::Server {
 

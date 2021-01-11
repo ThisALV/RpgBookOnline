@@ -1,4 +1,4 @@
-#include <Rbo/Server/ServerCommon.hpp>
+#include <Rbo/Server/Common.hpp>
 
 namespace Rbo::Server {
 

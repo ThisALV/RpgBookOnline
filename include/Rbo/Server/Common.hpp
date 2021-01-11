@@ -1,5 +1,5 @@
-#ifndef SERVER_COMMONS
-#define SERVER_COMMONS
+#ifndef SERVER_COMMONS_HPP
+#define SERVER_COMMONS_HPP
 
 #include <Rbo/Common.hpp>
 
@@ -43,4 +43,4 @@ using MembersStates = std::map<byte, Member>;
 
 } // namespace Rbo::Server
 
-#endif // SERVER_COMMONS
+#endif // SERVER_COMMONS_HPP

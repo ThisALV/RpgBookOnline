@@ -1,7 +1,7 @@
 #ifndef LOBBY_HPP
 #define LOBBY_HPP
 
-#include <Rbo/Server/ServerCommon.hpp>
+#include <Rbo/Server/Common.hpp>
 
 #include <Rbo/Session.hpp>
 
