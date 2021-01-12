@@ -49,8 +49,8 @@ using RandomEngine = std::mt19937_64;
 enum struct ReplyValidity : byte;
 
 using OptionsList = std::vector<std::string>;
-using Replies = std::map<byte, byte>;
-using DiceRollResults = std::map<byte, RollResult>;
+using Replies = std::unordered_map<byte, byte>;
+using DiceRollResults = std::map<byte, RollResult>; // Triés pour les tests unitaires sur la fabrication de paquets
 using ReplyController = std::function<void(const byte reply)>;
 
 using Next = std::optional<word>;
@@ -74,7 +74,7 @@ using Stats = std::unordered_map<std::string, Stat>;
 
 using Death = std::optional<std::string>;
 
-using PlayersState = std::map<byte, PlayerState>;
+using PlayersState = std::unordered_map<byte, PlayerState>;
 using InventoryUpdate = std::unordered_map<std::string, int>;
 using InventoriesUpdate = std::unordered_map<std::string, InventoryUpdate>;
 
