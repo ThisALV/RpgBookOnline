@@ -5,7 +5,7 @@
 namespace Rbo::Server {
 
 enum struct RegistrationResult : byte {
-    Ok, InvalidRequest, UnavailableID, UnavailableName, UnavailableSession
+    Ok, InvalidRequest, UnavailableID, UnavailableName, UnavailableSession, ReservedID
 };
 
 enum struct Event : byte {

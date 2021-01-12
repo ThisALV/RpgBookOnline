@@ -233,6 +233,8 @@ void Lobby::handleRegistrationRequest(const tcp::endpoint& client_endpt, const E
         registration = RegistrationResult::UnavailableSession;
     else if (name.empty())
         registration = RegistrationResult::InvalidRequest;
+    else if (id == ACTIVE_PLAYERS || id == ALL_PLAYERS)
+        registration = RegistrationResult::ReservedID;
     else if (registered(id))
         registration = RegistrationResult::UnavailableID;
     else if (registered(name))
@@ -252,7 +254,7 @@ void Lobby::handleRegistrationRequest(const tcp::endpoint& client_endpt, const E
     }
 
     if (registration != RegistrationResult::Ok) {
-        logger_.warn("Unable to register [{}] : {}", client_endpt, static_cast<int>(registration));
+        logger_.warn("Unable to register [{}] : #{}", client_endpt, static_cast<int>(registration));
         registering_.at(client_endpt).shutdown(tcp::socket::shutdown_both);
         registering_.erase(client_endpt);
 
