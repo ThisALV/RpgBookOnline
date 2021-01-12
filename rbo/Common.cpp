@@ -23,7 +23,7 @@ namespace {
 auto sink_file { std::make_shared<spdlog::sinks::basic_file_sink_mt>("logs/" + std::to_string(now()) + ".log", true) };
 auto sink_console { std::make_shared<spdlog::sinks::stdout_color_sink_mt>() };
 
-constexpr std::string_view log_format { "[%T.%e/%^%L%$] %-13n #%t : %v" };
+constexpr std::string_view log_format { "[%T.%e/%^%L%$] %-13n #%-5t : %v" };
 
 void loggerErrorHandler(const std::string& err) {
     std::cerr << "Logger error : " << err << std::endl;
