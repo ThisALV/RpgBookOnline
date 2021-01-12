@@ -148,11 +148,14 @@ BOOST_AUTO_TEST_SUITE(EnemiesGroupTests)
 BOOST_AUTO_TEST_SUITE(Ctor)
 
 BOOST_AUTO_TEST_CASE(MoreThan255Enemies) {
-    GroupDescriptor descriptor;
+    Game ctx;
+    ctx.groups.insert({ "a", {} });
+
+    GroupDescriptor& descriptor { ctx.groups.at("a") };
     for (std::size_t i { 0 }; i <= EnemiesGroup::LIMIT; i++)
         descriptor.insert({ i, { "", "" } });
 
-    BOOST_CHECK_THROW(EnemiesGroup(descriptor, Game()), TooManyEnemies);
+    BOOST_CHECK_THROW(EnemiesGroup("a", ctx), TooManyEnemies);
 }
 
 BOOST_AUTO_TEST_CASE(SameCtxNameTwice) {
@@ -160,14 +163,13 @@ BOOST_AUTO_TEST_CASE(SameCtxNameTwice) {
     ctx.enemies = {
         { "A", {} }, { "B", {} }
     };
-
-    const GroupDescriptor descriptor {
+    ctx.groups.insert({ "a", {
         { 3, EnemyDescriptorBinding { "1", "A" } },
         { 2, EnemyDescriptorBinding { "2", "A" } },
         { 1, EnemyDescriptorBinding { "1", "B" } }
-    };
+    } });
 
-    BOOST_CHECK_THROW(EnemiesGroup(descriptor, ctx), SameEnemiesName);
+    BOOST_CHECK_THROW(EnemiesGroup("a", ctx), SameEnemiesName);
 }
 
 BOOST_AUTO_TEST_CASE(Normal) {
@@ -175,14 +177,13 @@ BOOST_AUTO_TEST_CASE(Normal) {
     ctx.enemies = {
         { "A", {} }, { "B", {} }
     };
-
-    const GroupDescriptor descriptor {
+    ctx.groups.insert({ "a", {
         { 3, EnemyDescriptorBinding { "3", "A" } },
         { 1, EnemyDescriptorBinding { "1", "A" } },
         { 2, EnemyDescriptorBinding { "2", "B" } }
-    };
+    } });
 
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
     const std::vector<std::string> expected_queue { "3", "2", "1" };
 
     BOOST_CHECK_EQUAL(group.queue(), expected_queue);
@@ -196,13 +197,12 @@ BOOST_AUTO_TEST_SUITE(Defeated)
 BOOST_AUTO_TEST_CASE(NoEnemiesAlive) {
     Game ctx;
     ctx.enemies = { { "A", { 0, 5 } } };
-
-    const GroupDescriptor descriptor {
+    ctx.groups.insert({ "a", {
         { 1, EnemyDescriptorBinding { "1", "A" } },
         { 2, EnemyDescriptorBinding { "2", "A" } }
-    };
+    } });
 
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK(group.defeated());
 }
@@ -213,14 +213,13 @@ BOOST_AUTO_TEST_CASE(AnyEnemiesAlive) {
         { "A", { 0, 5 } },
         { "B", { 1, 5 } },
     };
-
-    const GroupDescriptor descriptor {
+    ctx.groups.insert({ "a", {
         { 1, EnemyDescriptorBinding { "1", "A" } },
         { 2, EnemyDescriptorBinding { "2", "B" } },
         { 0, EnemyDescriptorBinding { "3", "A" } }
-    };
+    } });
 
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK(!group.defeated());
 }
@@ -229,28 +228,33 @@ BOOST_AUTO_TEST_SUITE_END()
 
 struct EnemiesFixture {
     Game ctx;
-    const GroupDescriptor descriptor {
-        { 1, EnemyDescriptorBinding { "1", "A" } },
-        { 2, EnemyDescriptorBinding { "2", "B" } },
-        { 0, EnemyDescriptorBinding { "3", "A" } }
-    };
 
     EnemiesFixture() {
         ctx.enemies = {
             { "A", { 0, 5 } },
             { "B", { 1, 5 } },
         };
+
+        ctx.groups.insert({ "a", {
+            { 1, EnemyDescriptorBinding { "1", "A" } },
+            { 2, EnemyDescriptorBinding { "2", "B" } },
+            { 0, EnemyDescriptorBinding { "3", "A" } }
+        } });
+        ctx.groups.insert({ "b", {
+            { 1, EnemyDescriptorBinding { "1", "A" } },
+            { 2, EnemyDescriptorBinding { "2", "A" } }
+        } });
     }
 };
 
 BOOST_FIXTURE_TEST_SUITE(CheckName, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(Exists) {
-    testNameChecking(EnemiesGroup { descriptor, ctx }, "1");
+    testNameChecking(EnemiesGroup { "a", ctx }, "1");
 }
 
 BOOST_AUTO_TEST_CASE(NotExists) {
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK_THROW(testNameChecking(group, "0"), EnemyNotFound);
 }
@@ -260,11 +264,11 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(CheckPos, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(InRange) {
-    testPosChecking(EnemiesGroup { descriptor, ctx }, 2);
+    testPosChecking(EnemiesGroup { "a", ctx }, 2);
 }
 
 BOOST_AUTO_TEST_CASE(OutRange) {
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK_THROW(testPosChecking(group, 3), NotEnoughEnemies);
 }
@@ -274,7 +278,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(GetByPos, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(PosInRange) {
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     const Enemy& enemy { group.get(1) };
     const EnemyDescriptor& descriptor { ctx.enemies.at("A") };
@@ -285,13 +289,13 @@ BOOST_AUTO_TEST_CASE(PosInRange) {
 }
 
 BOOST_AUTO_TEST_CASE(PosOutRange) {
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK_THROW(group.get(10), NotEnoughEnemies);
 }
 
 BOOST_AUTO_TEST_CASE(Current) {
-    const EnemiesGroup group { descriptor, ctx };
+    const EnemiesGroup group { "a", ctx };
 
     const Enemy& enemy { group.current() };
     const EnemyDescriptor& descriptor { ctx.enemies.at("B") };
@@ -306,7 +310,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(GoTo, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(InRange) {
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "a", ctx };
 
     const Enemy& enemy { group.goTo(2) };
     const EnemyDescriptor descriptor { ctx.enemies.at("A") };
@@ -317,7 +321,7 @@ BOOST_AUTO_TEST_CASE(InRange) {
 }
 
 BOOST_AUTO_TEST_CASE(OutRange) {
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "a", ctx };
 
     BOOST_CHECK_THROW(group.goTo(3), NotEnoughEnemies);
 }
@@ -327,7 +331,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(Next, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(BeginOfQueue) {
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "a", ctx };
 
     const Enemy& enemy { group.next() };
     const EnemyDescriptor& descriptor { ctx.enemies.at("A") };
@@ -338,7 +342,7 @@ BOOST_AUTO_TEST_CASE(BeginOfQueue) {
 }
 
 BOOST_AUTO_TEST_CASE(EndOfQueue) {
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "a", ctx };
     group.goTo(2);
 
     const Enemy& enemy { group.next() };
@@ -350,11 +354,7 @@ BOOST_AUTO_TEST_CASE(EndOfQueue) {
 }
 
 BOOST_AUTO_TEST_CASE(Defeated) {
-    const GroupDescriptor descriptor {
-        { 1, EnemyDescriptorBinding { "1", "A" } },
-        { 2, EnemyDescriptorBinding { "2", "A" } }
-    };
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "b", ctx };
 
     const Enemy& enemy { group.next() };
     const EnemyDescriptor& e_descriptor { ctx.enemies.at("A") };
@@ -369,25 +369,20 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_FIXTURE_TEST_SUITE(NextAlive, EnemiesFixture)
 
 BOOST_AUTO_TEST_CASE(Defeated) {
-    const GroupDescriptor descriptor {
-        { 1, EnemyDescriptorBinding { "1", "A" } },
-        { 2, EnemyDescriptorBinding { "2", "A" } }
-    };
-
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "b", ctx };
 
     BOOST_CHECK_THROW(group.nextAlive(), NoMoreEnemies);
 }
 
 BOOST_AUTO_TEST_CASE(NotDefeated) {
-    const GroupDescriptor descriptor {
+    ctx.groups.insert({ "c", {
         { 10, EnemyDescriptorBinding { "1", "A" } },
         { 5, EnemyDescriptorBinding { "2", "A" } },
         { 2, EnemyDescriptorBinding { "3", "B" }},
         { -99, EnemyDescriptorBinding { "4", "A" } }
-    };
+    } });
 
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "c", ctx };
     const Enemy& enemy { group.nextAlive() };
     const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
 
@@ -397,14 +392,14 @@ BOOST_AUTO_TEST_CASE(NotDefeated) {
 }
 
 BOOST_AUTO_TEST_CASE(BackToBeginning) {
-    const GroupDescriptor descriptor {
-        { 10, EnemyDescriptorBinding { "1", "A" } },
-        { 5, EnemyDescriptorBinding { "2", "B" } },
-        { 2, EnemyDescriptorBinding { "3", "A" }},
-        { -99, EnemyDescriptorBinding { "4", "A" } }
-    };
+    ctx.groups.insert({ "c", {
+            { 10, EnemyDescriptorBinding { "1", "A" } },
+            { 5, EnemyDescriptorBinding { "2", "B" } },
+            { 2, EnemyDescriptorBinding { "3", "A" }},
+            { -99, EnemyDescriptorBinding { "4", "A" } }
+    } });
 
-    EnemiesGroup group { descriptor, ctx };
+    EnemiesGroup group { "c", ctx };
     group.goTo(2);
 
     const Enemy& enemy { group.nextAlive() };

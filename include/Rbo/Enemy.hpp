@@ -71,7 +71,7 @@ public:
 
     static constexpr std::size_t LIMIT { std::numeric_limits<byte>::max() };
 
-    EnemiesGroup(const GroupDescriptor& descriptor, const Game& ctx);
+    EnemiesGroup(const std::string& group_name, const Game& ctx);
 
     EnemiesGroup(const EnemiesGroup&) = delete;
     EnemiesGroup& operator=(const EnemiesGroup&) = delete;

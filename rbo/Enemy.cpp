@@ -51,12 +51,13 @@ void Enemy::unbuff(const int malus) {
     stats_.change("skill", -malus);
 }
 
-EnemiesGroup::EnemiesGroup(const GroupDescriptor& descriptor, const Game& ctx) : current_ { 0 } {
+EnemiesGroup::EnemiesGroup(const std::string& group_name, const Game& ctx) : current_ { 0 } {
+    const GroupDescriptor& descriptor { ctx.group(group_name) };
+
     if (descriptor.size() > LIMIT)
         throw TooManyEnemies {};
 
     queue_.reserve(descriptor.size());
-
     for (const auto& enemy : descriptor) {
         const auto& [ctxName, genericName] { enemy.second };
 
