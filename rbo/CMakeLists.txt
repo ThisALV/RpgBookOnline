@@ -18,7 +18,7 @@ else()
 endif()
 
 if(RBO_STATIC_WINDOWS_LIBRARIES)
-    target_link_libraries(rbo PUBLIC ws2_32 wsock32)
+    target_link_libraries(rbo PRIVATE ws2_32 wsock32)
 endif()
 
 target_link_libraries(rbo PRIVATE nlohmann_json::nlohmann_json)
