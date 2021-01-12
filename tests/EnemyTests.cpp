@@ -4,11 +4,11 @@
 #include <Rbo/Enemy.hpp>
 #include <Rbo/Game.hpp>
 
-BOOST_TEST_DONT_PRINT_LOG_VALUE(typename std::vector<std::string>)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(typename std::vector<std::string_view>)
 
 namespace Rbo {
 
-void testNameChecking(const EnemiesGroup& group, const std::string& name) {
+void testNameChecking(const EnemiesGroup& group, const std::string_view name) {
     group.checkName(name);
 }
 
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(Normal) {
     } });
 
     const EnemiesGroup group { "a", ctx };
-    const std::vector<std::string> expected_queue { "3", "2", "1" };
+    const std::vector<std::string_view> expected_queue { "3", "2", "1" };
 
     BOOST_CHECK_EQUAL(group.queue(), expected_queue);
     BOOST_CHECK_EQUAL(group.currentPos(), 0);

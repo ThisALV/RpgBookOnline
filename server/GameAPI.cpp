@@ -82,7 +82,7 @@ void InstructionsProvider::initGameAPI() {
     group["defeated"] = &EnemiesGroup::defeated;
     group["lastPos"] = &EnemiesGroup::lastPos;
     group["get"] = sol::overload(
-            sol::resolve<Enemy&(const std::string&)>(&EnemiesGroup::get),
+            sol::resolve<Enemy&(const std::string_view)>(&EnemiesGroup::get),
             sol::resolve<Enemy&(const byte)>(&EnemiesGroup::get)
     );
     group["current"] = sol::resolve<Enemy&()>(&EnemiesGroup::current);

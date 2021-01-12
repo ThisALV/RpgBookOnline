@@ -59,14 +59,14 @@ struct NoMoreEnemies : std::logic_error {
 
 class EnemiesGroup {
 private:
-    std::unordered_map<std::string, Enemy> enemies_;
-    std::vector<std::string> queue_;
+    std::unordered_map<std::string_view, Enemy> enemies_;
+    std::vector<std::string_view> queue_;
     byte current_;
 
-    void checkName(const std::string& name) const;
+    void checkName(const std::string_view name) const;
     void checkPos(const byte pos) const;
 public:
-    friend void testNameChecking(const EnemiesGroup& group, const std::string& ctx_name);
+    friend void testNameChecking(const EnemiesGroup& group, const std::string_view ctx_name);
     friend void testPosChecking(const EnemiesGroup& group, const byte pos_in_queue);
 
     static constexpr std::size_t LIMIT { std::numeric_limits<byte>::max() };
@@ -84,8 +84,8 @@ public:
     bool defeated() const;
     byte lastPos() const { return queue_.size() - 1; }
 
-    Enemy& get(const std::string& enemy_name);
-    const Enemy& get(const std::string& enemy_name) const;
+    Enemy& get(const std::string_view enemy_name);
+    const Enemy& get(const std::string_view enemy_name) const;
 
     Enemy& get(const byte pos_in_queue);
     const Enemy& get(const byte pos_in_queue) const;
@@ -93,14 +93,14 @@ public:
     const Enemy& current() const;
 
     byte currentPos() const { return current_; }
-    const std::string& currentName() const { return queue_.at(currentPos()); }
+    const std::string_view& currentName() const { return queue_.at(currentPos()); }
 
     Enemy& goTo(const byte pos_in_queue);
     Enemy& next();
     Enemy& nextAlive(const bool self_included = true);
 
-    const std::unordered_map<std::string, Enemy>& enemies() const { return enemies_; }
-    const std::vector<std::string>& queue() const { return queue_; }
+    const std::unordered_map<std::string_view, Enemy>& enemies() const { return enemies_; }
+    const std::vector<std::string_view>& queue() const { return queue_; }
 };
 
 std::vector<std::string> namesOf(const GroupDescriptor&);

@@ -71,9 +71,9 @@ EnemiesGroup::EnemiesGroup(const std::string& group_name, const Game& ctx) : cur
     assert(enemies_.size() == queue_.size());
 }
 
-void EnemiesGroup::checkName(const std::string& name) const {
+void EnemiesGroup::checkName(const std::string_view name) const {
     if (enemies_.count(name) == 0)
-        throw EnemyNotFound { name };
+        throw EnemyNotFound { std::string { name } };
 }
 
 void EnemiesGroup::checkPos(const byte pos) const {
@@ -87,12 +87,12 @@ bool EnemiesGroup::defeated() const {
     });
 }
 
-Enemy& EnemiesGroup::get(const std::string& enemy_name) {
+Enemy& EnemiesGroup::get(const std::string_view enemy_name) {
     checkName(enemy_name);
     return enemies_.at(enemy_name);
 }
 
-const Enemy& EnemiesGroup::get(const std::string& enemy_name) const {
+const Enemy& EnemiesGroup::get(const std::string_view enemy_name) const {
     checkName(enemy_name);
     return enemies_.at(enemy_name);
 }
