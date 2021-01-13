@@ -115,16 +115,17 @@ Enemy& EnemiesGroup::goTo(const size_t pos_in_queue) {
     return *current_;
 }
 
-Enemy& EnemiesGroup::next() {
-    if (current_ == (queue().cend() - 1))
+std::tuple<bool, Enemy*> EnemiesGroup::next() {
+    const bool looped { current_ == (queue().cend() - 1) };
+    if (looped)
         current_ = queue_.begin();
     else
         current_++;
 
-    return current();
+    return { looped, &current() };
 }
 
-Enemy& EnemiesGroup::nextAlive(const bool self_included) {
+std::tuple<bool, Enemy*> EnemiesGroup::nextAlive(const bool self_included) {
     if (defeated())
         throw NoMoreEnemies {};
 
@@ -134,17 +135,20 @@ Enemy& EnemiesGroup::nextAlive(const bool self_included) {
     else
         next = current_ == (queue_.cend() - 1) ? queue_.begin() : (current_ + 1);
 
+    bool looped { false };
     while (!next->alive()) {
-        if (next == (queue_.cend() - 1))
+        if (next == (queue_.cend() - 1)) {
             next = queue_.begin();
-        else
+            looped = true;
+        } else {
             next++;
+        }
     }
 
     assert(next->alive());
 
     current_ = next;
-    return current();
+    return { looped, &current() };
 }
 
 } // namespace Rbo

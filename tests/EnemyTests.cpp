@@ -337,35 +337,38 @@ BOOST_FIXTURE_TEST_SUITE(Next, EnemiesFixture)
 BOOST_AUTO_TEST_CASE(BeginOfQueue) {
     EnemiesGroup group { "a", ctx };
 
-    const Enemy& enemy { group.next() };
+    const auto [looped, enemy] { group.next() };
     const EnemyDescriptor& descriptor { ctx.enemies.at("A") };
 
-    BOOST_CHECK_EQUAL(enemy.name(), "1");
-    BOOST_CHECK_EQUAL(enemy.hp(), descriptor.hp);
-    BOOST_CHECK_EQUAL(enemy.skill(), descriptor.skill);
+    BOOST_CHECK(!looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "1");
+    BOOST_CHECK_EQUAL(enemy->hp(), descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), descriptor.skill);
 }
 
 BOOST_AUTO_TEST_CASE(EndOfQueue) {
     EnemiesGroup group { "a", ctx };
     group.goTo(2);
 
-    const Enemy& enemy { group.next() };
+    const auto [looped, enemy] { group.next() };
     const EnemyDescriptor& descriptor { ctx.enemies.at("B") };
 
-    BOOST_CHECK_EQUAL(enemy.name(), "2");
-    BOOST_CHECK_EQUAL(enemy.hp(), descriptor.hp);
-    BOOST_CHECK_EQUAL(enemy.skill(), descriptor.skill);
+    BOOST_CHECK(looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "2");
+    BOOST_CHECK_EQUAL(enemy->hp(), descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), descriptor.skill);
 }
 
 BOOST_AUTO_TEST_CASE(Defeated) {
     EnemiesGroup group { "b", ctx };
 
-    const Enemy& enemy { group.next() };
+    const auto [looped, enemy] { group.next() };
     const EnemyDescriptor& e_descriptor { ctx.enemies.at("A") };
 
-    BOOST_CHECK_EQUAL(enemy.name(), "1");
-    BOOST_CHECK_EQUAL(enemy.hp(), e_descriptor.hp);
-    BOOST_CHECK_EQUAL(enemy.skill(), e_descriptor.skill);
+    BOOST_CHECK(!looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "1");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -389,12 +392,13 @@ BOOST_AUTO_TEST_CASE(NotDefeated) {
     });
 
     EnemiesGroup group { "c", ctx };
-    const Enemy& enemy { group.nextAlive() };
+    const auto [looped, enemy] { group.nextAlive() };
     const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
 
-    BOOST_CHECK_EQUAL(enemy.name(), "3");
-    BOOST_CHECK_EQUAL(enemy.hp(), e_descriptor.hp);
-    BOOST_CHECK_EQUAL(enemy.skill(), e_descriptor.skill);
+    BOOST_CHECK(!looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "3");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
 }
 
 BOOST_AUTO_TEST_CASE(BackToBeginning) {
@@ -410,12 +414,13 @@ BOOST_AUTO_TEST_CASE(BackToBeginning) {
     EnemiesGroup group { "c", ctx };
     group.goTo(2);
 
-    const Enemy& enemy { group.nextAlive() };
+    const auto [looped, enemy] { group.nextAlive() };
     const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
 
-    BOOST_CHECK_EQUAL(enemy.name(), "2");
-    BOOST_CHECK_EQUAL(enemy.hp(), e_descriptor.hp);
-    BOOST_CHECK_EQUAL(enemy.skill(), e_descriptor.skill);
+    BOOST_CHECK(looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "2");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

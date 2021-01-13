@@ -90,8 +90,8 @@ public:
     const std::string& currentName() const { return current().name(); }
 
     Enemy& goTo(const size_t pos_in_queue);
-    Enemy& next();
-    Enemy& nextAlive(const bool self_included = true);
+    std::tuple<bool, Enemy*> next();
+    std::tuple<bool, Enemy*> nextAlive(const bool self_included = true);
 
     const EnemiesQueue& queue() const { return queue_; }
 };

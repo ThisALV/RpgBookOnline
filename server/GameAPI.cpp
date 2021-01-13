@@ -92,7 +92,7 @@ void InstructionsProvider::initGameAPI() {
     group["goTo"] = &EnemiesGroup::goTo;
     group["next"] = &EnemiesGroup::next;
     group["nextAlive"] = sol::overload(
-            [](EnemiesGroup& self) -> Enemy& { return self.nextAlive(); },
+            [](EnemiesGroup& self) { return self.nextAlive(); },
             &EnemiesGroup::nextAlive
     );
 
