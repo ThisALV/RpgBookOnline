@@ -63,8 +63,8 @@ void from_json(const json& data, Stat& stat);
 void to_json(json& data, const PlayerState& player);
 void from_json(const json& data, PlayerState& player);
 
-void to_json(json& data, const std::map<byte, PlayerState>& players);
-void from_json(const json& data, std::map<byte, PlayerState>& players);
+void to_json(json& data, const std::unordered_map<byte, PlayerState>& players);
+void from_json(const json& data, std::unordered_map<byte, PlayerState>& players);
 
 void to_json(json& data, const PlayerUpdate& changes);
 
