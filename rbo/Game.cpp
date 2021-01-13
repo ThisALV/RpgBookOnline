@@ -152,7 +152,7 @@ std::vector<Game::Error> Game::validity() const {
 
     const bool valid_groups = std::all_of(groups.cbegin(), groups.cend(), [this](const auto& g) {
         return std::all_of(g.second.cbegin(), g.second.cend(), [this](const auto& e) {
-            return hasEnemy(e.second.genericName);
+            return hasEnemy(e.genericName);
         });
     });
 

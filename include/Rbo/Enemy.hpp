@@ -40,36 +40,29 @@ struct SameEnemiesName : std::logic_error {
     explicit SameEnemiesName(const std::string& ctx_name) : std::logic_error { "Name \"" + ctx_name + "\" already took" } {}
 };
 
-struct TooManyEnemies : std::logic_error {
-    TooManyEnemies() : std::logic_error { "There cannot be more than " + std::to_string(255) + " enemies in one group" } {}
-};
-
 struct EnemyNotFound : std::logic_error {
     explicit EnemyNotFound(const std::string& name) : std::logic_error { "The enemy \"" + name + "\" isn't in this group" } {}
 };
 
 struct NotEnoughEnemies : std::logic_error {
-    explicit NotEnoughEnemies(const byte pos) : std::logic_error { "There is less than " + std::to_string(pos + 1) + " in the group's queue" } {}
+    explicit NotEnoughEnemies(const std::size_t pos)
+            : std::logic_error { "There is less than " + std::to_string(pos + 1) + " in the group's queue" } {}
 };
 
 struct NoMoreEnemies : std::logic_error {
     NoMoreEnemies() : std::logic_error { "All enemies are already killed in this group" } {}
 };
 
-
 class EnemiesGroup {
 private:
-    std::unordered_map<std::string_view, Enemy> enemies_;
-    std::vector<std::string_view> queue_;
-    byte current_;
+    EnemiesQueue queue_;
+    EnemiesQueue::iterator current_;
 
-    void checkName(const std::string_view name) const;
-    void checkPos(const byte pos) const;
+    std::size_t checkName(const std::string& name) const;
+    std::size_t checkPos(const std::size_t pos) const;
 public:
-    friend void testNameChecking(const EnemiesGroup& group, const std::string_view ctx_name);
+    friend void testNameChecking(const EnemiesGroup& group, const std::string& ctx_name);
     friend void testPosChecking(const EnemiesGroup& group, const byte pos_in_queue);
-
-    static constexpr std::size_t LIMIT { std::numeric_limits<byte>::max() };
 
     EnemiesGroup(const std::string& group_name, const Game& ctx);
 
@@ -81,26 +74,26 @@ public:
 
     bool operator==(const EnemiesGroup&) const = delete;
 
+    std::size_t count() const { return queue().size(); }
     bool defeated() const;
-    byte lastPos() const { return queue_.size() - 1; }
+    std::size_t lastPos() const { return queue_.size() - 1; }
 
-    Enemy& get(const std::string_view enemy_name);
-    const Enemy& get(const std::string_view enemy_name) const;
+    Enemy& get(const std::string& enemy_name);
+    const Enemy& get(const std::string& enemy_name) const;
 
-    Enemy& get(const byte pos_in_queue);
-    const Enemy& get(const byte pos_in_queue) const;
-    Enemy& current();
-    const Enemy& current() const;
+    Enemy& get(const std::size_t pos_in_queue);
+    const Enemy& get(const std::size_t pos_in_queue) const;
+    Enemy& current() { return *current_; }
+    const Enemy& current() const { return *current_; }
 
-    byte currentPos() const { return current_; }
-    const std::string_view& currentName() const { return queue_.at(currentPos()); }
+    std::size_t currentPos() const { return current_ - queue().cbegin(); }
+    const std::string& currentName() const { return current().name(); }
 
-    Enemy& goTo(const byte pos_in_queue);
+    Enemy& goTo(const size_t pos_in_queue);
     Enemy& next();
     Enemy& nextAlive(const bool self_included = true);
 
-    const std::unordered_map<std::string_view, Enemy>& enemies() const { return enemies_; }
-    const std::vector<std::string_view>& queue() const { return queue_; }
+    const EnemiesQueue& queue() const { return queue_; }
 };
 
 std::vector<std::string> namesOf(const GroupDescriptor&);

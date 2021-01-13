@@ -129,10 +129,10 @@ BOOST_AUTO_TEST_CASE(PlayerUpdates) {
 
 BOOST_AUTO_TEST_CASE(BattleInit) {
     Data expected { std::vector<byte> { 8, 0 } };
-    const json group_data {
-        { "1", { { "name", "B" }, { "hp", 46 }, { "skill", 17 } } },
-        { "3", { { "name", "A" }, { "hp", 45 }, { "skill", 16 } } }
-    };
+    const json group_data = json::array({
+        json::object({ { "name", "B" }, { "hp", 46 }, { "skill", 17 } }),
+        json::object({ { "name", "A" }, { "hp", 45 }, { "skill", 16 } })
+    });
     expected.put(group_data.dump());
 
     Game ctx;
@@ -142,8 +142,8 @@ BOOST_AUTO_TEST_CASE(BattleInit) {
     };
 
     const GroupDescriptor group {
-        { 3, { "A", "EnemyA" } },
-        { 1, { "B", "EnemyB" } }
+        EnemyDescriptorBinding { "B", "EnemyB" },
+        EnemyDescriptorBinding { "A", "EnemyA" }
     };
 
     SessionDataFactory factory;

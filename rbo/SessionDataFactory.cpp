@@ -127,16 +127,15 @@ void SessionDataFactory::makeBattle(const Battle type) {
 }
 
 void SessionDataFactory::makeBattleInit(const GroupDescriptor& group, const Game& ctx) {
-    json infos;
-    for (const auto& [priority, enemy_descriptor_binding] : group) {
-        const auto& [ctxName, genericName] { enemy_descriptor_binding };
+    json infos = json::array();
+    for (const auto& [ctxName, genericName] : group) {
         const EnemyDescriptor& enemy { ctx.enemy(genericName) };
 
-        infos[std::to_string(priority)] = {
+        infos.push_back(json::object({
             { "name", ctxName },
             { "hp", enemy.hp },
             { "skill", enemy.skill }
-        };
+        }));
     }
 
     makeBattle(Battle::Init);

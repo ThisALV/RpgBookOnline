@@ -79,11 +79,12 @@ void InstructionsProvider::initGameAPI() {
     enemy_type["unbuff"] = &Enemy::unbuff;
 
     sol::usertype<EnemiesGroup> group { ctx_.new_usertype<EnemiesGroup>("EnemiesGroup") };
+    group["count"] = &EnemiesGroup::count;
     group["defeated"] = &EnemiesGroup::defeated;
     group["lastPos"] = &EnemiesGroup::lastPos;
     group["get"] = sol::overload(
-            sol::resolve<Enemy&(const std::string_view)>(&EnemiesGroup::get),
-            sol::resolve<Enemy&(const byte)>(&EnemiesGroup::get)
+            sol::resolve<Enemy&(const std::string&)>(&EnemiesGroup::get),
+            sol::resolve<Enemy&(const std::size_t)>(&EnemiesGroup::get)
     );
     group["current"] = sol::resolve<Enemy&()>(&EnemiesGroup::current);
     group["currentPos"] = &EnemiesGroup::currentPos;

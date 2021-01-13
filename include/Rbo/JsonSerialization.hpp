@@ -51,7 +51,7 @@ void from_json(const json& data, InventoryDescriptor& inv);
 void from_json(const json& data, ItemBonus& bonus);
 void from_json(const json& data, EventEffect& effect);
 void from_json(const json& data, EnemyDescriptor& enemy);
-void from_json(const json& data, GroupDescriptor& group);
+void from_json(const json& data, EnemyDescriptorBinding& enemy);
 void from_json(const json& data, RestProperties& rest);
 void from_json(const json& data, Condition& condition);
 void from_json(const json& data, DeathCondition& death_condition);

@@ -8,8 +8,8 @@ std::vector<std::string> namesOf(const GroupDescriptor& group) {
     std::vector<std::string> names;
     names.resize(group.size());
 
-    std::transform(group.cbegin(), group.cend(), names.begin(), [](const auto& e) {
-        return e.first;
+    std::transform(group.cbegin(), group.cend(), names.begin(), [](const EnemyDescriptorBinding& e) {
+        return e.genericName;
     });
 
     return names;
@@ -51,81 +51,76 @@ void Enemy::unbuff(const int malus) {
     stats_.change("skill", -malus);
 }
 
-EnemiesGroup::EnemiesGroup(const std::string& group_name, const Game& ctx) : current_ { 0 } {
+EnemiesGroup::EnemiesGroup(const std::string& group_name, const Game& ctx) {
     const GroupDescriptor& descriptor { ctx.group(group_name) };
 
-    if (descriptor.size() > LIMIT)
-        throw TooManyEnemies {};
-
     queue_.reserve(descriptor.size());
-    for (const auto& enemy : descriptor) {
-        const auto& [ctxName, genericName] { enemy.second };
+    for (const auto& [ctxName, genericName] : descriptor) {
+        const std::string& uniqueName { ctxName }; // Nécessaire pour la capture dans une lambda
+        const auto b { queue().cbegin() };
+        const auto e { queue().cend() };
 
-        if (enemies_.count(ctxName) == 1)
+        if (std::find_if(b, e, [&uniqueName](const Enemy& e) { return e.name() == uniqueName; }) != e)
             throw SameEnemiesName { ctxName };
 
-        queue_.push_back(ctxName);
-        enemies_.insert({ ctxName, Enemy { ctxName, ctx.enemy(genericName) } });
+        queue_.push_back(Enemy { ctxName, ctx.enemy(genericName) });
     }
 
-    assert(enemies_.size() == queue_.size());
+    current_ = queue_.begin();
 }
 
-void EnemiesGroup::checkName(const std::string_view name) const {
-    if (enemies_.count(name) == 0)
-        throw EnemyNotFound { std::string { name } };
+std::size_t EnemiesGroup::checkName(const std::string& name) const {
+    const auto b { queue().cbegin() };
+    const auto e { queue().cend() };
+
+    const auto result { std::find_if(b, e, [&name](const Enemy& e) { return e.name() == name; }) };
+    if (result == e)
+        throw EnemyNotFound { name };
+
+    return static_cast<byte>(result - b);
 }
 
-void EnemiesGroup::checkPos(const byte pos) const {
+std::size_t EnemiesGroup::checkPos(const std::size_t pos) const {
     if (pos >= queue().size())
         throw NotEnoughEnemies { pos };
+
+    return pos;
 }
 
 bool EnemiesGroup::defeated() const {
-    return std::none_of(enemies_.cbegin(), enemies_.cend(), [](const auto& e) -> bool {
-        return e.second.alive();
+    return std::none_of(queue().cbegin(), queue().cend(), [](const auto& e) {
+        return e.alive();
     });
 }
 
-Enemy& EnemiesGroup::get(const std::string_view enemy_name) {
-    checkName(enemy_name);
-    return enemies_.at(enemy_name);
+Enemy& EnemiesGroup::get(const std::string& enemy_name) {
+    return queue_.at(checkName(enemy_name));
 }
 
-const Enemy& EnemiesGroup::get(const std::string_view enemy_name) const {
-    checkName(enemy_name);
-    return enemies_.at(enemy_name);
+const Enemy& EnemiesGroup::get(const std::string& enemy_name) const {
+    return queue().at(checkName(enemy_name));
 }
 
-Enemy& EnemiesGroup::get(const byte pos_in_queue) {
-    checkPos(pos_in_queue);
-    return enemies_.at(queue_.at(pos_in_queue));
+Enemy& EnemiesGroup::get(const std::size_t pos_in_queue) {
+    return queue_.at(checkPos(pos_in_queue));
 }
 
-const Enemy& EnemiesGroup::get(const byte pos_in_queue) const {
-    checkPos(pos_in_queue);
-    return enemies_.at(queue_.at(pos_in_queue));
+const Enemy& EnemiesGroup::get(const std::size_t pos_in_queue) const {
+    return queue().at(checkPos(pos_in_queue));
 }
 
-Enemy& EnemiesGroup::current() {
-    assert(queue_.size() > current_);
-    return enemies_.at(queue_.at(current_));
-}
+Enemy& EnemiesGroup::goTo(const size_t pos_in_queue) {
+    current_ += checkPos(pos_in_queue);
 
-const Enemy& EnemiesGroup::current() const {
-    assert(queue_.size() > current_);
-    return enemies_.at(queue_.at(current_));
-}
-
-Enemy& EnemiesGroup::goTo(const byte pos_in_queue) {
-    checkPos(pos_in_queue);
-
-    current_ = pos_in_queue;
-    return enemies_.at(currentName());
+    return *current_;
 }
 
 Enemy& EnemiesGroup::next() {
-    current_ = currentPos() == lastPos() ? 0 : currentPos() + 1;
+    if (current_ == (queue().cend() - 1))
+        current_ = queue_.begin();
+    else
+        current_++;
+
     return current();
 }
 
@@ -133,21 +128,20 @@ Enemy& EnemiesGroup::nextAlive(const bool self_included) {
     if (defeated())
         throw NoMoreEnemies {};
 
-    byte next;
-    if (self_included) {
-        next = currentPos();
-    } else {
-        next = currentPos() == lastPos() ? byte { 0 } : currentPos() + 1;
-    }
+    EnemiesQueue::iterator next;
+    if (self_included)
+        next = current_;
+    else
+        next = current_ == (queue_.cend() - 1) ? queue_.begin() : (current_ + 1);
 
-    while (!get(next).alive()) {
-        if (next == lastPos())
-            next = 0;
+    while (!next->alive()) {
+        if (next == (queue_.cend() - 1))
+            next = queue_.begin();
         else
             next++;
     }
 
-    assert(enemies().at(queue().at(next)).alive());
+    assert(next->alive());
 
     current_ = next;
     return current();

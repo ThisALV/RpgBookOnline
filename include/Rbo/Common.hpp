@@ -28,6 +28,7 @@ using ulong = std::uint64_t;
 namespace Rbo {
 
 class StatsManager;
+class Enemy;
 class Player;
 class Inventory;
 class Gameplay;
@@ -82,7 +83,8 @@ using InventoriesUpdate = std::unordered_map<std::string, InventoryUpdate>;
 using StatsDescriptor = std::unordered_map<std::string, StatDescriptor>;
 using InventoriesDescriptor = std::unordered_map<std::string, InventoryDescriptor>;
 
-using GroupDescriptor = std::map<byte, EnemyDescriptorBinding, std::greater<>>;
+using GroupDescriptor = std::vector<EnemyDescriptorBinding>;
+using EnemiesQueue = std::vector<Enemy>;
 
 using Message = std::optional<std::string>;
 using Messages = std::unordered_map<std::string, Message>;
