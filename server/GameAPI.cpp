@@ -69,7 +69,7 @@ void InstructionsProvider::initGameAPI() {
     effect_type["apply"] = &EventEffect::apply;
     effect_type["simulateItemsChanges"] = &EventEffect::simulateItemsChanges;
 
-    sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy") };
+    sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy", sol::constructors<Enemy(const std::string&, const std::string&, const Game&)>()) };
     enemy_type["alive"] = &Enemy::alive;
     enemy_type["hp"] = &Enemy::hp;
     enemy_type["skill"] = &Enemy::skill;
@@ -78,7 +78,7 @@ void InstructionsProvider::initGameAPI() {
     enemy_type["buff"] = &Enemy::buff;
     enemy_type["unbuff"] = &Enemy::unbuff;
 
-    sol::usertype<EnemiesGroup> group { ctx_.new_usertype<EnemiesGroup>("EnemiesGroup") };
+    sol::usertype<EnemiesGroup> group { ctx_.new_usertype<EnemiesGroup>("EnemiesGroup", sol::constructors<EnemiesGroup(const std::string&, const Game&)>()) };
     group["count"] = &EnemiesGroup::count;
     group["defeated"] = &EnemiesGroup::defeated;
     group["lastPos"] = &EnemiesGroup::lastPos;
