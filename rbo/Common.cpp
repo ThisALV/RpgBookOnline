@@ -45,43 +45,37 @@ spdlog::logger& rboLogger(std::string name) {
     return *logger;
 }
 
-namespace {
-
-RandomEngine vote_rd { now() };
-
-}
+namespace { RandomEngine vote_rd { now() }; }
 
 std::optional<byte> vote(const Replies& replies) {
     if (replies.empty())
         return {};
 
-    std::map<byte, byte> votes_map;
-    for (const auto& reply : replies)
-        votes_map[reply.second]++;
+    std::unordered_map<byte, byte> replies_score;
+    replies_score.reserve(replies.size());
 
-    std::vector<std::pair<byte, byte>> votes {
-        std::move_iterator { votes_map.begin() },
-        std::move_iterator { votes_map.end() }
-    };
+    for (const auto [player, reply] : replies)
+        replies_score[reply]++;
 
-    std::sort(votes.begin(), votes.end(), [](const auto& r1, const auto& r2) -> bool {
-        return r1.second > r2.second;
-    });
+    std::vector<byte> best_replies;
+    best_replies.reserve(replies_score.size());
 
-    const byte max_score { votes.cbegin()->second };
-
-    std::vector<byte> winners;
-    for (const auto& [option, count] : votes) {
-        if (count == max_score)
-            winners.push_back(option);
+    byte best_score { 0 };
+    for (const auto [reply, score] : replies_score) {
+        if (score == best_score) {
+            best_replies.push_back(reply);
+        } else if (score > best_score) {
+            best_replies.clear();
+            best_replies.push_back(reply);
+            best_score = score;
+        }
     }
 
-    if (winners.size() == 1)
-        return winners.at(0);
+    if (best_replies.size() == 1)
+        return best_replies.at(0);
 
-    const std::size_t winner { std::uniform_int_distribution<std::size_t> { 0, winners.size() - 1 } (vote_rd) };
-
-    return winners.at(winner);
+    const std::size_t winner_i { std::uniform_int_distribution<std::size_t> { 0, best_replies.size() } (vote_rd) };
+    return best_replies.at(winner_i);
 }
 
 
