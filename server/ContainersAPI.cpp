@@ -14,16 +14,20 @@ template<typename T> sol::as_container_t<std::vector<T>> luaVector(std::vector<T
     return luaContainer<std::vector<T>>(v);
 }
 
+template<typename K, typename V> sol::as_container_t<std::unordered_map<K, V>> luaUnorderedMap(std::unordered_map<K, V>& m) {
+    return luaContainer<std::unordered_map<K, V>>(m);
+}
+
 }
 
 void InstructionsProvider::initContainersAPI() {
-    ctx_.new_usertype<std::vector<std::string>>("StringVector", sol::constructors<std::vector<std::string>()>(), "iterable", luaVector < std::string > );
-    ctx_.new_usertype<std::vector<byte>>("ByteVector", sol::constructors<std::vector<byte>()>(), "iterable", luaVector < byte > );
+    ctx_.new_usertype<std::vector<std::string>>("StringVector", sol::constructors<std::vector<std::string>()>(), "iterable", luaVector<std::string>);
+    ctx_.new_usertype<std::vector<byte>>("ByteVector", sol::constructors<std::vector<byte>()>(), "iterable", luaVector<byte>);
 
-    ctx_.new_usertype<std::map<byte, std::string>>("ByteWithString", sol::constructors<std::map<byte, std::string>()>(), "iterable", luaContainer < std::map<byte, std::string>>);
-    ctx_.new_usertype<std::unordered_map<std::string, std::string>>("StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaContainer < std::unordered_map<std::string, std::string>>);
-    ctx_.new_usertype<std::map<byte, byte>>("ByteWithByte", sol::constructors<std::map<byte, byte>()>(), "iterable", luaContainer < std::map<byte, byte>>);
-    ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer < Effects > );
+    ctx_.new_usertype<std::unordered_map<byte, std::string>>("ByteWithString", sol::constructors<std::unordered_map<byte, std::string>()>(), "iterable", luaUnorderedMap<byte, std::string>);
+    ctx_.new_usertype<std::unordered_map<std::string, std::string>>("StringWithString", sol::constructors<std::unordered_map<std::string, std::string>()>(), "iterable", luaUnorderedMap<std::string, std::string>);
+    ctx_.new_usertype<std::unordered_map<byte, byte>>("ByteWithByte", sol::constructors<std::unordered_map<byte, byte>()>(), "iterable", luaUnorderedMap<byte, byte>);
+    ctx_.new_usertype<Effects>("Effects", sol::constructors<Effects()>(), "iterable", luaContainer<Effects>);
 }
 
 } // namespace Rbo::Server
