@@ -11,17 +11,16 @@ namespace { RandomEngine chkpt_id_rd { now() }; }
 
 std::size_t LocalGameBuilder::counter_ { 0 };
 
-LocalGameBuilder::LocalGameBuilder(fs::path game_file, fs::path checkpts_file, fs::path scenes_file, const fs::path& instructions_dir)
+LocalGameBuilder::LocalGameBuilder(fs::path game_file, fs::path checkpts_file, const fs::path& scenes_file, const fs::path& instructions_dir)
     : game_ { std::move(game_file) },
       chkpts_ { std::move(checkpts_file) },
-      scenes_ { std::move(scenes_file) },
       logger_ { rboLogger("GBuilder-" + std::to_string(counter_++)) },
       exec_ctx_ {},
       provider_ { exec_ctx_, logger_ }
 {
     logger_.info("Loading scenes...");
     try {
-        scenes_table_ = exec_ctx_.script_file(scenes_.string()).get<sol::table>();
+        scenes_table_ = exec_ctx_.script_file(scenes_file.string()).get<sol::table>();
     } catch (const sol::error& err) {
         throw GameLoadingError { err.what() };
     }

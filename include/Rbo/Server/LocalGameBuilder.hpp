@@ -38,7 +38,6 @@ private:
 
     const fs::path game_;
     const fs::path chkpts_;
-    const fs::path scenes_;
 
     spdlog::logger& logger_;
     sol::state exec_ctx_;
@@ -46,7 +45,7 @@ private:
     InstructionsProvider provider_;
 
 public:
-    LocalGameBuilder(fs::path game_file, fs::path checkpts_file, fs::path scenes_file, const fs::path& instructions_dir);
+    LocalGameBuilder(fs::path game_file, fs::path checkpts_file, const fs::path& scenes_file, const fs::path& instructions_dir);
     ~LocalGameBuilder() override = default;
 
     LocalGameBuilder(const LocalGameBuilder&) = delete;
