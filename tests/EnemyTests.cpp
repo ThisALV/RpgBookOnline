@@ -25,8 +25,10 @@ BOOST_AUTO_TEST_SUITE(EnemyTests)
 BOOST_AUTO_TEST_SUITE(Ctor)
 
 BOOST_AUTO_TEST_CASE(DescriptorInLimits) {
-    const EnemyDescriptor descriptor { 5, 99 };
-    const Enemy enemy { "A", descriptor };
+    Game ctx;
+    ctx.enemies.insert({ "1", EnemyDescriptor { 5, 99 } });
+
+    const Enemy enemy { "A", "1", ctx };
 
     BOOST_CHECK_EQUAL(enemy.name(), "A");
     BOOST_CHECK_EQUAL(enemy.hp(), 5);
@@ -34,8 +36,10 @@ BOOST_AUTO_TEST_CASE(DescriptorInLimits) {
 }
 
 BOOST_AUTO_TEST_CASE(DescriptorDeadEnemy) {
-    const EnemyDescriptor descriptor { -5, 99 };
-    const Enemy enemy { "A", descriptor };
+    Game ctx;
+    ctx.enemies.insert({ "1", EnemyDescriptor { -5, 99 } });
+
+    const Enemy enemy { "A", "1", ctx };
 
     BOOST_CHECK_EQUAL(enemy.name(), "A");
     BOOST_CHECK_EQUAL(enemy.hp(), 0);
@@ -43,8 +47,10 @@ BOOST_AUTO_TEST_CASE(DescriptorDeadEnemy) {
 }
 
 BOOST_AUTO_TEST_CASE(DescriptorNegativeSkill) {
-    const EnemyDescriptor descriptor { 5, -99 };
-    const Enemy enemy { "A", descriptor };
+    Game ctx;
+    ctx.enemies.insert({ "1", EnemyDescriptor { 5, -99 } });
+
+    const Enemy enemy { "A", "1", ctx };
 
     BOOST_CHECK_EQUAL(enemy.name(), "A");
     BOOST_CHECK_EQUAL(enemy.hp(), 5);
@@ -53,10 +59,18 @@ BOOST_AUTO_TEST_CASE(DescriptorNegativeSkill) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(Hit)
+struct EnemyFixture {
+    Game ctx;
+
+    EnemyFixture() {
+        ctx.enemies.insert({ "1", EnemyDescriptor { 5, 5 } });
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(Hit, EnemyFixture)
 
 BOOST_AUTO_TEST_CASE(NotKill) {
-    Enemy enemy { "", EnemyDescriptor { 5, 0 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.hit(3);
 
@@ -64,7 +78,7 @@ BOOST_AUTO_TEST_CASE(NotKill) {
 }
 
 BOOST_AUTO_TEST_CASE(Kill) {
-    Enemy enemy { "", EnemyDescriptor { 5, 0 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.hit(5);
 
@@ -72,7 +86,7 @@ BOOST_AUTO_TEST_CASE(Kill) {
 }
 
 BOOST_AUTO_TEST_CASE(Overkill) {
-    Enemy enemy { "", EnemyDescriptor { 5, 0 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.hit(99);
 
@@ -80,15 +94,15 @@ BOOST_AUTO_TEST_CASE(Overkill) {
 }
 
 BOOST_AUTO_TEST_CASE(NegativeDmg) {
-    BOOST_CHECK_THROW(Enemy("", EnemyDescriptor{ 5, 0 }).hit(-1), NegativeModifier);
+    BOOST_CHECK_THROW(Enemy("A", "1", ctx).hit(-1), NegativeModifier);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(Heal)
+BOOST_FIXTURE_TEST_SUITE(Heal, EnemyFixture)
 
 BOOST_AUTO_TEST_CASE(Normal) {
-    Enemy enemy { "", EnemyDescriptor { 5, 0 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.heal(3);
 
@@ -96,15 +110,15 @@ BOOST_AUTO_TEST_CASE(Normal) {
 }
 
 BOOST_AUTO_TEST_CASE(NegativeHealing) {
-    BOOST_CHECK_THROW(Enemy("", EnemyDescriptor{ 5, 0 }).heal(-1), NegativeModifier);
+    BOOST_CHECK_THROW(Enemy("A", "1", ctx).heal(-1), NegativeModifier);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(Buff)
+BOOST_FIXTURE_TEST_SUITE(Buff, EnemyFixture)
 
 BOOST_AUTO_TEST_CASE(Normal) {
-    Enemy enemy { "", EnemyDescriptor { 0, 5 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.buff(3);
 
@@ -112,15 +126,15 @@ BOOST_AUTO_TEST_CASE(Normal) {
 }
 
 BOOST_AUTO_TEST_CASE(Unbuff) {
-    BOOST_CHECK_THROW(Enemy("", EnemyDescriptor{ 0, 5 }).buff(-1), NegativeModifier);
+    BOOST_CHECK_THROW(Enemy("A", "1", ctx).buff(-1), NegativeModifier);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(Unbuff)
+BOOST_FIXTURE_TEST_SUITE(Unbuff, EnemyFixture)
 
 BOOST_AUTO_TEST_CASE(Normal) {
-    Enemy enemy { "", EnemyDescriptor { 0, 5 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.unbuff(3);
 
@@ -128,7 +142,7 @@ BOOST_AUTO_TEST_CASE(Normal) {
 }
 
 BOOST_AUTO_TEST_CASE(ToNegative) {
-    Enemy enemy { "", EnemyDescriptor { 0, 5 } };
+    Enemy enemy { "A", "1", ctx };
 
     enemy.unbuff(10);
 
@@ -136,7 +150,7 @@ BOOST_AUTO_TEST_CASE(ToNegative) {
 }
 
 BOOST_AUTO_TEST_CASE(Buff) {
-    BOOST_CHECK_THROW(Enemy("", EnemyDescriptor{ 0, 5 }).unbuff(-1), NegativeModifier);
+    BOOST_CHECK_THROW(Enemy("A", "1", ctx).unbuff(-1), NegativeModifier);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -11,7 +11,7 @@ private:
     StatsManager stats_;
 
 public:
-    Enemy(const std::string& name, const EnemyDescriptor& descriptor);
+    Enemy(const std::string& unique_name, const std::string& generic_name, const Game& ctx);
 
     Enemy(const Enemy&) = delete;
     Enemy& operator=(const Enemy&) = delete;

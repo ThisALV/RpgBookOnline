@@ -15,12 +15,15 @@ std::vector<std::string> namesOf(const GroupDescriptor& group) {
     return names;
 }
 
-Enemy::Enemy(const std::string& name, const EnemyDescriptor& descriptor) : name_ { name }, stats_ { std::vector<std::string> { "hp", "skill" } } {
+Enemy::Enemy(const std::string& unique_name, const std::string& generic_name, const Game& ctx)
+    : name_ { unique_name }, stats_ { std::vector<std::string> { "hp", "skill" } }
+{
     stats_.setLimits("hp", 0, std::numeric_limits<int>::max());
     stats_.setLimits("skill", 0, std::numeric_limits<int>::max());
 
-    stats_.set("hp", descriptor.hp);
-    stats_.set("skill", descriptor.skill);
+    const auto [hp, skill] { ctx.enemy(generic_name) };
+    stats_.set("hp", hp);
+    stats_.set("skill", skill);
 }
 
 void Enemy::hit(const int dmg) {
@@ -63,7 +66,7 @@ EnemiesGroup::EnemiesGroup(const std::string& group_name, const Game& ctx) {
         if (std::find_if(b, e, [&uniqueName](const Enemy& e) { return e.name() == uniqueName; }) != e)
             throw SameEnemiesName { ctxName };
 
-        queue_.push_back(Enemy { ctxName, ctx.enemy(genericName) });
+        queue_.push_back(Enemy { ctxName, genericName, ctx });
     }
 
     current_ = queue_.begin();
