@@ -70,6 +70,7 @@ void InstructionsProvider::initGameAPI() {
     effect_type["simulateItemsChanges"] = &EventEffect::simulateItemsChanges;
 
     sol::usertype<Enemy> enemy_type { ctx_.new_usertype<Enemy>("Enemy", sol::constructors<Enemy(const std::string&, const std::string&, const Game&)>()) };
+    enemy_type["name"] = &Enemy::name;
     enemy_type["alive"] = &Enemy::alive;
     enemy_type["hp"] = &Enemy::hp;
     enemy_type["skill"] = &Enemy::skill;
