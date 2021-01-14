@@ -74,7 +74,7 @@ std::optional<byte> vote(const Replies& replies) {
     if (best_replies.size() == 1)
         return best_replies.at(0);
 
-    const std::size_t winner_i { std::uniform_int_distribution<std::size_t> { 0, best_replies.size() } (vote_rd) };
+    const std::size_t winner_i { std::uniform_int_distribution<std::size_t> { 0, best_replies.size() - 1 } (vote_rd) };
     return best_replies.at(winner_i);
 }
 
