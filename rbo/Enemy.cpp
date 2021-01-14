@@ -132,13 +132,20 @@ std::tuple<bool, Enemy*> EnemiesGroup::nextAlive(const bool self_included) {
     if (defeated())
         throw NoMoreEnemies {};
 
-    EnemiesQueue::iterator next;
-    if (self_included)
-        next = current_;
-    else
-        next = current_ == (queue_.cend() - 1) ? queue_.begin() : (current_ + 1);
-
     bool looped { false };
+
+    EnemiesQueue::iterator next;
+    if (self_included) {
+        next = current_;
+    } else {
+        if (current_ == (queue_.cend() - 1)) {
+            next = queue_.begin();
+            looped = true;
+        } else {
+            next = current_ + 1;
+        }
+    }
+
     while (!next->alive()) {
         if (next == (queue_.cend() - 1)) {
             next = queue_.begin();

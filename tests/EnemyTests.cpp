@@ -262,6 +262,23 @@ struct EnemiesFixture {
                 EnemyDescriptorBinding { "1", "A" },
             }
         });
+        ctx.groups.insert({
+            "c", {
+                EnemyDescriptorBinding { "1", "A" },
+                EnemyDescriptorBinding { "2", "A" },
+                EnemyDescriptorBinding { "3", "B" },
+                EnemyDescriptorBinding { "4", "A" }
+            }
+        });
+        ctx.groups.insert({
+            "d", {
+                EnemyDescriptorBinding { "1", "A" },
+                EnemyDescriptorBinding { "2", "B" },
+                EnemyDescriptorBinding { "3", "A" },
+                EnemyDescriptorBinding { "4", "A" }
+            }
+        });
+
     }
 };
 
@@ -389,6 +406,8 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_FIXTURE_TEST_SUITE(NextAlive, EnemiesFixture)
 
+BOOST_AUTO_TEST_SUITE(SelfIncluded)
+
 BOOST_AUTO_TEST_CASE(Defeated) {
     EnemiesGroup group { "b", ctx };
 
@@ -396,15 +415,6 @@ BOOST_AUTO_TEST_CASE(Defeated) {
 }
 
 BOOST_AUTO_TEST_CASE(NotDefeated) {
-    ctx.groups.insert({
-        "c", {
-            EnemyDescriptorBinding { "1", "A" },
-            EnemyDescriptorBinding { "2", "A" },
-            EnemyDescriptorBinding { "3", "B" },
-            EnemyDescriptorBinding { "4", "A" }
-        }
-    });
-
     EnemiesGroup group { "c", ctx };
     const auto [looped, enemy] { group.nextAlive() };
     const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
@@ -416,16 +426,7 @@ BOOST_AUTO_TEST_CASE(NotDefeated) {
 }
 
 BOOST_AUTO_TEST_CASE(BackToBeginning) {
-    ctx.groups.insert({
-        "c", {
-            EnemyDescriptorBinding { "1", "A" },
-            EnemyDescriptorBinding { "2", "B" },
-            EnemyDescriptorBinding { "3", "A" },
-            EnemyDescriptorBinding { "4", "A" }
-        }
-    });
-
-    EnemiesGroup group { "c", ctx };
+    EnemiesGroup group { "d", ctx };
     group.goTo(2);
 
     const auto [looped, enemy] { group.nextAlive() };
@@ -436,6 +437,55 @@ BOOST_AUTO_TEST_CASE(BackToBeginning) {
     BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
     BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(SelfExcluded)
+
+BOOST_AUTO_TEST_CASE(Defeated) {
+    EnemiesGroup group { "b", ctx };
+
+    BOOST_CHECK_THROW(group.nextAlive(false), NoMoreEnemies);
+}
+
+BOOST_AUTO_TEST_CASE(NotDefeated) {
+    EnemiesGroup group { "c", ctx };
+    const auto [looped, enemy] { group.nextAlive() };
+    const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
+
+    BOOST_CHECK(!looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "3");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
+}
+
+BOOST_AUTO_TEST_CASE(BackToBeginningEndOfQueue) {
+    EnemiesGroup group { "d", ctx };
+    group.goTo(3);
+
+    const auto [looped, enemy] { group.nextAlive() };
+    const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
+
+    BOOST_CHECK(looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "2");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
+}
+
+BOOST_AUTO_TEST_CASE(BackToBeginningMiddleOfQueue) {
+    EnemiesGroup group { "d", ctx };
+    group.goTo(2);
+
+    const auto [looped, enemy] { group.nextAlive() };
+    const EnemyDescriptor e_descriptor { ctx.enemies.at("B") };
+
+    BOOST_CHECK(looped);
+    BOOST_CHECK_EQUAL(enemy->name(), "2");
+    BOOST_CHECK_EQUAL(enemy->hp(), e_descriptor.hp);
+    BOOST_CHECK_EQUAL(enemy->skill(), e_descriptor.skill);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
