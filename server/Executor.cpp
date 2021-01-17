@@ -39,7 +39,7 @@ void Executor::runEventsLoop() {
 
     while (isRunning()) {
         try {
-            server_.run_for(std::chrono::milliseconds { 10 });
+            server_.run();
         } catch (const std::exception& err) {
             stop(EventsLoopError, err.what());
         }
