@@ -3,8 +3,7 @@ Debug-LLVM/
 Release/
 CMakeLists.txt.user
 CMakeSettings.json
-/server/game/
-/server/instructions/Custom.lua
+/server/game/chkpts.json
 *.log
 .vscode/
 out/

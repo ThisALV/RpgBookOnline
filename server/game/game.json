@@ -1,0 +1,127 @@
+{
+    "name": "YourOnlineRPG (Test)",
+    "messages": {
+        "stat_dice_roll": "Roll dices to determine stat \"{stat}\"",
+        "inventory_capacity_dice_roll": "Roll dices to determine capacity of \"{inventory}\"",
+        "all_players_dead": "All players are dead !"
+    },
+    "globals": {
+        "Victory points": {
+            "initialValue": { "dices": 7, "bonus": -3 },
+            "limits": { "min": 0, "max": 10 },
+            "capped": false,
+            "hidden": false,
+            "main": true
+        },
+        "Day": {
+            "initialValue": { "dices": 0, "bonus": 0 },
+            "limits": { "min": 0, "max": 7 },
+            "capped": false,
+            "hidden": false,
+            "main": false
+        }
+    },
+    "players": {
+        "HP": {
+            "initialValue": { "dices": 3, "bonus": 3 },
+            "limits": { "min": 0, "max": 99 },
+            "capped": false,
+            "hidden": false,
+            "main": true
+        },
+        "Magic": {
+            "initialValue": { "dices": 2, "bonus": 0 },
+            "limits": { "min": 0, "max": 20 },
+            "capped": false,
+            "hidden": false,
+            "main": true
+        },
+        "Currency": {
+            "initialValue": { "dices": 0, "bonus": 0 },
+            "limits": { "min": 0, "max": 99999 },
+            "capped": false,
+            "hidden": false,
+            "main": true
+        },
+        "An useless stat": {
+            "initialValue": { "dices": 0, "bonus": 0 },
+            "limits": { "min": 0, "max": 99999 },
+            "capped": false,
+            "hidden": false,
+            "main": false
+        },
+        "A very bad gamemaster": {
+            "initialValue": { "dices": 0, "bonus": 0 },
+            "limits": { "min": 0, "max": 99999 },
+            "capped": false,
+            "hidden": false,
+            "main": false
+        }
+    },
+    "inventories": {
+        "Optional stuff" : {
+            "limit": null,
+            "items": [ "Warm clothes" ],
+            "initial": { "Warm clothes": 1 }
+        },
+        "First-aid kit": {
+            "limit": null,
+            "items": [],
+            "initial": {}
+        },
+        "Bag": {
+            "limit": { "dices": 1, "bonus": 3 },
+            "items": [ "Common potion", "Magical potion", "Sword" ],
+            "initial": { "Magical potion": 2, "Sword": 1 }
+        }
+    },
+    "bonuses": {},
+    "effects": {
+        "dmg": {
+            "stats": { "HP": -8 },
+            "items": {}
+        },
+        "death": {
+            "stats": { "HP": -999999999 },
+            "items": {}
+        },
+        "heal": {
+            "stats": { "HP": 8 },
+            "items": {}
+        },
+        "unlock_chest": {
+            "stats": {},
+            "items": { "Bag/Magical potion": 1 }
+        }
+    },
+    "enemies": {
+        "Hand": { "hp": 999, "skill": 6 },
+        "Burst": { "hp": 1, "skill": 3 }
+    },
+    "groups": {
+        "Hand which emerges from the roof": [
+            { "ctx": "Giant Hand", "generic": "Hand" },
+            { "ctx": "Flame burst", "generic": "Burst" }
+        ]
+    },
+    "rest": {
+        "givables": [],
+        "availables": {}
+    },
+    "playerDeath": [
+        {
+            "dieIf": { "stat": "HP", "op": "==", "value": 0 },
+            "deathMessage": "HPs dropped to 0."
+        }
+    ],
+    "gameEnd": [
+        {
+            "stopIf": {
+                "stat": "Victory points", "op": ">=", "value": 30
+            },
+            "endMessage": "You reached the required 30 pts, congratulations !"
+        }
+    ],
+    "voteLeader": true,
+    "voteOnLeaderDeath": false
+}
