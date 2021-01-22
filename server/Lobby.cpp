@@ -155,7 +155,7 @@ void Lobby::open() {
 
     sendToAll(open_data.dataWithLength());
 
-    master_.emptyLobby();
+    master_.reset();
     updateMaster();
 
     acceptMember();
@@ -344,12 +344,12 @@ void Lobby::handleMemberRequest(const byte id, const ErrCode request_err, const 
 }
 
 void Lobby::safeSendToAll(const Data& data) {
-    const bool was_here { master_.exists() };
-    const std::optional<byte> prev_master { master_.get() };
+    const bool was_here { master_ };
+    const std::optional<byte> prev_master { master_ };
 
     sendToAll(data);
 
-    if (was_here && (!master_.exists() || *prev_master != master_ ))
+    if (was_here && (!master_ || *prev_master != master_ ))
         throw MasterDisconnected { *prev_master };
 }
 
@@ -360,7 +360,7 @@ ReceiveBuffer Lobby::receiveFromMaster() {
     std::atomic_bool received { false };
     bool receive_err { false };
 
-    connections_.at(master_).async_receive(io::buffer(buffer), [&received, &receive_err](const ErrCode err, const std::size_t) {
+    connections_.at(*master_).async_receive(io::buffer(buffer), [&received, &receive_err](const ErrCode err, const std::size_t) {
         received = true;
 
         if (err)
@@ -377,7 +377,7 @@ ReceiveBuffer Lobby::receiveFromMaster() {
 }
 
 void Lobby::sendToMaster(const Data& data) {
-    const ErrCode send_err { trySend(connections_.at(master_), trunc(data)) };
+    const ErrCode send_err { trySend(connections_.at(*master_), trunc(data)) };
 
     if (send_err)
         disconnectMaster();
@@ -386,18 +386,18 @@ void Lobby::sendToMaster(const Data& data) {
 bool Lobby::updateMaster() {
     bool updated;
     if (members().empty()) {
-        updated = master_.exists();
-        master_.emptyLobby();
+        updated = master_.has_value();
+        master_.reset();
 
         if (updated)
             logger_.info("Not any master member, lobby is empty.");
     } else {
-        const std::optional<byte> prev_master { master_.get() };
+        const std::optional<byte> prev_master { master_ };
         master_ = members().cbegin()->first;
 
         updated = !prev_master || *prev_master != master_;
         if (updated)
-            logger_.info("New master member is [{}].", master_);
+            logger_.info("New master member is [{}].", *master_);
     }
 
     if (updated)
@@ -414,19 +414,18 @@ void Lobby::sendMaster() {
 }
 
 void Lobby::disconnectMaster() {
-    assert(master_.exists());
+    assert(master_.has_value());
 
-    const byte master { master_ };
-    disconnect(master, true);
+    disconnect(*master_, true);
 
-    throw MasterDisconnected { master };
+    throw MasterDisconnected { *master_ };
 }
 
 std::string Lobby::askCheckpoint() {
     LobbyDataFactory ask_data;
     ask_data.makeEvent(Event::AskCheckpoint);
 
-    logger_.info("Asking master [{}] for checkpoint...", master_);
+    logger_.info("Asking master [{}] for checkpoint...", *master_);
     sendToMaster(ask_data.dataWithLength());
 
     const ReceiveBuffer chkpt_buffer { receiveFromMaster() };
@@ -448,7 +447,7 @@ bool Lobby::askYesNo(const YesNoQuestion request) {
     LobbyDataFactory ask_data;
     ask_data.makeYesNo(request);
 
-    logger_.info("Asking master [{}] for #{}...", master_, static_cast<int>(request));
+    logger_.info("Asking master [{}] for #{}...", *master_, static_cast<int>(request));
     sendToMaster(ask_data.dataWithLength());
 
     const ReceiveBuffer reply { receiveFromMaster() };
@@ -474,9 +473,9 @@ void Lobby::reset() {
 void Lobby::prepareSession(Session& session) {
     try {
         LobbyDataFactory prepare_data;
-        prepare_data.makePrepare(master_);
+        prepare_data.makePrepare(*master_);
 
-        logger_.info("Preparing session, master member is {}.", master_);
+        logger_.info("Preparing session, master member is {}.", *master_);
         safeSendToAll(prepare_data.dataWithLength());
 
         configureSession(session);
@@ -581,10 +580,8 @@ void Lobby::configureSession(Session& session, const std::optional<std::string>&
             const auto& e { run.expectedIDs.cend() };
 
             if (std::find(b, e, master_) == e) {
-                const byte master { master_ };
-
-                disconnect(master);
-                throw MasterDisconnected { master };
+                disconnect(*master_);
+                throw MasterDisconnected { *master_ };
             }
 
             for (const byte id : ids()) {

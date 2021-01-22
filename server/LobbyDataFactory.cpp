@@ -75,9 +75,9 @@ void LobbyDataFactory::makeInvalidIDs(const SessionResult result, const std::vec
 void LobbyDataFactory::makeMasterSwitch(const Master& new_master) {
     makeEvent(Event::MasterSwitch);
 
-    if (new_master.exists()) {
+    if (new_master) {
         data_.add(MasterSwitch::NewMaster);
-        data_.add(new_master.load());
+        data_.add(*new_master);
     } else {
         data_.add(MasterSwitch::NotAnyMaster);
     }

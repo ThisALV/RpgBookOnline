@@ -4,6 +4,7 @@
 #include <Rbo/Server/Common.hpp>
 
 #include <Rbo/Session.hpp>
+#include <atomic>
 
 namespace Rbo::Server {
 
