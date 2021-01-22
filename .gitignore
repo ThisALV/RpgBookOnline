@@ -1,4 +1,5 @@
 Debug/
+Debug-LLVM/
 Release/
 CMakeLists.txt.user
 CMakeSettings.json
