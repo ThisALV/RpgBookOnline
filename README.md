@@ -8,8 +8,8 @@ Cross-platform server for [RpgBookOnline](#the-rbo-project), an online role-play
     * [Table of contents](#table-of-contents)
     * [The Rbo project](#the-rbo-project)
     * [The server](#the-server)
-        * [Prerequisites](#prerequisites)
         * [Install](#install)
+            * [Prerequisites](#prerequisites)
             * [Steps](#steps)
             * [Project options](#project-options)
         * [Quick and Easy install (For Windows)](#quick-and-easy-install-for-windows)
@@ -27,7 +27,9 @@ For more details about how to play this game, check the [wiki](https://github.co
 
 ## The server
 
-### Prerequisites
+### Install
+
+#### Prerequisites
 
 You need to get these dependencies to build the project :
 
@@ -47,7 +49,6 @@ cmake .
 sudo cmake --install .
 ```
 
-### Install
 
 #### Steps
 
