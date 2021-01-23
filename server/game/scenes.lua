@@ -37,7 +37,7 @@ return {
             "YesOrNoDecision", {
                 question="Do you want to drink it ?",
                 target="leader",
-                yes=2, no=3
+                yes=2, no=30
             }
         }
     },
@@ -63,17 +63,29 @@ return {
             }
         },
         {
+            "Text", {
+                text="On the emergency, you run for the only exit of this room."
+            }
+        },
+        {
             "Goto", {
                 scene=3
             }
         }
     },
-    [3] = {
+    [30] = {
         {
             "Text", {
-                text="On the emergency, you run for the only exit of this room."
+                text="You see a door at the opposed to the one you're coming from and decide to enter it."
             }
         },
+        {
+            "Goto", {
+                scene=4
+            }
+        }
+    },
+    [3] = {
         {
             "Checkpoint", {
                 name="hall", scene=4
